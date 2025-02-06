@@ -3,6 +3,7 @@
 ## 2.3.8
 
 - Improved compatibility with RSLS
+- Fixed sound pitch reading volume config value
 
 ## 2.3.7
 

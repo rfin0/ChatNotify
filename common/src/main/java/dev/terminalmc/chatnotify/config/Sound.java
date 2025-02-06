@@ -186,7 +186,7 @@ public class Sound {
 
     Sound validate() {
         if (volume < 0 || volume > 1) volume = volumeDefault;
-        if (pitch < 0.5 || pitch > 2) pitch = volumeDefault;
+        if (pitch < 0.5 || pitch > 2) pitch = pitchDefault;
         return this;
     }
 
@@ -217,8 +217,8 @@ public class Sound {
             float volume = JsonUtil.getOrDefault(obj, "volume",
                     volumeDefault, silent);
 
-            float pitch = JsonUtil.getOrDefault(obj, "volume",
-                    volumeDefault, silent);
+            float pitch = JsonUtil.getOrDefault(obj, "pitch",
+                    pitchDefault, silent);
 
             return new Sound(
                     enabled,
