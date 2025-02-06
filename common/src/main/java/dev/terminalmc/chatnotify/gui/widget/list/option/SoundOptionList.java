@@ -44,6 +44,7 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
 public class SoundOptionList extends OptionList {
     private final Sound sound;
     private final Runnable closeRunnable;
+    private @Nullable SoundInstance lastSound;
 
     public SoundOptionList(Minecraft mc, int width, int height, int y, 
                            int entryWidth, int entryHeight, Sound sound, Runnable closeRunnable) {
@@ -197,15 +198,16 @@ public class SoundOptionList extends OptionList {
     }
 
     private void playNotifSound() {
-        minecraft.getSoundManager().stop();
         ResourceLocation location = sound.getResourceLocation();
         if (location != null) {
-            minecraft.getSoundManager().play(new SimpleSoundInstance(
+            if (lastSound != null) minecraft.getSoundManager().stop(lastSound);
+            lastSound = new SimpleSoundInstance(
                     location,
                     Config.get().soundSource,
                     sound.getVolume(), sound.getPitch(),
                     SoundInstance.createUnseededRandom(), false, 0,
-                    SoundInstance.Attenuation.NONE, 0, 0, 0, true));
+                    SoundInstance.Attenuation.NONE, 0, 0, 0, true);
+            minecraft.getSoundManager().play(lastSound);
         }
     }
 
@@ -229,7 +231,6 @@ public class SoundOptionList extends OptionList {
                                     wX, wY, wWidth, wHeight, Component.empty(),
                                     sound::getId, sound::setId,
                                     (widget) -> {
-                                        Minecraft.getInstance().getSoundManager().stop();
                                         list.screen.removeOverlayWidget();
                                         list.reload();
                                     }, Minecraft.getInstance().getSoundManager().getAvailableSounds()

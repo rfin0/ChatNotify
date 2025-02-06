@@ -166,7 +166,6 @@ public class HsvColorPicker extends OverlayWidget {
 
         cancelButton = Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
                     onClose();
-                    playDownSound(mc.getSoundManager());
                 })
                 .pos(getX() + cancelButtonX, getY() + cancelButtonY)
                 .size(cancelButtonWidth, buttonHeight)
@@ -179,7 +178,6 @@ public class HsvColorPicker extends OverlayWidget {
         confirmButton = Button.builder(CommonComponents.GUI_OK, (button) -> {
                     dest.accept(Mth.hsvToRgb(hsv[0], hsv[1], hsv[2]));
                     onClose();
-                    playDownSound(mc.getSoundManager());
                 })
                 .pos(getX() + confirmButtonX, getY() + confirmButtonY)
                 .size(confirmButtonWidth, buttonHeight)
@@ -341,11 +339,11 @@ public class HsvColorPicker extends OverlayWidget {
                     return true;
                 }
                 if (mouseOnWidget(cancelButton, mouseX, mouseY)) {
-                    cancelButton.onClick(mouseX, mouseY);
+                    cancelButton.mouseClicked(mouseX, mouseY, button);
                     return true;
                 }
                 if (mouseOnWidget(confirmButton, mouseX, mouseY)) {
-                    confirmButton.onClick(mouseX, mouseY);
+                    confirmButton.mouseClicked(mouseX, mouseY, button);
                     return true;
                 }
             }

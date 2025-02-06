@@ -89,7 +89,6 @@ public class DropdownTextField extends OverlayWidget {
         cancelButton = Button.builder(Component.literal("\u274C").withStyle(ChatFormatting.RED), 
                 (button) -> {
                     onClose();
-                    playDownSound(mc.getSoundManager());
                 })
                 .pos(x + width - (buttonWidth * 2), y)
                 .size(buttonWidth, widgetHeight)
@@ -98,7 +97,6 @@ public class DropdownTextField extends OverlayWidget {
                 (button) -> {
                     dest.accept(textField.getValue());
                     onClose();
-                    playDownSound(mc.getSoundManager());
                 })
                 .pos(x + width - buttonWidth, y)
                 .size(buttonWidth, widgetHeight)
@@ -140,6 +138,7 @@ public class DropdownTextField extends OverlayWidget {
 
     public DropdownTextField withDefaultDropType() {
         dropWidgetProvider = this::createDefaultDropWidget;
+        init();
         return this;
     }
 
@@ -151,6 +150,7 @@ public class DropdownTextField extends OverlayWidget {
 
     public DropdownTextField withSoundDropType() {
         dropWidgetProvider = this::createSoundDropWidget;
+        init();
         return this;
     }
 
@@ -287,6 +287,14 @@ public class DropdownTextField extends OverlayWidget {
             dropdown.renderWidget(graphics, mouseX, mouseY, delta);
         }
     }
+    
+    @Override
+    public void onClose() {
+        super.onClose();
+        if (SoundDropdownWidget.lastSound != null) {
+            Minecraft.getInstance().getSoundManager().stop(SoundDropdownWidget.lastSound);
+        }
+    }
 
     // Suggestion dropdown list element
 
@@ -312,6 +320,8 @@ public class DropdownTextField extends OverlayWidget {
     }
 
     public static class SoundDropdownWidget extends DropdownWidget {
+        private static @Nullable SoundInstance lastSound;
+        
         private SoundDropdownWidget(int x, int y, int width, int height, Component msg,
                                     Font font, Consumer<String> dest) {
             super(x, y, width, height, msg, font, dest);
@@ -323,13 +333,14 @@ public class DropdownTextField extends OverlayWidget {
         }
 
         @Override
-        public void playDownSound(SoundManager soundManager) {
-            soundManager.stop();
-            soundManager.play(new SimpleSoundInstance(
+        public void playDownSound(@NotNull SoundManager soundManager) {
+            if (lastSound != null) soundManager.stop(lastSound);
+            lastSound = new SimpleSoundInstance(
                     ResourceLocation.parse(getMessage().getString()),
                     SoundSource.MASTER, 1.0F, 1.0F,
                     SoundInstance.createUnseededRandom(), false, 0,
-                    SoundInstance.Attenuation.NONE, 0, 0, 0, true));
+                    SoundInstance.Attenuation.NONE, 0, 0, 0, true);
+            soundManager.play(lastSound);
         }
     }
 }
