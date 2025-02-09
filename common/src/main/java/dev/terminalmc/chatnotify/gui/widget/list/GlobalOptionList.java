@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list.option;
+package dev.terminalmc.chatnotify.gui.widget.list;
 
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;

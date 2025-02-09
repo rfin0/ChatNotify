@@ -19,7 +19,7 @@ package dev.terminalmc.chatnotify.gui.screen;
 import dev.terminalmc.chatnotify.config.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import dev.terminalmc.chatnotify.gui.widget.list.option.MainOptionList;
+import dev.terminalmc.chatnotify.gui.widget.list.MainOptionList;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 

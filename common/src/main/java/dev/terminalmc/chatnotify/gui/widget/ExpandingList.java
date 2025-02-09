@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list;
+package dev.terminalmc.chatnotify.gui.widget;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

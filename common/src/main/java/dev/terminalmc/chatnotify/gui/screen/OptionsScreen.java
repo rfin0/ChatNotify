@@ -19,7 +19,7 @@ package dev.terminalmc.chatnotify.gui.screen;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import dev.terminalmc.chatnotify.gui.widget.OverlayWidget;
-import dev.terminalmc.chatnotify.gui.widget.list.option.OptionList;
+import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import dev.terminalmc.chatnotify.mixin.accessor.ScreenAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

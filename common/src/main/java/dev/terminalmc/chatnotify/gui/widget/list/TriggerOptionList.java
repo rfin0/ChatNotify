@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list.option;
+package dev.terminalmc.chatnotify.gui.widget.list;
 
 import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.ChatNotify;

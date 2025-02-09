@@ -18,7 +18,7 @@ package dev.terminalmc.chatnotify.gui.widget.field;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.gui.widget.OverlayWidget;
-import dev.terminalmc.chatnotify.gui.widget.list.ExpandingList;
+import dev.terminalmc.chatnotify.gui.widget.ExpandingList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

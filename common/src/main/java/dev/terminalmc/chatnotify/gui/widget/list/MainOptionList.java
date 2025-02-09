@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list.option;
+package dev.terminalmc.chatnotify.gui.widget.list;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.config.Config;
