@@ -17,20 +17,35 @@
 package dev.terminalmc.chatnotify.gui.widget;
 
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
 
 /**
- * A {@link Button} that does not play a sound when pressed.
+ * A {@link Button} that must be pressed twice to complete an action.
  */
-public class SilentButton extends Button {
-    public SilentButton(int x, int y, int width, int height, Component message, OnPress onPress) {
+public class ConfirmButton extends Button {
+    private Component message;
+    private Component confirmMessage;
+    private boolean hasBeenPressed;
+    
+    public ConfirmButton(int x, int y, int width, int height, Component message, 
+                         Component confirmMessage, OnPress onPress) {
         super(x, y, width, height, message, onPress, DEFAULT_NARRATION);
+        this.message = message;
+        this.confirmMessage = confirmMessage;
+    }
+    
+    public void reset() {
+        hasBeenPressed = false;
+        this.setMessage(message);
     }
 
     @Override
-    public void playDownSound(@NotNull SoundManager soundManager) {
-        // Shut up
+    public void onPress() {
+        if (!hasBeenPressed) {
+            hasBeenPressed = true;
+            this.setMessage(confirmMessage);
+        } else {
+            super.onPress();
+        }
     }
 }

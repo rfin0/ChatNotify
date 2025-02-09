@@ -347,12 +347,12 @@ public class NotifOptionList extends OptionList {
                 elements.add(styleButton);
 
                 // Delete button
-                elements.add(Button.builder(Component.literal("\u274C")
-                                        .withStyle(ChatFormatting.RED),
-                                (button) -> {
-                                    notif.triggers.remove(index);
-                                    list.reload();
-                                })
+                elements.add(Button.builder(
+                        Component.literal("\u274C").withStyle(ChatFormatting.RED),
+                        (button) -> {
+                            notif.triggers.remove(index);
+                            list.reload();
+                        })
                         .pos(x + width + SPACING, 0)
                         .size(list.smallWidgetWidth, height)
                         .build());
@@ -406,11 +406,12 @@ public class NotifOptionList extends OptionList {
                 movingX = x + width - list.tinyWidgetWidth;
 
                 // Delete button
-                elements.add(Button.builder(Component.literal("\u274C"),
-                                (button) -> {
-                                    styleTarget.enabled = false;
-                                    list.reload();
-                                })
+                elements.add(Button.builder(
+                        Component.literal("\u274C").withStyle(ChatFormatting.RED), 
+                        (button) -> {
+                            styleTarget.enabled = false;
+                            list.reload();
+                        })
                         .pos(movingX, 0)
                         .size(list.tinyWidgetWidth, height)
                         .build());

@@ -330,11 +330,12 @@ public class TriggerOptionList extends OptionList {
                 movingX = x + width - list.tinyWidgetWidth;
 
                 // Delete button
-                elements.add(Button.builder(Component.literal("\u274C"),
-                                (button) -> {
-                                    styleTarget.enabled = false;
-                                    list.reload();
-                                })
+                elements.add(Button.builder(
+                        Component.literal("\u274C").withStyle(ChatFormatting.RED),
+                        (button) -> {
+                            styleTarget.enabled = false;
+                            list.reload();
+                        })
                         .pos(movingX, 0)
                         .size(list.tinyWidgetWidth, height)
                         .build());

@@ -22,6 +22,7 @@ import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.TextStyle;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
+import dev.terminalmc.chatnotify.gui.widget.ConfirmButton;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.RightClickableButton;
 import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
@@ -481,16 +482,16 @@ public class MainOptionList extends OptionList {
                 
                 if (index != 0) {
                     // Delete button (right-side extension)
-                    elements.add(Button.builder(Component.literal("\u274C")
-                                            .withStyle(ChatFormatting.RED),
-                                    (button) -> {
-                                        if (Config.get().removeNotif(index)) {
-                                            list.reload();
-                                        }
-                                    })
-                            .pos(x + width + SPACING, 0)
-                            .size(list.smallWidgetWidth, height)
-                            .build());
+                    elements.add(new ConfirmButton(
+                            x + width + SPACING, 0,
+                            list.smallWidgetWidth, height,
+                            Component.literal("\u274C"),
+                            Component.literal("\u274C").withStyle(ChatFormatting.RED), 
+                            (button) -> {
+                                if (Config.get().removeNotif(index)) {
+                                    list.reload();
+                                }
+                            }));
                 }
             }
 

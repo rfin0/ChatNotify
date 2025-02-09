@@ -3,6 +3,7 @@
 ## 2.3.9
 
 - Added duplicate trigger detection
+- Added confirmation check when deleting notifications
 
 ## 2.3.8
 

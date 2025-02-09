@@ -289,12 +289,12 @@ public class GlobalOptionList extends OptionList {
                 prefixField.setValue(Config.get().prefixes.get(index));
                 elements.add(prefixField);
 
-                elements.add(Button.builder(Component.literal("\u274C")
-                                        .withStyle(ChatFormatting.RED),
-                                (button) -> {
-                                    Config.get().prefixes.remove(index);
-                                    list.reload();
-                                })
+                elements.add(Button.builder(
+                        Component.literal("\u274C").withStyle(ChatFormatting.RED),
+                        (button) -> {
+                            Config.get().prefixes.remove(index);
+                            list.reload();
+                        })
                         .pos(x + width + SPACING, 0)
                         .size(list.smallWidgetWidth, height)
                         .build());

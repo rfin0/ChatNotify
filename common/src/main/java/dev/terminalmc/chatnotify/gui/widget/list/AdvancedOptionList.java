@@ -411,12 +411,12 @@ public class AdvancedOptionList extends OptionList {
                 elements.add(triggerField);
 
                 // Delete button
-                elements.add(Button.builder(Component.literal("\u274C")
-                                        .withStyle(ChatFormatting.RED),
-                                (button) -> {
-                                    notif.exclusionTriggers.remove(index);
-                                    list.reload();
-                                })
+                elements.add(Button.builder(
+                        Component.literal("\u274C").withStyle(ChatFormatting.RED),
+                        (button) -> {
+                            notif.exclusionTriggers.remove(index);
+                            list.reload();
+                        })
                         .pos(x + width + SPACING, 0)
                         .size(list.smallWidgetWidth, height)
                         .build());
@@ -550,12 +550,12 @@ public class AdvancedOptionList extends OptionList {
                 elements.add(timeField);
 
                 // Delete button
-                elements.add(Button.builder(Component.literal("\u274C")
-                                        .withStyle(ChatFormatting.RED),
-                                (button) -> {
-                                    notif.responseMessages.remove(index);
-                                    list.reload();
-                                })
+                elements.add(Button.builder(
+                        Component.literal("\u274C").withStyle(ChatFormatting.RED),
+                        (button) -> {
+                            notif.responseMessages.remove(index);
+                            list.reload();
+                        })
                         .pos(x + width + SPACING, 0)
                         .size(list.smallWidgetWidth, height)
                         .build());
