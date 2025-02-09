@@ -16,11 +16,12 @@
 
 package dev.terminalmc.chatnotify.gui.widget.field;
 
+import dev.terminalmc.chatnotify.mixin.MixinMultiLineEditBox;
 import dev.terminalmc.chatnotify.mixin.accessor.MultiLineEditBoxAccessor;
 import dev.terminalmc.chatnotify.mixin.accessor.MultilineTextFieldAccessor;
 import dev.terminalmc.chatnotify.mixin.accessor.StringViewAccessor;
-import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.MultiLineEditBox;
 import net.minecraft.client.gui.components.MultilineTextField;
@@ -34,25 +35,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 /**
- * A custom {@link MultiLineEditBox} which supports resizing, double-clicking
- * to select all text, and when combined with 
- * {@link dev.terminalmc.chatnotify.mixin.MixinMultiLineEditBox}, supports
- * content validation with text color and tooltip change.
+ * A custom {@link MultiLineEditBox} which supports double-clicking to select
+ * words and triple-clicking to select all (with 
+ * {@link MultilineTextFieldAccessor}), resizing (with
+ * {@link MultiLineEditBoxAccessor}), and content validation with warning text 
+ * color and tooltip (with {@link MixinMultiLineEditBox}).
  */
 public class MultiLineTextField extends MultiLineEditBox {
-    public static final int NORMAL_COLOR = 0xE0E0E0;
-    public static final int ERROR_COLOR = 0xFF5555;
     public static final long CLICK_CHAIN_TIME = 250L;
+    public static final int TEXT_COLOR_DEFAULT = 0xE0E0E0;
+    public static final int TEXT_COLOR_ERROR = 0xFF5555;
     
-    private TextField.Validator validator;
-    public boolean lenient = false;
-    private int defaultTextColor;
-    private Tooltip defaultTooltip;
-    private int textColor;
+    // Validation
+    public final List<TextField.@NotNull Validator> validators = new ArrayList<>();
+    public boolean lenient = true;
+    private int normalTextColor = TEXT_COLOR_DEFAULT;
+    private int currentTextColor = normalTextColor;
+    private @Nullable Tooltip normalTooltip;
+    private @Nullable Tooltip errorTooltip;
 
     // Undo-redo history
     private final List<String> history = new ArrayList<>();
@@ -61,47 +63,79 @@ public class MultiLineTextField extends MultiLineEditBox {
     // Double and triple-click selection
     private long lastClickTime;
     private int chainedClicks;
+
+    public MultiLineTextField(int x, int y, int width, int height) {
+        this(Minecraft.getInstance().font, x, y, width, height, Component.empty(), 
+                Component.empty(), null);
+    }
+
+    public MultiLineTextField(int x, int y, int width, int height, Component placeholder) {
+        this(Minecraft.getInstance().font, x, y, width, height, placeholder, 
+                Component.empty(), null);
+    }
     
-    public MultiLineTextField(Font font, int x, int y, int width, int height, 
-                              Component placeholder, Component message) {
+    public MultiLineTextField(Font font, int x, int y, int width, int height,
+                              Component placeholder, Component message, 
+                              @Nullable TextField.Validator validator) {
         super(font, x, y, width, height, placeholder, message);
-        this.validator = new Validator.Default();
-        this.defaultTextColor = NORMAL_COLOR;
-        this.textColor = defaultTextColor;
+        if (validator != null) {
+            this.validators.add(validator);
+        }
+    }
+
+    public MultiLineTextField withValidator(@NotNull TextField.Validator validator) {
+        this.validators.add(validator);
+        return this;
     }
 
     public MultiLineTextField regexValidator() {
-        validator = new Validator.Regex();
+        this.validators.add(new TextField.Validator.Regex());
         return this;
     }
 
     @Override
     public void setValueListener(@NotNull Consumer<String> responder) {
         super.setValueListener((str) -> {
-            if (valid(str) || lenient) {
+            if (validate(str) || lenient) {
                 updateHistory(str);
                 responder.accept(str);
             }
         });
     }
 
-    private boolean valid(String str) {
-        Optional<Component> error = validator.validate(str);
-        if (error.isPresent()) {
-            super.setTooltip(Tooltip.create(error.get()));
-            this.textColor = ERROR_COLOR;
-            return false;
-        } else {
-            this.textColor = defaultTextColor;
-            super.setTooltip(defaultTooltip);
-            return true;
+    private boolean validate(String str) {
+        for (TextField.Validator v : validators) {
+            Optional<Component> error = v.validate(str);
+            if (error.isPresent()) {
+                errorTooltip = Tooltip.create(error.get());
+                super.setTooltip(errorTooltip);
+                this.currentTextColor = TEXT_COLOR_ERROR;
+                return false;
+            }
         }
+        errorTooltip = null;
+        this.currentTextColor = normalTextColor;
+        super.setTooltip(normalTooltip);
+        return true;
     }
 
     @Override
     public void setTooltip(@Nullable Tooltip tooltip) {
-        defaultTooltip = tooltip;
-        super.setTooltip(tooltip);
+        normalTooltip = tooltip;
+        if (errorTooltip == null) {
+            super.setTooltip(tooltip);
+        }
+    }
+
+    public int getTextColor() {
+        return currentTextColor;
+    }
+    
+    public void setTextColor(int color) {
+        normalTextColor = color;
+        if (errorTooltip == null) {
+            currentTextColor = color;
+        }
     }
 
     @Override
@@ -109,15 +143,6 @@ public class MultiLineTextField extends MultiLineEditBox {
         super.setWidth(width);
         ((MultilineTextFieldAccessor)((MultiLineEditBoxAccessor)this)
                 .getTextField()).setWidth(width);
-    }
-
-    public int getTextColor() {
-        return textColor;
-    }
-
-    public void setTextColor(int color) {
-        if (textColor == defaultTextColor) textColor = color;
-        defaultTextColor = color;
     }
 
     // Chained clicks
@@ -201,34 +226,6 @@ public class MultiLineTextField extends MultiLineEditBox {
     private void redo() {
         if (historyIndex < history.size() - 1) {
             setValue(history.get(++historyIndex));
-        }
-    }
-    
-    // Validator
-
-    public interface Validator {
-        Optional<Component> validate(String str);
-
-        // Implementations
-
-        class Default implements TextField.Validator {
-            @Override
-            public Optional<Component> validate(String str) {
-                return Optional.empty();
-            }
-        }
-
-        class Regex implements TextField.Validator {
-            @Override
-            public Optional<Component> validate(String str) {
-                try {
-                    Pattern.compile(str);
-                    return Optional.empty();
-                } catch (PatternSyntaxException e) {
-                    return Optional.of(Component.literal(TextField.fixRegexMessage(e.getMessage()))
-                            .withStyle(ChatFormatting.RED));
-                }
-            }
         }
     }
 }

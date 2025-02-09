@@ -23,6 +23,7 @@ import dev.terminalmc.chatnotify.config.ResponseMessage;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.widget.field.DropdownTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
+import dev.terminalmc.chatnotify.gui.widget.field.MultiLineTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.mixin.accessor.KeyAccessor;
 import net.minecraft.ChatFormatting;
@@ -32,11 +33,11 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -66,21 +67,21 @@ public class AdvancedOptionList extends OptionList {
         addEntry(new Entry.MessageConfigEntry(dynEntryX, dynEntryWidth, entryHeight,
                 () -> notif.replacementMsg, (str) -> notif.replacementMsg = str,
                 () -> notif.replacementMsgEnabled, (val) -> notif.replacementMsgEnabled = val,
-                localized("option", "advanced.msg.replacement").getString(),
+                localized("option", "advanced.msg.replacement").withColor(0x555555),
                 localized("option", "advanced.msg.replacement").append(".\n")
                         .append(localized("option", "advanced.msg.replacement.tooltip"))
                         .append("\n\n").append(localized("option", "advanced.msg.info.blank_hide"))));
         addEntry(new Entry.MessageConfigEntry(dynEntryX, dynEntryWidth, entryHeight,
                 () -> notif.statusBarMsg, (str) -> notif.statusBarMsg = str,
                 () -> notif.statusBarMsgEnabled, (val) -> notif.statusBarMsgEnabled = val,
-                localized("option", "advanced.msg.status_bar").getString(),
+                localized("option", "advanced.msg.status_bar").withColor(0x555555),
                 localized("option", "advanced.msg.status_bar").append(".\n")
                         .append(localized("option", "advanced.msg.status_bar.tooltip"))
                         .append("\n\n").append(localized("option", "advanced.msg.info.blank_original"))));
         addEntry(new Entry.MessageConfigEntry(dynEntryX, dynEntryWidth, entryHeight,
                 () -> notif.titleMsg, (str) -> notif.titleMsg = str,
                 () -> notif.titleMsgEnabled, (val) -> notif.titleMsgEnabled = val,
-                localized("option", "advanced.msg.title").getString(),
+                localized("option", "advanced.msg.title").withColor(0x555555),
                 localized("option", "advanced.msg.title").append(".\n")
                         .append(localized("option", "advanced.msg.title.tooltip"))
                         .append("\n\n").append(localized("option", "advanced.msg.info.blank_original"))));
@@ -320,27 +321,17 @@ public class AdvancedOptionList extends OptionList {
             MessageConfigEntry(int x, int width, int height,
                                Supplier<String> textSupplier, Consumer<String> textConsumer,
                                Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
-                               String placeholder, Component tooltip) {
+                               Component hint, Component tooltip) {
                 super();
                 int statusButtonWidth = Math.max(24, height);
                 int fieldWidth = width - statusButtonWidth - SPACING;
 
-                // Title text field
+                // String field
                 TextField titleField = new TextField(x, 0, fieldWidth, height);
                 titleField.setMaxLength(256);
-                if (textSupplier.get().isBlank()) {
-                    // Shenanigans for placeholder text
-                    titleField.setValue(placeholder);
-                    titleField.setTextColor(0x555555);
-                    titleField.setResponder((str) -> {
-                        titleField.setTextColor(0xffffff);
-                        titleField.setResponder(textConsumer);
-                        titleField.setValue("");
-                    });
-                } else {
-                    titleField.setValue(textSupplier.get());
-                    titleField.setResponder(textConsumer);
-                }
+                titleField.setValue(textSupplier.get());
+                titleField.setResponder(textConsumer);
+                titleField.setHint(hint);
                 titleField.setTooltip(Tooltip.create(tooltip));
                 elements.add(titleField);
 
@@ -502,14 +493,13 @@ public class AdvancedOptionList extends OptionList {
                                             list.reload();
                                         }, keys));
                             });
-                    Component tooltip1 = localized("option", "advanced.response.commandkeys.limit_key.tooltip");
-                    keyField1.setTooltip(Tooltip.create(tooltip1));
+                    MutableComponent label1 = localized(
+                            "option", "advanced.response.commandkeys.limit_key");
+                    keyField1.setHint(label1.copy().withColor(0x555555));
+                    keyField1.setTooltip(Tooltip.create(label1.append("\n\n").append(localized(
+                            "option", "advanced.response.commandkeys.limit_key.tooltip"))));
                     keyField1.setMaxLength(240);
-                    keyField1.setValidator((val) -> {
-                        if (keys.contains(val)) return Optional.empty();
-                        else return Optional.of(tooltip1.copy().append("\n").append(
-                                localized("option", "advanced.key.error").withStyle(ChatFormatting.RED)));
-                    });
+                    keyField1.withValidator(new TextField.Validator.InputKey(keys));
                     keyField1.setValue(response.string.matches(".+-.+") ? response.string.split("-")[0] : "");
                     elements.add(keyField1);
                     movingX += keyFieldWidth;
@@ -528,20 +518,19 @@ public class AdvancedOptionList extends OptionList {
                                             list.reload();
                                         }, keys));
                             });
-                    Component tooltip2 = localized("option", "advanced.response.commandkeys.key.tooltip");
-                    keyField2.setTooltip(Tooltip.create(tooltip2));
+                    MutableComponent label2 = localized(
+                            "option", "advanced.response.commandkeys.key");
+                    keyField2.setHint(label2.copy().withColor(0x555555));
+                    keyField2.setTooltip(Tooltip.create(label2.append("\n\n").append(localized(
+                            "option", "advanced.response.commandkeys.key.tooltip"))));
                     keyField2.setMaxLength(240);
-                    keyField2.setValidator((val) -> {
-                        if (keys.contains(val)) return Optional.empty();
-                        else return Optional.of(tooltip2.copy().append("\n").append(
-                                localized("option", "advanced.key.error").withStyle(ChatFormatting.RED)));
-                    });
+                    keyField2.withValidator(new TextField.Validator.InputKey(keys));
                     keyField2.setValue(response.string.matches(".+-.+") ? response.string.split("-")[1] : "");
                     elements.add(keyField2);
                 } else {
                     // Response field
-                    MultiLineEditBox msgField = new MultiLineEditBox(Minecraft.getInstance().font,
-                            movingX, 0, msgFieldWidth, height * 2, Component.empty(), Component.empty());
+                    MultiLineTextField msgField = new MultiLineTextField(
+                            movingX, 0, msgFieldWidth, height * 2);
                     msgField.setCharacterLimit(256);
                     msgField.setValue(response.string);
                     msgField.setValueListener((val) -> response.string = val.strip());
@@ -551,7 +540,7 @@ public class AdvancedOptionList extends OptionList {
                 // Delay field
                 TextField timeField = new TextField(
                         x + width - timeFieldWidth, 0, timeFieldWidth, height);
-                timeField.posIntValidator();
+                timeField.posIntValidator().strict();
                 timeField.setTooltip(Tooltip.create(
                         localized("option", "advanced.response.time.tooltip")));
                 timeField.setTooltipDelay(Duration.ofMillis(500));

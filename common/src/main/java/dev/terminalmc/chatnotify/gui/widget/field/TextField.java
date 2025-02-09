@@ -17,6 +17,8 @@
 package dev.terminalmc.chatnotify.gui.widget.field;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.terminalmc.chatnotify.config.Notification;
+import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -34,6 +36,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -42,17 +45,22 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 /**
  * A custom {@link EditBox} which supports click-dragging to select text,
- * double-clicking to select all text, and content validation with text color 
- * and tooltip change.
+ * double-clicking to select words, triple-clicking to select all, and content
+ * validation with warning text color and tooltip.
  */
 public class TextField extends EditBox {
     public static final long CLICK_CHAIN_TIME = 250L;
+    public static final int TEXT_COLOR_DEFAULT = 0xE0E0E0;
+    public static final int TEXT_COLOR_ERROR = 0xFF5555;
     
-    private Validator validator;
-    public boolean lenient = false;
-    private int defaultTextColor;
-    private Tooltip defaultTooltip;
     private final Font font;
+    
+    // Validation
+    public final List<@NotNull Validator> validators = new ArrayList<>();
+    public boolean lenient = true;
+    private int normalTextColor = TEXT_COLOR_DEFAULT;
+    private @Nullable Tooltip normalTooltip;
+    private @Nullable Tooltip errorTooltip;
 
     // Undo-redo history
     private final List<String> history = new ArrayList<>();
@@ -67,81 +75,97 @@ public class TextField extends EditBox {
     private int chainedClicks;
 
     public TextField(int x, int y, int width, int height) {
-        this(Minecraft.getInstance().font, x, y, width, height, Component.empty(),
-                (str) -> Optional.empty());
+        this(Minecraft.getInstance().font, x, y, width, height, Component.empty(), null);
     }
 
-    public TextField(Font font, int x, int y, int width, int height, Component msg,
-                     Function<String, Optional<Component>> validator) {
+    public TextField(int x, int y, int width, int height, @Nullable Validator validator) {
+        this(Minecraft.getInstance().font, x, y, width, height, Component.empty(), validator);
+    }
+
+    public TextField(Font font, int x, int y, int width, int height, Component msg, 
+                     @Nullable Validator validator) {
         super(font, x, y, width, height, msg);
         this.font = font;
-        this.validator = new Validator.Custom(validator);
-        this.defaultTextColor = 0xE0E0E0;
+        if (validator != null) {
+            this.validators.add(validator);
+        }
     }
 
-    public TextField setValidator(Function<String, Optional<Component>> validator) {
-        this.validator = new Validator.Custom(validator);
-        return this;
-    }
-
-    public TextField defaultValidator() {
-        validator = new Validator.Default();
+    public TextField withValidator(@NotNull Validator validator) {
+        this.validators.add(validator);
         return this;
     }
 
     public TextField regexValidator() {
-        validator = new Validator.Regex();
+        this.validators.add(new Validator.Regex());
         return this;
     }
 
     public TextField hexColorValidator() {
-        validator = new Validator.HexColor();
+        this.validators.add(new Validator.HexColor());
         return this;
     }
 
     public TextField soundValidator() {
-        validator = new Validator.Sound();
+        this.validators.add(new Validator.Sound());
         return this;
     }
 
     public TextField posIntValidator() {
-        validator = new Validator.PosInt();
+        this.validators.add(new Validator.PosInt());
+        return this;
+    }
+    
+    public TextField strict() {
+        this.lenient = false;
+        return this;
+    }
+
+    public TextField lenient() {
+        this.lenient = true;
         return this;
     }
 
     @Override
     public void setResponder(@NotNull Consumer<String> responder) {
         super.setResponder((str) -> {
-            if (valid(str) || lenient) {
+            if (validate(str) || lenient) {
                 updateHistory(str);
                 responder.accept(str);
             }
         });
     }
 
-    private boolean valid(String str) {
-        Optional<Component> error = validator.validate(str);
-        if (error.isPresent()) {
-            super.setTooltip(Tooltip.create(error.get()));
-            super.setTextColor(0xFF5555);
-            return false;
-        } else {
-            super.setTextColor(defaultTextColor);
-            super.setTooltip(defaultTooltip);
-            return true;
+    private boolean validate(String str) {
+        for (Validator v : validators) {
+            Optional<Component> error = v.validate(str);
+            if (error.isPresent()) {
+                errorTooltip = Tooltip.create(error.get());
+                super.setTooltip(errorTooltip);
+                super.setTextColor(TEXT_COLOR_ERROR);
+                return false;
+            }
         }
+        errorTooltip = null;
+        super.setTextColor(normalTextColor);
+        super.setTooltip(normalTooltip);
+        return true;
     }
 
     @Override
     public void setTooltip(@Nullable Tooltip tooltip) {
-        defaultTooltip = tooltip;
-        super.setTooltip(tooltip);
+        normalTooltip = tooltip;
+        if (errorTooltip == null) {
+            super.setTooltip(tooltip);
+        }
     }
 
     @Override
     public void setTextColor(int color) {
-        defaultTextColor = color;
-        super.setTextColor(color);
+        normalTextColor = color;
+        if (errorTooltip == null) {
+            super.setTextColor(color);
+        }
     }
     
     // Chained clicks and click-drag
@@ -261,30 +285,11 @@ public class TextField extends EditBox {
     
     // Validator
 
+    @FunctionalInterface
     public interface Validator {
         Optional<Component> validate(String str);
 
         // Implementations
-
-        class Custom implements Validator {
-            private final Function<String, Optional<Component>> validator;
-
-            public Custom(Function<String, Optional<Component>> validator) {
-                this.validator = validator;
-            }
-
-            @Override
-            public Optional<Component> validate(String str) {
-                return validator.apply(str);
-            }
-        }
-
-        class Default implements Validator {
-            @Override
-            public Optional<Component> validate(String str) {
-                return Optional.empty();
-            }
-        }
 
         class Regex implements Validator {
             @Override
@@ -305,21 +310,24 @@ public class TextField extends EditBox {
                 if (ColorUtil.parseColor(str) != null) {
                     return Optional.empty();
                 } else {
-                    return Optional.of(localized("option", "field.color.error"));
+                    return Optional.of(localized("option", "field.error.color")
+                            .withStyle(ChatFormatting.RED));
                 }
             }
         }
 
         class Sound implements Validator {
-            Set<String> sounds = new HashSet<>(Minecraft.getInstance().getSoundManager()
-                    .getAvailableSounds().stream().map(ResourceLocation::toString).toList());
+            private final Set<String> sounds = new HashSet<>(Minecraft.getInstance()
+                    .getSoundManager().getAvailableSounds().stream()
+                    .map(ResourceLocation::toString).toList());
 
             @Override
             public Optional<Component> validate(String str) {
                 if (sounds.contains(str) || (!str.contains(":") && sounds.contains(("minecraft:" + str)))) {
                     return Optional.empty();
                 } else {
-                    return Optional.of(localized("option", "field.sound.error"));
+                    return Optional.of(localized("option", "field.error.sound")
+                            .withStyle(ChatFormatting.RED));
                 }
             }
         }
@@ -331,13 +339,74 @@ public class TextField extends EditBox {
                     if (Integer.parseInt(str) < 0) throw new NumberFormatException();
                     return Optional.empty();
                 } catch (NumberFormatException ignored) {
-                    return Optional.of(localized("option", "field.posint.error"));
+                    return Optional.of(localized("option", "field.error.posint")
+                            .withStyle(ChatFormatting.RED));
                 }
+            }
+        }
+
+        class InputKey implements Validator {
+            List<String> keys;
+
+            public InputKey(List<String> keys) {
+                this.keys = keys;
+            }
+
+            @Override
+            public Optional<Component> validate(String str) {
+                if (keys.contains(str)) {
+                    return Optional.empty();
+                } else {
+                    return Optional.of(localized("option", "field.error.input_key")
+                            .withStyle(ChatFormatting.RED));
+                }
+            }
+        }
+
+        class UniqueTrigger implements Validator {
+            Supplier<List<Notification>> notifSupplier;
+            Function<Notification,List<Trigger>> triggerSupplier;
+            @Nullable Notification notif;
+            Trigger trigger;
+
+            public UniqueTrigger(Supplier<List<Notification>> notifSupplier, 
+                                 Function<Notification, List<Trigger>> triggerSupplier, 
+                                 @Nullable Notification notif, Trigger trigger) {
+                this.notifSupplier = notifSupplier;
+                this.triggerSupplier = triggerSupplier;
+                this.notif = notif;
+                this.trigger = trigger;
+            }
+            
+            @Override
+            public Optional<Component> validate(String str) {
+                if (str.isBlank()) return Optional.empty();
+                int i = 0;
+                for (Notification n : notifSupplier.get()) {
+                    i++; // 1-indexed for users
+                    int j = 0;
+                    for (Trigger t : triggerSupplier.apply(n)) {
+                        j++;
+                        if (!t.equals(trigger) && t.string.equals(str) && t.type.equals(trigger.type)) {
+                            if (n.equals(notif)) {
+                                return Optional.of(localized("option", "field.error.trigger.duplicate.here",
+                                        Component.literal(String.valueOf(j)).withStyle(ChatFormatting.GOLD))
+                                        .withStyle(ChatFormatting.RED));
+                            } else {
+                                return Optional.of(localized("option", "field.error.trigger.duplicate",
+                                        Component.literal(String.valueOf(j)).withStyle(ChatFormatting.GOLD),
+                                        Component.literal(String.valueOf(i)).withStyle(ChatFormatting.GOLD))
+                                        .withStyle(ChatFormatting.RED));
+                            }
+                        }
+                    }
+                }
+                return Optional.empty();
             }
         }
     }
     
-    // Static methods
+    // Utility methods
 
     public static boolean isUndo(int keyCode) {
         return keyCode == InputConstants.KEY_Z

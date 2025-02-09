@@ -219,7 +219,7 @@ public class GlobalOptionList extends OptionList {
 
                 TextField colorField = new TextField(x + width - colorFieldWidth, 0,
                         colorFieldWidth, height);
-                colorField.hexColorValidator();
+                colorField.hexColorValidator().strict();
                 colorField.setMaxLength(7);
                 colorField.setResponder((val) -> {
                     TextColor textColor = ColorUtil.parseColor(val);
@@ -282,7 +282,7 @@ public class GlobalOptionList extends OptionList {
             PrefixFieldEntry(int x, int width, int height, GlobalOptionList list, int index) {
                 super();
 
-                EditBox prefixField = new TextField(x, 0, width, height);
+                TextField prefixField = new TextField(x, 0, width, height);
                 prefixField.setMaxLength(30);
                 prefixField.setResponder((prefix) -> 
                         Config.get().prefixes.set(index, prefix.strip()));

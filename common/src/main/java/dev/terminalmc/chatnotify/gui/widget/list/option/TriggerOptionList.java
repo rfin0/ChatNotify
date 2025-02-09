@@ -58,8 +58,8 @@ public class TriggerOptionList extends OptionList {
     private final TextStyle textStyle;
     private boolean filter;
     private boolean restyle;
-    final MultiLineEditBox textDisplayBox;
-    final EditBox keyDisplayBox;
+    final MultiLineTextField textDisplayBox;
+    final TextField keyDisplayBox;
     private final Runnable closeRunnable;
     private final List<Component> allChat;
     
@@ -85,8 +85,8 @@ public class TriggerOptionList extends OptionList {
                     this, trigger.styleTarget));
         }
 
-        textDisplayBox = new MultiLineTextField(mc.font, dynEntryX, 0, dynEntryWidth, entryHeight, 
-                localized("option", "trigger.text.placeholder"), Component.empty());
+        textDisplayBox = new MultiLineTextField(dynEntryX, 0, dynEntryWidth, entryHeight, 
+                localized("option", "trigger.text.placeholder"));
         textDisplayBox.setValue(displayText);
         keyDisplayBox = new TextField(dynEntryX, 0, dynEntryWidth, entryHeight);
         keyDisplayBox.setMaxLength(256);
@@ -222,10 +222,11 @@ public class TriggerOptionList extends OptionList {
                 movingX += list.tinyWidgetWidth;
 
                 // Trigger field
-                MultiLineTextField triggerField = new MultiLineTextField(
-                        Minecraft.getInstance().font, movingX, 0, triggerFieldWidth, height,
-                        localized("option", "trigger.field.tooltip"), Component.empty());
+                MultiLineTextField triggerField = new MultiLineTextField(movingX, 0, 
+                        triggerFieldWidth, height, localized("option", "trigger.field.tooltip"));
                 if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
+                triggerField.withValidator(new TextField.Validator.UniqueTrigger(
+                        () -> Config.get().getNotifs(), (n) -> n.triggers, null, trigger));
                 triggerField.setValueListener((str) -> {
                     trigger.string = str.strip();
                     if (list.children().size() > 4) {

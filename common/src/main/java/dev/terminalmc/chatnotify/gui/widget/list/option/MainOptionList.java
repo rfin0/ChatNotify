@@ -17,7 +17,6 @@
 package dev.terminalmc.chatnotify.gui.widget.list.option;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.TextStyle;
@@ -269,6 +268,27 @@ public class MainOptionList extends OptionList {
                 if (singleTrig) triggerFieldWidth -= (list.tinyWidgetWidth * 2);
                 if (keyTrig) triggerFieldWidth -= list.tinyWidgetWidth;
                 int movingX = x;
+
+                if (index != 0) {
+                    // Index indicator
+                    Button indicatorButton = Button.builder(
+                                    Component.literal(String.valueOf(index + 1)), (button) -> {})
+                            .pos(x - list.smallWidgetWidth - SPACING - list.tinyWidgetWidth, 0)
+                            .size(list.tinyWidgetWidth, height)
+                            .build();
+                    indicatorButton.active = false;
+                    elements.add(indicatorButton);
+
+                    // Drag reorder button (left-side extension)
+                    elements.add(Button.builder(Component.literal("\u2191\u2193"),
+                                    (button) -> {
+                                        this.setDragging(true);
+                                        list.dragSourceSlot = list.children().indexOf(this);
+                                    })
+                            .pos(x - list.smallWidgetWidth - SPACING, 0)
+                            .size(list.smallWidgetWidth, height)
+                            .build());
+                }
                 
                 if (singleTrig) {
                     // Type button
@@ -290,19 +310,24 @@ public class MainOptionList extends OptionList {
                 }
 
                 // Trigger field
-                TextField triggerField = singleTrig
-                        ? new TextField(movingX, 0, triggerFieldWidth, height)
-                        : new FakeTextField(movingX, 0, triggerFieldWidth, height,
-                        () -> list.openNotificationConfig(index));
-                if (singleTrig && trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
-                triggerField.setMaxLength(240);
-                if (singleTrig) triggerField.setResponder((str) -> trigger.string = str.strip());
-                triggerField.setValue(singleTrig 
-                        ? trigger.string 
-                        : createLabel(notif, triggerFieldWidth - 10).getString());
-                triggerField.setTooltip(Tooltip.create(
-                        localized("option", "main.trigger.tooltip")));
-                triggerField.setTooltipDelay(Duration.ofMillis(500));
+                TextField triggerField;
+                if (singleTrig) {
+                    triggerField = new TextField(movingX, 0, triggerFieldWidth, height);
+                    if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
+                    triggerField.withValidator(new TextField.Validator.UniqueTrigger(
+                            () -> Config.get().getNotifs(), (n) -> n.triggers, notif, trigger));
+                    triggerField.setMaxLength(240);
+                    triggerField.setValue(trigger.string);
+                    triggerField.setResponder((str) -> trigger.string = str.strip());
+                    triggerField.setTooltip(Tooltip.create(
+                            localized("option", "main.trigger.tooltip")));
+                    triggerField.setTooltipDelay(Duration.ofMillis(500));
+                } else {
+                    triggerField = new FakeTextField(movingX, 0,
+                            triggerFieldWidth, height, () -> list.openNotificationConfig(index));
+                    triggerField.setMaxLength(240);
+                    triggerField.setValue(createLabel(notif, triggerFieldWidth - 10).getString());
+                }
                 elements.add(triggerField);
                 movingX += triggerFieldWidth + (singleTrig ? 0 : SPACING_NARROW);
 
@@ -382,7 +407,7 @@ public class MainOptionList extends OptionList {
                 colorEditButton.setTooltipDelay(Duration.ofMillis(200));
                 if (showColorField) {
                     TextField colorField = new TextField(movingX, 0, colorFieldWidth, height);
-                    colorField.hexColorValidator();
+                    colorField.hexColorValidator().strict();
                     colorField.setMaxLength(7);
                     colorField.setResponder((val) -> {
                         TextColor textColor = ColorUtil.parseColor(val);
@@ -455,16 +480,6 @@ public class MainOptionList extends OptionList {
                                 Component.empty(), (button, status) -> notif.enabled = status));
                 
                 if (index != 0) {
-                    // Drag reorder button (left-side extension)
-                    elements.add(Button.builder(Component.literal("\u2191\u2193"),
-                                    (button) -> {
-                                        this.setDragging(true);
-                                        list.dragSourceSlot = list.children().indexOf(this);
-                                    })
-                            .pos(x - list.smallWidgetWidth - SPACING, 0)
-                            .size(list.smallWidgetWidth, height)
-                            .build());
-
                     // Delete button (right-side extension)
                     elements.add(Button.builder(Component.literal("\u274C")
                                             .withStyle(ChatFormatting.RED),

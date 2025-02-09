@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.9
+
+- Added duplicate trigger detection
+
 ## 2.3.8
 
 - Improved compatibility with RSLS

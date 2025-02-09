@@ -17,7 +17,6 @@
 package dev.terminalmc.chatnotify.gui.widget.list.option;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.config.*;
 import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
@@ -252,6 +251,15 @@ public class NotifOptionList extends OptionList {
                 if (keyTrigger) triggerFieldWidth -= list.tinyWidgetWidth;
                 int movingX = x;
 
+                // Index indicator
+                Button indicatorButton = Button.builder(
+                        Component.literal(String.valueOf(index + 1)), (button) -> {})
+                        .pos(x - list.smallWidgetWidth - SPACING - list.tinyWidgetWidth, 0)
+                        .size(list.tinyWidgetWidth, height)
+                        .build();
+                indicatorButton.active = false;
+                elements.add(indicatorButton);
+                
                 // Drag reorder button
                 elements.add(Button.builder(Component.literal("\u2191\u2193"),
                                 (button) -> {
@@ -283,6 +291,8 @@ public class NotifOptionList extends OptionList {
                 // Trigger field
                 TextField triggerField = new TextField(movingX, 0, triggerFieldWidth, height);
                 if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
+                triggerField.withValidator(new TextField.Validator.UniqueTrigger(
+                        () -> Config.get().getNotifs(), (n) -> n.triggers, notif, trigger));
                 triggerField.setMaxLength(240);
                 triggerField.setResponder((str) -> trigger.string = str.strip());
                 triggerField.setValue(trigger.string);
@@ -566,7 +576,7 @@ public class NotifOptionList extends OptionList {
                 // Hex code field
                 TextField colorField = new TextField(x + mainButtonWidth + SPACING, 0,
                         colorFieldWidth, height);
-                colorField.hexColorValidator();
+                colorField.hexColorValidator().strict();
                 colorField.setMaxLength(7);
                 colorField.setResponder((val) -> {
                     TextColor textColor = ColorUtil.parseColor(val);

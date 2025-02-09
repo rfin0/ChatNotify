@@ -153,7 +153,7 @@ public class HsvColorPicker extends OverlayWidget {
 
         hexField = new TextField(getX() + hexFieldX, getY() + hexFieldY,
                 hexFieldWidth, hexFieldHeight);
-        hexField.hexColorValidator();
+        hexField.hexColorValidator().strict();
         hexField.setMaxLength(7);
         hexField.setResponder(this::updateColorFromHexField);
         hexField.setValue(TextColor.fromRgb(Color.HSBtoRGB(hsv[0], hsv[1], hsv[2])).formatValue());
