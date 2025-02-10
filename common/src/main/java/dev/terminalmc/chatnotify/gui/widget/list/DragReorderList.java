@@ -234,7 +234,7 @@ public abstract class DragReorderList extends OptionList {
         
         @Nullable Entry hoveredEntry = getEntryAtPosition(getX() + (double)getWidth() / 2, mouseY);
         if (hoveredEntry == null) {
-            if (mouseY > getBottom()) {
+            if (mouseY > getBottom() || mouseY > getY() + itemHeight * children().size()) {
                 // If we're off the bottom, snap to list bottom. Now if
                 // hoveredEntry is still null we can assume we're off the top.
                 hoveredEntry = children().get(end);
