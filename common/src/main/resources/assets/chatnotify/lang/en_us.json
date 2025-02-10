@@ -147,6 +147,7 @@
   "option.chatnotify.notif.trigger.special.display_name.tooltip": "Display name\n(updated automatically)",
   "option.chatnotify.notif.trigger.special.profile_name.tooltip": "Profile name\n(updated automatically)",
   "option.chatnotify.notif.triggers": "Notification Triggers %s",
+  "option.chatnotify.notif.triggers.search.hint": "Search",
   "option.chatnotify.notif.triggers.tooltip": "If a trigger from the list below matches an incoming chat message, this notification will be activated.\nNote: Normal triggers are NOT case-sensitive.",
   "option.chatnotify.picker.color.new": "New",
   "option.chatnotify.picker.color.old": "Old",

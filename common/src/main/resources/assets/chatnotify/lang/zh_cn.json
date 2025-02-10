@@ -147,6 +147,7 @@
   "option.chatnotify.notif.trigger.special.display_name.tooltip": "Display name\n(updated automatically)",
   "option.chatnotify.notif.trigger.special.profile_name.tooltip": "Profile name\n(updated automatically)",
   "option.chatnotify.notif.triggers": "通知触发器%s",
+  "option.chatnotify.notif.triggers.search.hint": "Search",
   "option.chatnotify.notif.triggers.tooltip": "如果在聊天消息中检测到触发器，则会激活通知。\n请注意：正常触发器不区分大小写。",
   "option.chatnotify.picker.color.new": "New",
   "option.chatnotify.picker.color.old": "Old",

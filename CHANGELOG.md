@@ -6,6 +6,7 @@
 - Added confirmation click requirement when deleting notifications
 - Added option to revert config changes on exit (no change to exiting via ESC)
 - Moved key selector button to adjacent trigger type button
+- Added filter fields for notification and trigger lists
 
 ## 2.3.8
 

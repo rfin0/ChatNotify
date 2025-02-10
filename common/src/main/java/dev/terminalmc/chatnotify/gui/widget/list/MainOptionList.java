@@ -29,10 +29,8 @@ import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.CycleButton;
-import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.Component;
@@ -54,6 +52,8 @@ import static dev.terminalmc.chatnotify.util.Localization.translationKey;
  * linked to {@link Notification} instances.
  */
 public class MainOptionList extends DragReorderList {
+    private String filterString = "";
+    private @Nullable Pattern filterPattern = null;
 
     public MainOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
                           int entryHeight, int entrySpacing) {
@@ -68,23 +68,38 @@ public class MainOptionList extends DragReorderList {
                 localized("option", "global"), null, -1,
                 (button -> openGlobalConfig())));
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                localized("option", "main.notifs", "\u2139"),
-                Tooltip.create(localized("option", "main.notifs.tooltip")), -1));
+        addEntry(new Entry.TitleAndSearchEntry(entryX, entryWidth, entryHeight, this));
 
-        List<Notification> notifs = Config.get().getNotifs();
-        addEntry(new Entry.LockedNotifConfigEntry(dynEntryX, dynEntryWidth, entryHeight, this,
-                notifs, 0));
-        for (int i = 1; i < notifs.size(); i++) {
-            addEntry(new Entry.NotifConfigEntry(dynEntryX, dynEntryWidth, entryHeight, this,
-                    notifs, i));
-        }
+        refreshNotifSubList();
         addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
                     Config.get().addNotif();
+                    filterString = "";
+                    filterPattern = null;
                     init();
                 }));
+    }
+
+    protected void refreshNotifSubList() {
+        children().removeIf((entry) -> entry instanceof Entry.NotifConfigEntry);
+        // Add in reverse order at index 2 (entry 0 is global options, entry 1
+        // is title/search)
+        int start = 2;
+        List<Notification> notifs = Config.get().getNotifs();
+        for (int i = notifs.size() - 1; i >= 0; i--) {
+            if (filterPattern == null || notifs.get(i).triggers.stream().anyMatch(
+                    (trigger) -> filterPattern.matcher(trigger.string).find())) {
+                if (i == 0) {
+                    children().add(start, new Entry.LockedNotifConfigEntry(dynEntryX, dynEntryWidth,
+                            entryHeight, this, notifs, 0));
+                } else {
+                    children().add(start, new Entry.NotifConfigEntry(dynEntryX, dynEntryWidth,
+                            entryHeight, this, notifs, i));
+                }
+            }
+        }
+        clampScrollAmount();
     }
     
     // Sub-screen opening
@@ -130,6 +145,37 @@ public class MainOptionList extends DragReorderList {
     // Custom entries
 
     public static class Entry extends OptionList.Entry {
+
+        private static class TitleAndSearchEntry extends Entry {
+            TitleAndSearchEntry(int x, int width, int height, MainOptionList list) {
+                super();
+                int searchFieldWidth = 100;
+                int titleWidth = width - searchFieldWidth - SPACE;
+
+                StringWidget titleWidget = new StringWidget(x, 0, titleWidth, height,
+                        localized("option", "main.notifs", "\u2139"), list.mc.font);
+                titleWidget.setTooltip(Tooltip.create(localized(
+                        "option", "main.notifs.tooltip")));
+                elements.add(titleWidget);
+
+                TextField searchField = new TextField(x + width - searchFieldWidth, 0,
+                        searchFieldWidth, height);
+                searchField.setMaxLength(64);
+                searchField.setHint(localized("option", "notif.triggers.search.hint")
+                        .withColor(TextField.TEXT_COLOR_HINT));
+                searchField.setValue(list.filterString);
+                searchField.setResponder((str) -> {
+                    list.filterString = str;
+                    if (str.isBlank()) {
+                        list.filterPattern = null;
+                    } else {
+                        list.filterPattern = Pattern.compile("(?iU)" + Pattern.quote(str));
+                    }
+                    list.refreshNotifSubList();
+                });
+                elements.add(searchField);
+            }
+        }
 
         private static class NotifConfigEntry extends Entry {
             NotifConfigEntry(int x, int width, int height, MainOptionList list,
@@ -223,14 +269,16 @@ public class MainOptionList extends DragReorderList {
                     elements.add(indicatorButton);
 
                     // Drag reorder button (left-side extension)
-                    elements.add(Button.builder(Component.literal("\u2191\u2193"),
+                    Button dragButton = Button.builder(Component.literal("\u2191\u2193"),
                                     (button) -> {
                                         this.setDragging(true);
                                         list.startDragging(this, null, false);
                                     })
                             .pos(x - list.smallWidgetWidth - SPACE, 0)
                             .size(list.smallWidgetWidth, height)
-                            .build());
+                            .build();
+                    dragButton.active = list.filterPattern == null;
+                    elements.add(dragButton);
                 }
                 
                 if (singleTrig) {

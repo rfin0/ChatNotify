@@ -147,6 +147,7 @@
   "option.chatnotify.notif.trigger.special.display_name.tooltip": "Display name\n(updated automatically)",
   "option.chatnotify.notif.trigger.special.profile_name.tooltip": "Profile name\n(updated automatically)",
   "option.chatnotify.notif.triggers": "通知觸發條件 %s",
+  "option.chatnotify.notif.triggers.search.hint": "Search",
   "option.chatnotify.notif.triggers.tooltip": "如果在聊天訊息中偵測到觸發條件，則會啟動通知。\n注意：一般觸發條件不區分大小寫。",
   "option.chatnotify.picker.color.new": "New",
   "option.chatnotify.picker.color.old": "Old",

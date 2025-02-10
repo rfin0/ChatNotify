@@ -147,6 +147,7 @@
   "option.chatnotify.notif.trigger.special.display_name.tooltip": "Отображаемое имя\n(обновляется автоматически)",
   "option.chatnotify.notif.trigger.special.profile_name.tooltip": "Имя профиля\n(обновляется автоматически)",
   "option.chatnotify.notif.triggers": "Триггеры уведомлений %s",
+  "option.chatnotify.notif.triggers.search.hint": "Search",
   "option.chatnotify.notif.triggers.tooltip": "Если триггер из списка ниже совпадает с входящим сообщением в чате, это уведомление будет активировано.\nПримечание: Обычные триггеры НЕ чувствительны к регистру.",
   "option.chatnotify.picker.color.new": "Новый",
   "option.chatnotify.picker.color.old": "Старый",

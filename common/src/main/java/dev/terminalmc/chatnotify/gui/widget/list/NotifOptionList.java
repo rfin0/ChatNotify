@@ -28,6 +28,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FastColor;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.time.Duration;
@@ -35,6 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
@@ -44,6 +46,8 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
  */
 public class NotifOptionList extends DragReorderList {
     private final Notification notif;
+    private String filterString = "";
+    private @Nullable Pattern filterPattern = null;
 
     public NotifOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
                            int entryHeight, int entrySpacing, Notification notif) {
@@ -57,32 +61,17 @@ public class NotifOptionList extends DragReorderList {
 
     @Override
     protected void addEntries() {
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                localized("option", "notif.triggers", "\u2139"),
-                Tooltip.create(localized("option", "notif.triggers.tooltip")), -1));
+        addEntry(new Entry.TitleAndSearchEntry(entryX, entryWidth, entryHeight, this));
 
-        boolean isUser = notif.equals(Config.get().getUserNotif());
-        for (int i = 0; i < notif.triggers.size(); i++) {
-            Trigger trigger = notif.triggers.get(i);
-            if (isUser && i <= 1) {
-                addEntry(new Entry.TriggerDisplayFieldEntry(dynEntryX, dynEntryWidth, entryHeight,
-                        trigger.string, i == 0));
-            } else {
-                addEntry(new Entry.TriggerFieldEntry(dynEntryX, dynEntryWidth, entryHeight,
-                        this, notif, trigger, i));
-                if (trigger.styleTarget.enabled) {
-                    addEntry(new Entry.StyleTargetFieldEntry(dynEntryX, dynEntryWidth, entryHeight,
-                            this, trigger.styleTarget));
-                }
-            }
-        }
+        refreshTriggerSubList();
         addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
                     notif.triggers.add(new Trigger());
+                    filterString = "";
+                    filterPattern = null;
                     init();
                 }));
-
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "notif"), null, -1));
@@ -99,6 +88,31 @@ public class NotifOptionList extends DragReorderList {
                 localized("option", "advanced"),
                 Tooltip.create(localized("option", "advanced.tooltip")), 500,
                 (button) -> openAdvancedConfig()));
+    }
+    
+    protected void refreshTriggerSubList() {
+        children().removeIf((entry) -> entry instanceof Entry.TriggerFieldEntry 
+                || entry instanceof Entry.StyleTargetFieldEntry);
+        // Add in reverse order at index 1 (entry 0 is title/search)
+        int start = 1;
+        boolean isUser = notif.equals(Config.get().getUserNotif());
+        for (int i = notif.triggers.size() - 1; i >= 0; i--) {
+            Trigger trigger = notif.triggers.get(i);
+            if (filterPattern == null || filterPattern.matcher(trigger.string).find()) {
+                if (isUser && i <= 1) {
+                    children().add(start, new Entry.TriggerDisplayFieldEntry(
+                            dynEntryX, dynEntryWidth, entryHeight, trigger.string, i == 0));
+                } else {
+                    if (trigger.styleTarget.enabled) {
+                        children().add(start, new Entry.StyleTargetFieldEntry(
+                                dynEntryX, dynEntryWidth, entryHeight, this, trigger.styleTarget));
+                    }
+                    children().add(start, new Entry.TriggerFieldEntry(
+                            dynEntryX, dynEntryWidth, entryHeight, this, notif, trigger, i));
+                }
+            }
+        }
+        clampScrollAmount();
     }
     
     // Sub-screen opening
@@ -141,6 +155,37 @@ public class NotifOptionList extends DragReorderList {
     // Custom entries
 
     abstract static class Entry extends OptionList.Entry {
+        
+        private static class TitleAndSearchEntry extends Entry {
+            TitleAndSearchEntry(int x, int width, int height, NotifOptionList list) {
+                super();
+                int searchFieldWidth = 100;
+                int titleWidth = width - searchFieldWidth - SPACE;
+
+                StringWidget titleWidget = new StringWidget(x, 0, titleWidth, height,
+                        localized("option", "notif.triggers", "\u2139"), list.mc.font);
+                titleWidget.setTooltip(Tooltip.create(localized(
+                        "option", "notif.triggers.tooltip")));
+                elements.add(titleWidget);
+                
+                TextField searchField = new TextField(x + width - searchFieldWidth, 0,
+                        searchFieldWidth, height);
+                searchField.setMaxLength(64);
+                searchField.setHint(localized("option", "notif.triggers.search.hint")
+                        .withColor(TextField.TEXT_COLOR_HINT));
+                searchField.setValue(list.filterString);
+                searchField.setResponder((str) -> {
+                    list.filterString = str;
+                    if (str.isBlank()) {
+                        list.filterPattern = null;
+                    } else {
+                        list.filterPattern = Pattern.compile("(?iU)" + Pattern.quote(str));
+                    }
+                    list.refreshTriggerSubList();
+                });
+                elements.add(searchField);
+            }
+        }
 
         private static class TriggerDisplayFieldEntry extends Entry {
             TriggerDisplayFieldEntry(int x, int width, int height, String value, boolean first) {
@@ -177,7 +222,7 @@ public class NotifOptionList extends DragReorderList {
                 elements.add(indicatorButton);
                 
                 // Drag reorder button
-                elements.add(Button.builder(Component.literal("\u2191\u2193"),
+                Button dragButton = Button.builder(Component.literal("\u2191\u2193"),
                                 (button) -> {
                                     this.setDragging(true);
                                     list.startDragging(this, StyleTargetFieldEntry.class,
@@ -185,7 +230,9 @@ public class NotifOptionList extends DragReorderList {
                                 })
                         .pos(x - list.smallWidgetWidth - SPACE, 0)
                         .size(list.smallWidgetWidth, height)
-                        .build());
+                        .build();
+                dragButton.active = list.filterPattern == null;
+                elements.add(dragButton);
 
                 // Type button
                 CycleButton<Trigger.Type> typeButton = CycleButton.<Trigger.Type>builder(
