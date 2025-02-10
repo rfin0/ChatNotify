@@ -16,7 +16,6 @@
 
 package dev.terminalmc.chatnotify.gui.widget.list;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.ResponseMessage;
@@ -28,16 +27,16 @@ import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.mixin.accessor.KeyAccessor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -47,45 +46,57 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
  * Contains controls for advanced options of a {@link Notification}, including
  * exclusion triggers, response messages, and reset options.
  */
-public class AdvancedOptionList extends OptionList {
+public class AdvancedOptionList extends DragReorderList {
     private final Notification notif;
-    private int dragSourceSlot = -1;
 
-    public AdvancedOptionList(Minecraft mc, int width, int height, int y, int itemHeight,
-                              int entryWidth, int entryHeight, Notification notif) {
-        super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
+    public AdvancedOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
+                              int entryHeight, int entrySpacing, Notification notif) {
+        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, () -> {},
+                new HashMap<>(Map.of(
+                        Entry.ExclusionFieldEntry.class, notif::moveExclusionTrigger,
+                        Entry.ResponseFieldEntry.class, notif::moveResponseMessage
+                )));
         this.notif = notif;
+    }
 
+    @Override
+    protected void addEntries() {
+        Minecraft mc = Minecraft.getInstance();
+        
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.control"), null, -1));
         addEntry(new Entry.CheckOwnModeEntry(entryX, entryWidth, entryHeight, notif));
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                localized("option", "advanced.msg", "\u2139"), 
-                Tooltip.create(localized("option", "advanced.msg.info.format_codes").append("\n\n")
+                localized("option", "advanced.msg", "\u2139"),
+                Tooltip.create(localized("option", "advanced.msg.info.format_codes")
+                        .append("\n\n")
                         .append(localized("option", "advanced.msg.info.regex_groups"))), -1));
         addEntry(new Entry.MessageConfigEntry(dynEntryX, dynEntryWidth, entryHeight,
                 () -> notif.replacementMsg, (str) -> notif.replacementMsg = str,
                 () -> notif.replacementMsgEnabled, (val) -> notif.replacementMsgEnabled = val,
-                localized("option", "advanced.msg.replacement").withColor(0x555555),
+                localized("option", "advanced.msg.replacement")
+                        .withColor(TextField.TEXT_COLOR_HINT),
                 localized("option", "advanced.msg.replacement").append(".\n")
                         .append(localized("option", "advanced.msg.replacement.tooltip"))
                         .append("\n\n").append(localized("option", "advanced.msg.info.blank_hide"))));
         addEntry(new Entry.MessageConfigEntry(dynEntryX, dynEntryWidth, entryHeight,
                 () -> notif.statusBarMsg, (str) -> notif.statusBarMsg = str,
                 () -> notif.statusBarMsgEnabled, (val) -> notif.statusBarMsgEnabled = val,
-                localized("option", "advanced.msg.status_bar").withColor(0x555555),
+                localized("option", "advanced.msg.status_bar")
+                        .withColor(TextField.TEXT_COLOR_HINT),
                 localized("option", "advanced.msg.status_bar").append(".\n")
                         .append(localized("option", "advanced.msg.status_bar.tooltip"))
                         .append("\n\n").append(localized("option", "advanced.msg.info.blank_original"))));
         addEntry(new Entry.MessageConfigEntry(dynEntryX, dynEntryWidth, entryHeight,
                 () -> notif.titleMsg, (str) -> notif.titleMsg = str,
                 () -> notif.titleMsgEnabled, (val) -> notif.titleMsgEnabled = val,
-                localized("option", "advanced.msg.title").withColor(0x555555),
+                localized("option", "advanced.msg.title")
+                        .withColor(TextField.TEXT_COLOR_HINT),
                 localized("option", "advanced.msg.title").append(".\n")
                         .append(localized("option", "advanced.msg.title.tooltip"))
                         .append("\n\n").append(localized("option", "advanced.msg.info.blank_original"))));
-        
+
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.exclusion", "\u2139"),
                 Tooltip.create(localized("option", "advanced.exclusion.tooltip")), -1));
@@ -100,15 +111,16 @@ public class AdvancedOptionList extends OptionList {
                     Component.literal("+"), null, -1,
                     (button) -> {
                         notif.exclusionTriggers.add(new Trigger());
-                        reload();
+                        init();
                     }));
         }
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.response", "\u2139"),
                 Tooltip.create(localized("option", "advanced.response.tooltip")
+                        .append("\n")
                         .append(localized("option", "advanced.response.tooltip.warning")
-                        .withStyle(ChatFormatting.RED))), -1));
+                                .withStyle(ChatFormatting.RED))), -1));
         addEntry(new Entry.ResponseToggleEntry(entryX, entryWidth, entryHeight, notif, this));
 
         if (notif.responseEnabled) {
@@ -122,7 +134,7 @@ public class AdvancedOptionList extends OptionList {
                     Component.literal("+"), null, -1,
                     (button) -> {
                         notif.responseMessages.add(new ResponseMessage());
-                        reload();
+                        init();
                     }));
         }
 
@@ -135,7 +147,7 @@ public class AdvancedOptionList extends OptionList {
                 -1,
                 (button) -> {
                     notif.resetAdvanced();
-                    reload();
+                    init();
                 }));
 
         addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
@@ -150,8 +162,8 @@ public class AdvancedOptionList extends OptionList {
                                 }
                             }
                             mc.setScreen(screen);
-                            reload();
-                            },
+                            init();
+                        },
                         localized("option", "advanced.reset.level_2"),
                         localized("option", "advanced.reset.level_2.confirm")))));
 
@@ -167,135 +179,13 @@ public class AdvancedOptionList extends OptionList {
                             }
                             else {
                                 mc.setScreen(screen);
-                                reload();
+                                init();
                             }},
                         localized("option", "advanced.reset.level_3"),
                         localized("option", "advanced.reset.level_3.confirm")))));
     }
-
-    @Override
-    public AdvancedOptionList reload(int width, int height, double scrollAmount) {
-        AdvancedOptionList newList = new AdvancedOptionList(minecraft, width, height,
-                getY(), itemHeight, entryWidth, entryHeight, notif);
-        newList.setScrollAmount(scrollAmount);
-        return newList;
-    }
-
-    // Field dragging
-
-    @Override
-    public void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        super.renderWidget(graphics, mouseX, mouseY, delta);
-        if (dragSourceSlot != -1) {
-            super.renderItem(graphics, mouseX, mouseY, delta, dragSourceSlot,
-                    mouseX, mouseY, entryWidth, entryHeight);
-        }
-    }
-
-    @Override
-    public boolean mouseReleased(double x, double y, int button) {
-        if (dragSourceSlot != -1 && button == InputConstants.MOUSE_BUTTON_LEFT) {
-            dropDragged(x, y);
-            return true;
-        }
-        return super.mouseReleased(x, y, button);
-    }
-
-    private void dropDragged(double mouseX, double mouseY) {
-        OptionList.Entry sourceEntry = children().get(dragSourceSlot);
-        OptionList.Entry hoveredEntry = getEntryAtPosition(mouseX, mouseY);
-        switch(children().get(dragSourceSlot)) {
-            case Entry.ExclusionFieldEntry e -> dropDraggedExclusion(hoveredEntry);
-            case Entry.ResponseFieldEntry e -> dropDraggedResponse(hoveredEntry);
-            default -> throw new IllegalStateException("Unexpected value: " + sourceEntry);
-        }
-        this.dragSourceSlot = -1;
-    }
-
-    private void dropDraggedExclusion(OptionList.Entry hoveredEntry) {
-        int targetSlot = children().indexOf(hoveredEntry);
-        int offset = exclusionListOffset();
-        // Check whether the drop location is valid
-        if (hoveredEntry instanceof Entry.ExclusionFieldEntry || targetSlot == offset - 1) {
-            int hoveredSlot = children().indexOf(hoveredEntry);
-            // Check whether the move operation would actually change anything
-            if (targetSlot > dragSourceSlot || targetSlot < dragSourceSlot - 1) {
-                // Account for the list not starting at slot 0
-                int sourceIndex = dragSourceSlot - offset;
-                int destIndex = hoveredSlot - offset;
-                // I can't really explain why
-                if (sourceIndex > destIndex) destIndex += 1;
-                // Move
-                if (notif.moveExclusionTrigger(sourceIndex, destIndex)) {
-                    reload();
-                }
-            }
-        }
-    }
-
-    private void dropDraggedResponse(OptionList.Entry hoveredEntry) {
-        int hoveredSlot = children().indexOf(hoveredEntry);
-        // Check whether the drop location is valid
-        if (hoveredEntry instanceof Entry.ResponseFieldEntry || hoveredSlot == responseListOffset() - 1) {
-            // pass
-        } else if (hoveredEntry instanceof SpaceEntry) {
-            hoveredSlot -= 1; // Reference the 'parent' Entry
-        } else {
-            return;
-        }
-        // Check whether the move operation would actually change anything
-        if (hoveredSlot > dragSourceSlot || hoveredSlot < dragSourceSlot - 1) {
-            // Account for the list not starting at slot 0
-            int sourceIndex = dragSourceSlot - responseOffset(dragSourceSlot);
-            int destIndex = hoveredSlot - responseOffset(hoveredSlot);
-            // I can't really explain why
-            if (sourceIndex > destIndex) destIndex += 1;
-            // Move
-            if (notif.moveResponseMessage(sourceIndex, destIndex)) {
-                reload();
-            }
-        }
-    }
-
-    /**
-     * @return The index of the first {@link Entry.ExclusionFieldEntry} in the
-     * {@link OptionList}.
-     */
-    private int exclusionListOffset() {
-        int i = 0;
-        for (OptionList.Entry entry : children()) {
-            if (entry instanceof Entry.ExclusionFieldEntry) return i;
-            i++;
-        }
-        throw new IllegalStateException("Exclusion list not found");
-    }
-
-    /**
-     * @return The index of the first {@link Entry.ResponseFieldEntry} in the
-     * {@link OptionList}.
-     */
-    private int responseListOffset() {
-        int i = 0;
-        for (OptionList.Entry entry : children()) {
-            if (entry instanceof Entry.ResponseFieldEntry) return i;
-            i++;
-        }
-        throw new IllegalStateException("Response list not found");
-    }
-
-    /**
-     * @return The number of non-{@link Entry.ResponseFieldEntry} entries in the
-     * {@link OptionList} before (and including) the specified index.
-     */
-    private int responseOffset(int index) {
-        int i = 0;
-        int offset = 0;
-        for (OptionList.Entry entry : children()) {
-            if (!(entry instanceof Entry.ResponseFieldEntry)) offset++;
-            if (i++ == index) return offset;
-        }
-        throw new IllegalStateException("Response index out of range");
-    }
+    
+    // Custom entries
 
     private abstract static class Entry extends OptionList.Entry {
 
@@ -304,14 +194,13 @@ public class AdvancedOptionList extends OptionList {
                 super();
 
                 elements.add(CycleButton.<Notification.CheckOwnMode>builder((status) ->
-                                localized("option", "advanced.check_own_mode." + status.name()))
+                                localized("option", "advanced.self_notify." + status.name()))
                         .withValues(Notification.CheckOwnMode.values())
                         .withInitialValue(notif.checkOwnMode)
-                        .withTooltip((status) -> Tooltip.create(
-                                localized("option", "advanced.check_own_mode."
-                                        + status.name() + ".tooltip")))
+                        .withTooltip((status) -> Tooltip.create(localized(
+                                "option", "advanced.self_notify." + status.name() + ".tooltip")))
                         .create(x, 0, width, height,
-                                localized("option", "advanced.check_own_mode"),
+                                localized("option", "global.self_notify"),
                                 (button, status) ->
                                         notif.checkOwnMode = status));
             }
@@ -324,7 +213,7 @@ public class AdvancedOptionList extends OptionList {
                                Component hint, Component tooltip) {
                 super();
                 int statusButtonWidth = Math.max(24, height);
-                int fieldWidth = width - statusButtonWidth - SPACING;
+                int fieldWidth = width - statusButtonWidth - SPACE;
 
                 // String field
                 TextField titleField = new TextField(x, 0, fieldWidth, height);
@@ -358,7 +247,7 @@ public class AdvancedOptionList extends OptionList {
                         .create(x, 0, width, height, localized("option", "advanced.status"),
                                 (button, status) -> {
                                     notif.exclusionEnabled = status;
-                                    list.reload();
+                                    list.init();
                                 }));
             }
         }
@@ -376,9 +265,9 @@ public class AdvancedOptionList extends OptionList {
                 elements.add(Button.builder(Component.literal("\u2191\u2193"),
                                 (button) -> {
                                     this.setDragging(true);
-                                    list.dragSourceSlot = list.children().indexOf(this);
+                                    list.startDragging(this, null, false);
                                 })
-                        .pos(x - list.smallWidgetWidth - SPACING, 0)
+                        .pos(x - list.smallWidgetWidth - SPACE, 0)
                         .size(list.smallWidgetWidth, height)
                         .build());
 
@@ -388,12 +277,12 @@ public class AdvancedOptionList extends OptionList {
                         .withValues(Trigger.Type.values())
                         .displayOnlyValue()
                         .withInitialValue(trigger.type)
-                        .withTooltip((type) -> Tooltip.create(
-                                localized("option", "notif.trigger.type." + type + ".tooltip")))
+                        .withTooltip((type) -> Tooltip.create(localized(
+                                "option", "trigger.type." + type + ".tooltip")))
                         .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
                                 (button, type) -> {
                                     trigger.type = type;
-                                    list.reload();
+                                    list.init();
                                 });
                 typeButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(typeButton);
@@ -405,8 +294,8 @@ public class AdvancedOptionList extends OptionList {
                 triggerField.setMaxLength(240);
                 triggerField.setResponder((string) -> trigger.string = string.strip());
                 triggerField.setValue(trigger.string);
-                triggerField.setTooltip(Tooltip.create(
-                        localized("option", "trigger.field.tooltip")));
+                triggerField.setTooltip(Tooltip.create(localized(
+                        "option", "trigger.field.tooltip")));
                 triggerField.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(triggerField);
 
@@ -415,9 +304,9 @@ public class AdvancedOptionList extends OptionList {
                         Component.literal("\u274C").withStyle(ChatFormatting.RED),
                         (button) -> {
                             notif.exclusionTriggers.remove(index);
-                            list.reload();
+                            list.init();
                         })
-                        .pos(x + width + SPACING, 0)
+                        .pos(x + width + SPACE, 0)
                         .size(list.smallWidgetWidth, height)
                         .build());
             }
@@ -434,7 +323,7 @@ public class AdvancedOptionList extends OptionList {
                         .create(x, 0, width, height, localized("option", "advanced.status"),
                                 (button, status) -> {
                                     notif.responseEnabled = status;
-                                    listWidget.reload();
+                                    listWidget.init();
                                 }));
             }
         }
@@ -452,9 +341,9 @@ public class AdvancedOptionList extends OptionList {
                 elements.add(Button.builder(Component.literal("\u2191\u2193"),
                                 (button) -> {
                                     this.setDragging(true);
-                                    list.dragSourceSlot = list.children().indexOf(this);
+                                    list.startDragging(this, null, false);
                                 })
-                        .pos(x - list.smallWidgetWidth - SPACING, 0)
+                        .pos(x - list.smallWidgetWidth - SPACE, 0)
                         .size(list.smallWidgetWidth, height)
                         .build());
 
@@ -464,12 +353,12 @@ public class AdvancedOptionList extends OptionList {
                         .withValues(ResponseMessage.Type.values())
                         .displayOnlyValue()
                         .withInitialValue(response.type)
-                        .withTooltip((type) -> Tooltip.create(
-                                localized("option", "advanced.response." + type.name() + ".tooltip")))
+                        .withTooltip((type) -> Tooltip.create(localized(
+                                "option", "advanced.response." + type.name() + ".tooltip")))
                         .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
                                 (button, type) -> {
                                     response.type = type;
-                                    list.reload();
+                                    list.init();
                                 });
                 typeButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(typeButton);
@@ -484,13 +373,13 @@ public class AdvancedOptionList extends OptionList {
                                 int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynEntryWidth);
                                 int wX = x + (width / 2) - (wWidth / 2);
                                 int wY = list.getY();
-                                list.screen.setOverlayWidget(new DropdownTextField(
+                                list.screen.setOverlay(new DropdownTextField(
                                         wX, wY, wWidth, wHeight, Component.empty(),
                                         () -> response.string.matches(".+-.+") ? response.string.split("-")[0] : "", 
                                         (val) -> response.string = val + "-" + (response.string.matches(".+-.+") ? response.string.split("-")[1] : "key.keyboard.unknown"),
                                         (widget) -> {
                                             list.screen.removeOverlayWidget();
-                                            list.reload();
+                                            list.init();
                                         }, keys));
                             });
                     MutableComponent label1 = localized(
@@ -509,13 +398,13 @@ public class AdvancedOptionList extends OptionList {
                                 int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynEntryWidth);
                                 int wX = x + (width / 2) - (wWidth / 2);
                                 int wY = list.getY();
-                                list.screen.setOverlayWidget(new DropdownTextField(
+                                list.screen.setOverlay(new DropdownTextField(
                                         wX, wY, wWidth, wHeight, Component.empty(),
                                         () -> response.string.matches(".+-.+") ? response.string.split("-")[1] : "",
                                         (val) -> response.string = (response.string.matches(".+-.+") ? response.string.split("-")[0] + "-" + val : "key.keyboard.unknown"),
                                         (widget) -> {
                                             list.screen.removeOverlayWidget();
-                                            list.reload();
+                                            list.init();
                                         }, keys));
                             });
                     MutableComponent label2 = localized(
@@ -541,8 +430,8 @@ public class AdvancedOptionList extends OptionList {
                 TextField timeField = new TextField(
                         x + width - timeFieldWidth, 0, timeFieldWidth, height);
                 timeField.posIntValidator().strict();
-                timeField.setTooltip(Tooltip.create(
-                        localized("option", "advanced.response.time.tooltip")));
+                timeField.setTooltip(Tooltip.create(localized(
+                        "option", "advanced.response.time.tooltip")));
                 timeField.setTooltipDelay(Duration.ofMillis(500));
                 timeField.setMaxLength(5);
                 timeField.setResponder((str) -> response.delayTicks = Integer.parseInt(str.strip()));
@@ -554,9 +443,9 @@ public class AdvancedOptionList extends OptionList {
                         Component.literal("\u274C").withStyle(ChatFormatting.RED),
                         (button) -> {
                             notif.responseMessages.remove(index);
-                            list.reload();
+                            list.init();
                         })
-                        .pos(x + width + SPACING, 0)
+                        .pos(x + width + SPACE, 0)
                         .size(list.smallWidgetWidth, height)
                         .build());
             }

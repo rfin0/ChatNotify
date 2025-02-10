@@ -17,6 +17,7 @@
 package dev.terminalmc.chatnotify.gui.widget;
 
 import com.mojang.blaze3d.platform.Window;
+import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -26,9 +27,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Consumer;
 
 /**
- * An {@link OverlayWidget} is designed for display on a 
- * {@link dev.terminalmc.chatnotify.gui.screen.OptionsScreen}, on top of any 
- * other GUI elements.
+ * An {@link OverlayWidget} is designed for display on a {@link OptionScreen},
+ * on top of any other GUI elements.
  */
 public abstract class OverlayWidget extends AbstractWidget {
     private final Consumer<OverlayWidget> close;
@@ -91,6 +91,17 @@ public abstract class OverlayWidget extends AbstractWidget {
     }
 
     // Re-init on reposition or resize to maintain sub-widget position and size
+
+    public void updateBounds(int screenWidth, int screenHeight) {
+        // Proportional resizing
+        super.setWidth(getNominalWidth(screenWidth));
+        super.setHeight(getNominalHeight(screenHeight));
+        // Recenter
+        super.setX(screenWidth / 2 - getWidth() / 2);
+        super.setY(screenHeight / 2 - getHeight() / 2);
+        // Initialize
+        init();
+    }
 
     @Override
     public void setPosition(int x, int y) {

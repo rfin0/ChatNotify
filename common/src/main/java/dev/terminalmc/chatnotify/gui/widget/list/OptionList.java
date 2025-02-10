@@ -17,6 +17,7 @@
 package dev.terminalmc.chatnotify.gui.widget.list;
 
 import dev.terminalmc.chatnotify.ChatNotify;
+import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
@@ -27,7 +28,6 @@ import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.network.chat.Component;
 import dev.terminalmc.chatnotify.gui.widget.slider.DoubleSlider;
 import dev.terminalmc.chatnotify.gui.widget.SilentButton;
-import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,9 +39,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * Tightly coupled to a generic {@link OptionsScreen}, allowing many unique
- * options screens to use a single screen implementation, while displaying
- * different options.
+ * Tightly coupled to {@link OptionScreen}, allowing many unique options 
+ * 'screens' to use a single screen implementation while displaying different 
+ * options.
  *
  * <p>Contains list of {@link Entry} objects, which are drawn onto the screen
  * top-down in the order that they are stored, with each entry being allocated
@@ -54,33 +54,100 @@ import java.util.function.Supplier;
  * rendered at the same list level.</p>
  */
 public abstract class OptionList extends ContainerObjectSelectionList<OptionList.Entry> {
-    public static final int ROW_WIDTH_MARGIN = 20;
-
-    protected OptionsScreen screen;
+    protected OptionScreen screen;
 
     // Standard positional and dimensional values used by entries
-    protected final int rowWidth;
+    protected final Minecraft mc;
     protected final int entryWidth;
-    protected final int dynEntryWidth;
     protected final int entryHeight;
-    protected final int entryX;
-    protected final int dynEntryX;
+    protected final int entrySpacing;
+    
+    protected int rowWidth;
+    protected int dynEntryWidth;
+    
+    protected int entryX;
+    protected int dynEntryX;
 
-    protected final int smallWidgetWidth;
-    protected final int tinyWidgetWidth;
+    protected int smallWidgetWidth;
+    protected int tinyWidgetWidth;
+    
+    protected final Runnable onClose;
 
-    public OptionList(Minecraft mc, int width, int height, int y, int itemHeight,
-                      int entryWidth, int entryHeight) {
-        super(mc, width, height, y, itemHeight);
+    public OptionList(Minecraft mc, int width, int height, int y, int entryWidth,
+                      int entryHeight, int entrySpacing, Runnable onClose) {
+        super(mc, width, height, y, entryHeight + entrySpacing);
+        this.mc = mc;
         this.entryWidth = entryWidth;
-        this.dynEntryWidth = Math.max(entryWidth, (int)(width / 100F * 70F));
         this.entryHeight = entryHeight;
+        this.entrySpacing = entrySpacing;
+        this.onClose = onClose;
+        updateElementBounds();
+    }
+
+    /**
+     * Re-calculates all dimensional and positional base parameters used by
+     * list entries and their sub-elements.
+     * 
+     * <p>Should be called whenever the size of the {@link OptionList} is
+     * changed.</p>
+     */
+    protected void updateElementBounds() {
+        this.dynEntryWidth = Math.max(entryWidth, (int)(width / 100F * 70F));
         this.entryX = width / 2 - (entryWidth / 2);
         this.dynEntryX = width / 2 - (dynEntryWidth / 2);
         this.rowWidth = Math.max(entryWidth, dynEntryWidth)
-                + (OptionsScreen.LIST_ENTRY_SIDE_MARGIN * 2) + ROW_WIDTH_MARGIN;
+                + (OptionScreen.SCROLL_BAR_MARGIN * 2)
+                + (OptionScreen.HANGING_WIDGET_MARGIN * 2);
         this.smallWidgetWidth = Math.max(16, entryHeight);
         this.tinyWidgetWidth = 16;
+    }
+
+    /**
+     * Initializes the {@link OptionList}.
+     */
+    protected void init() {
+        double scrollAmount = getScrollAmount();
+        
+        clearEntries();
+        setFocused(null);
+        
+        addEntries();
+        
+        setScrollAmount(scrollAmount);
+    }
+
+    public void setScreen(OptionScreen screen) {
+        this.screen = screen;
+    }
+
+    public void onClose() {
+        onClose.run();
+    }
+    
+    public void addSpacedEntry(Entry entry) {
+        super.addEntry(entry);
+        super.addEntry(new SpaceEntry(entry));
+    }
+
+    /**
+     * Initializes and adds all list entries.
+     */
+    protected abstract void addEntries();
+
+    /**
+     * Updates the size and position of the {@link OptionList}, then initializes
+     * it to update list entries.
+     * 
+     * <p>It would be more efficient to iterate over list entries and resize and
+     * reposition each, rather than re-creating them, but that would add 
+     * significant complexity and yield minimal observable performance benefit.
+     * </p>
+     */
+    @Override
+    public void updateSizeAndPosition(int width, int height, int y) {
+        super.updateSizeAndPosition(width, height, y);
+        updateElementBounds();
+        init();
     }
 
     @Override
@@ -99,25 +166,13 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         return button == 0 || button == 1;
     }
 
-    protected void reload() {
-        screen.reload();
-    }
-
-    public OptionList reload(OptionsScreen screen, int width, int height, double scrollAmount) {
-        OptionList newList = reload(width, height, scrollAmount);
-        newList.screen = screen;
-        return newList;
-    }
-
-    protected abstract OptionList reload(int width, int height, double scrollAmount);
-
-    public void onClose() {}
-
     /**
      * Base implementation of {@link Entry}, with common entries.
      */
     public abstract static class Entry extends ContainerObjectSelectionList.Entry<Entry> {
-        public static final int SPACING = 4;
+        public static final int SPACE = OptionScreen.ELEMENT_SPACING;
+        public static final int SPACE_SMALL = OptionScreen.ELEMENT_SPACING_NARROW;
+        public static final int SPACE_TINY = OptionScreen.ELEMENT_SPACING_FINE;
 
         public static final WidgetSprites OPTION_SPRITES = new WidgetSprites(
                 ResourceLocation.fromNamespaceAndPath(ChatNotify.MOD_ID, "widget/options_button"),

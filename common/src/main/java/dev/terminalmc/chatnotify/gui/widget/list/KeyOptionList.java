@@ -16,13 +16,13 @@
 
 package dev.terminalmc.chatnotify.gui.widget.list;
 
-import dev.terminalmc.chatnotify.config.TextStyle;
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
@@ -30,18 +30,44 @@ import java.time.Duration;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 public class KeyOptionList extends OptionList {
+    public static final String[] CHAT_KEYS = {
+            ".",
+            "chat.type",
+            "chat.type.text",
+            "chat.type.announcement",
+            "chat.type.admin",
+            "chat.type.emote",
+            "chat.type.team.sent",
+            "chat.type.team.text",
+    };
+    public static final String[] PLAYER_KEYS = new String[]{
+            "multiplayer.player.joined",
+            "multiplayer.player.left",
+            "death.",
+    };
+    public static final String[] ADVANCEMENT_KEYS = new String[]{
+            "chat.type.advancement",
+            "chat.type.advancement.task",
+            "chat.type.advancement.goal",
+            "chat.type.advancement.challenge",
+    };
+    public static final String[] COMMAND_KEYS = new String[]{
+            "commands.",
+            "commands.message.display",
+            "commands.message.display.incoming",
+            "commands.message.display.outgoing",
+    };
+    
     private final Trigger trigger;
-    private final TextStyle textStyle;
-    private final Runnable closeRunnable;
 
-    public KeyOptionList(Minecraft mc, int width, int height, int y,
-                         int entryWidth, int entryHeight, Trigger trigger, TextStyle textStyle, 
-                         Runnable closeRunnable) {
-        super(mc, width, height, y, entryHeight + 1, entryWidth, entryHeight);
+    public KeyOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
+                         int entryHeight, Runnable onClose, Trigger trigger) {
+        super(mc, width, height, y, entryWidth, entryHeight, 1, onClose);
         this.trigger = trigger;
-        this.textStyle = textStyle;
-        this.closeRunnable = closeRunnable;
+    }
 
+    @Override
+    protected void addEntries() {
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "key.trigger", "\u2139"),
                 Tooltip.create(localized("option", "key.trigger.tooltip")), -1));
@@ -50,72 +76,29 @@ public class KeyOptionList extends OptionList {
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "key.group.chat"), null, -1));
-        String[] chatKeys = { 
-                ".",
-                "chat.type",
-                "chat.type.text",
-                "chat.type.announcement",
-                "chat.type.admin",
-                "chat.type.emote",
-                "chat.type.team.sent",
-                "chat.type.team.text",
-        };
-        for (int i = 0; i < chatKeys.length; i++) {
-            addEntry(new Entry.KeyOption(entryX, entryWidth, entryHeight, this, trigger,
-                    chatKeys[i], i < chatKeys.length - 1 ? chatKeys[++i] : null));
-        }
+        addKeyEntries(CHAT_KEYS);
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "key.group.player"), null, -1));
-        String[] playerKeys = new String[]{
-                "multiplayer.player.joined",
-                "multiplayer.player.left",
-                "death.",
-        };
-        for (int i = 0; i < playerKeys.length; i++) {
-            addEntry(new Entry.KeyOption(entryX, entryWidth, entryHeight, this, trigger,
-                    playerKeys[i], i < playerKeys.length - 1 ? playerKeys[++i] : null));
-        }
+        addKeyEntries(PLAYER_KEYS);
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "key.group.advancement"), null, -1));
-        String[] advancementKeys = new String[]{
-                "chat.type.advancement",
-                "chat.type.advancement.task",
-                "chat.type.advancement.goal",
-                "chat.type.advancement.challenge",
-        };
-        for (int i = 0; i < advancementKeys.length; i++) {
-            addEntry(new Entry.KeyOption(entryX, entryWidth, entryHeight, this, trigger,
-                    advancementKeys[i], i < advancementKeys.length - 1 ? advancementKeys[++i] : null));
-        }
+        addKeyEntries(ADVANCEMENT_KEYS);
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "key.group.command"), null, -1));
-        String[] commandKeys = new String[]{
-                "commands.",
-                "commands.message.display",
-                "commands.message.display.incoming",
-                "commands.message.display.outgoing",
-        };
-        for (int i = 0; i < commandKeys.length; i++) {
+        addKeyEntries(COMMAND_KEYS);
+    }
+    
+    private void addKeyEntries(String[] keys) {
+        for (int i = 0; i < keys.length; i++) {
             addEntry(new Entry.KeyOption(entryX, entryWidth, entryHeight, this, trigger,
-                    commandKeys[i], i < commandKeys.length - 1 ? commandKeys[++i] : null));
+                    keys[i], i < keys.length - 1 ? keys[++i] : null));
         }
     }
-
-    @Override
-    public KeyOptionList reload(int width, int height, double scrollAmount) {
-        KeyOptionList newList = new KeyOptionList(minecraft, width, height,
-                getY(), entryWidth, entryHeight, trigger, textStyle, closeRunnable);
-        newList.setScrollAmount(scrollAmount);
-        return newList;
-    }
-
-    @Override
-    public void onClose() {
-        closeRunnable.run();
-    }
+    
+    // Custom entries
 
     private abstract static class Entry extends OptionList.Entry {
 
@@ -125,10 +108,10 @@ public class KeyOptionList extends OptionList {
                 TextField triggerField = new TextField(x, 0, width, height);
                 if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
                 triggerField.setMaxLength(240);
-                triggerField.setResponder((str) -> trigger.string = str.strip());
                 triggerField.setValue(trigger.string);
-                triggerField.setTooltip(Tooltip.create(
-                        localized("option", "trigger.field.tooltip")));
+                triggerField.setResponder((str) -> trigger.string = str.strip());
+                triggerField.setTooltip(Tooltip.create(localized(
+                        "option", "trigger.field.tooltip")));
                 triggerField.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(triggerField);
             }
@@ -136,15 +119,15 @@ public class KeyOptionList extends OptionList {
 
         private static class KeyOption extends Entry {
             KeyOption(int x, int width, int height, KeyOptionList list, Trigger trigger,
-                      String key1, @Nullable String key2) {
+                      @NotNull String key1, @Nullable String key2) {
                 super();
-                int buttonWidth = (width - 1) / 2;
+                int buttonWidth = (width - SPACE_TINY) / 2;
                 
-                elements.add(Button.builder(localized("option", "key.id." + key1), 
+                elements.add(Button.builder(localized("option", "key.id." + key1),
                         (button) -> {
                             trigger.string = key1;
                             list.setScrollAmount(0);
-                            list.reload();
+                            list.init();
                         })
                         .tooltip(Tooltip.create(Component.literal(key1)))
                         .pos(x, 0)
@@ -156,7 +139,7 @@ public class KeyOptionList extends OptionList {
                                     (button) -> {
                                         trigger.string = key2;
                                         list.setScrollAmount(0);
-                                        list.reload();
+                                        list.init();
                                     })
                             .tooltip(Tooltip.create(Component.literal(key2)))
                             .pos(x + width - buttonWidth, 0)

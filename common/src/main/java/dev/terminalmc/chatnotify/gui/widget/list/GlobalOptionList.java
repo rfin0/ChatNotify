@@ -17,7 +17,7 @@
 package dev.terminalmc.chatnotify.gui.widget.list;
 
 import dev.terminalmc.chatnotify.config.Config;
-import dev.terminalmc.chatnotify.gui.screen.OptionsScreen;
+import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.util.ColorUtil;
@@ -41,14 +41,17 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
  * Contains global configuration options.
  */
 public class GlobalOptionList extends OptionList {
-    public GlobalOptionList(Minecraft mc, int width, int height, int y, int itemHeight,
-                            int entryWidth, int entryHeight) {
-        super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
+    public GlobalOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
+                            int entryHeight, int entrySpacing) {
+        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, () -> {});
+    }
 
-        addEntry(new Entry.DetectAndDebugEntry(entryX, entryWidth, entryHeight));
-        addEntry(new Entry.SelfCheckAndSendModeEntry(entryX, entryWidth, entryHeight));
-        addEntry(new Entry.MultiModeEntry(entryX, entryWidth, entryHeight));
-        addEntry(new Entry.SenderDetectionModeEntry(entryX, entryWidth, entryHeight));
+    @Override
+    protected void addEntries() {
+        addEntry(new Entry.DetectionAndDebugModeEntry(entryX, entryWidth, entryHeight));
+        addEntry(new Entry.SelfNotifyAndSendModeEntry(entryX, entryWidth, entryHeight));
+        addEntry(new Entry.NotifAndRestyleModeEntry(entryX, entryWidth, entryHeight));
+        addEntry(new Entry.SenderModeEntry(entryX, entryWidth, entryHeight));
         addEntry(new Entry.DefaultColorEntry(entryX, entryWidth, entryHeight, this));
         addEntry(new Entry.DefaultSoundEntry(entryX, entryWidth, entryHeight, this));
         addEntry(new Entry.SoundSourceEntry(entryX, entryWidth, entryHeight, this));
@@ -65,67 +68,62 @@ public class GlobalOptionList extends OptionList {
                 Component.literal("+"), null, -1,
                 (button) -> {
                     Config.get().prefixes.add("");
-                    reload();
+                    init();
                 }));
     }
-
-    @Override
-    public GlobalOptionList reload(int width, int height, double scrollAmount) {
-        GlobalOptionList newList = new GlobalOptionList(minecraft, width, height,
-                getY(), itemHeight, entryWidth, entryHeight);
-        newList.setScrollAmount(scrollAmount);
-        return newList;
-    }
+    
+    // Sub-screen opening
 
     private void openSoundConfig() {
-        minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "sound"),
-                new SoundOptionList(minecraft, width, height, getY(),
-                        entryWidth, entryHeight, Config.get().defaultSound, () -> {})));
+        mc.setScreen(new OptionScreen(mc.screen, localized("option", "sound"),
+                new SoundOptionList(mc, width, height, getY(), entryWidth, entryHeight,
+                        () -> {}, Config.get().defaultSound)));
     }
+    
+    // Custom entries
 
     private abstract static class Entry extends OptionList.Entry {
 
-        private static class DetectAndDebugEntry extends MainOptionList.Entry {
-            DetectAndDebugEntry(int x, int width, int height) {
+        private static class DetectionAndDebugModeEntry extends MainOptionList.Entry {
+            DetectionAndDebugModeEntry(int x, int width, int height) {
                 super();
-                int buttonWidth = (width - SPACING) / 2;
+                int buttonWidth = (width - SPACE) / 2;
 
-                elements.add(CycleButton.<Config.DetectionMode>builder((mode) ->
-                                localized("option", "global.detection_mode." + mode.name()))
+                elements.add(CycleButton.<Config.DetectionMode>builder((mode) -> localized(
+                        "option", "global.detection_mode." + mode.name()))
                         .withValues(Config.DetectionMode.values())
                         .withInitialValue(Config.get().detectionMode)
-                        .withTooltip((mode) -> Tooltip.create(
-                                localized("option", "global.detection_mode." + mode.name() + ".tooltip")
-                                        .append("\n\n")
-                                        .append(localized("option", "global.detection_mode.tooltip"))))
+                        .withTooltip((mode) -> Tooltip.create(localized(
+                                "option", "global.detection_mode." + mode.name() + ".tooltip")
+                                .append("\n\n")
+                                .append(localized("option", "global.detection_mode.tooltip"))))
                         .create(x, 0, buttonWidth, height,
-                                localized("option", "global.detection_mode"),
+                                localized("option", "global.detection_mode"), 
                                 (button, mode) -> Config.get().detectionMode = mode));
 
-                elements.add(CycleButton.<Config.DebugMode>builder((mode) ->
-                                localized("option", "global.debug_mode." + mode.name()))
+                elements.add(CycleButton.<Config.DebugMode>builder((mode) -> localized(
+                        "option", "global.debug_mode." + mode.name()))
                         .withValues(Config.DebugMode.values())
                         .withInitialValue(Config.get().debugMode)
-                        .withTooltip((mode) -> Tooltip.create(
-                                localized("option", "global.debug_mode."
-                                        + mode.name() + ".tooltip")))
+                        .withTooltip((mode) -> Tooltip.create(localized(
+                                "option", "global.debug_mode." + mode.name() + ".tooltip")))
                         .create(x + width - buttonWidth, 0, buttonWidth, height,
                                 localized("option", "global.debug_mode"),
                                 (button, mode) -> Config.get().debugMode = mode));
             }
         }
 
-        private static class SelfCheckAndSendModeEntry extends MainOptionList.Entry {
-            SelfCheckAndSendModeEntry(int x, int width, int height) {
+        private static class SelfNotifyAndSendModeEntry extends MainOptionList.Entry {
+            SelfNotifyAndSendModeEntry(int x, int width, int height) {
                 super();
-                int buttonWidth = (width - SPACING) / 2;
+                int buttonWidth = (width - SPACE) / 2;
 
                 elements.add(CycleButton.booleanBuilder(
                         CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .withInitialValue(Config.get().checkOwnMessages)
-                        .withTooltip((status) -> Tooltip.create(
-                                localized("option", "global.self_notify.tooltip")))
+                        .withTooltip((status) -> Tooltip.create(localized(
+                                "option", "global.self_notify.tooltip")))
                         .create(x, 0, buttonWidth, height, 
                                 localized("option", "global.self_notify"),
                                 (button, status) -> Config.get().checkOwnMessages = status));
@@ -134,28 +132,27 @@ public class GlobalOptionList extends OptionList {
                                 localized("option", "global.send_mode." + status.name()))
                         .withValues(Config.SendMode.values())
                         .withInitialValue(Config.get().sendMode)
-                        .withTooltip((mode) -> Tooltip.create(
-                                localized("option", "global.send_mode." + mode.name() + ".tooltip")
-                                        .append("\n\n")
-                                        .append(localized("option", "global.send_mode.tooltip"))))
+                        .withTooltip((mode) -> Tooltip.create(localized(
+                                "option", "global.send_mode." + mode.name() + ".tooltip")
+                                .append("\n\n")
+                                .append(localized("option", "global.send_mode.tooltip"))))
                         .create(x + width - buttonWidth, 0, buttonWidth, height,
                                 localized("option", "global.send_mode"),
                                 (button, status) -> Config.get().sendMode = status));
             }
         }
 
-        private static class MultiModeEntry extends MainOptionList.Entry {
-            MultiModeEntry(int x, int width, int height) {
+        private static class NotifAndRestyleModeEntry extends MainOptionList.Entry {
+            NotifAndRestyleModeEntry(int x, int width, int height) {
                 super();
-                int buttonWidth = (width - SPACING) / 2;
+                int buttonWidth = (width - SPACE) / 2;
 
                 elements.add(CycleButton.<Config.NotifMode>builder((status) -> 
                                 localized("option", "global.notif_mode." + status.name()))
                         .withValues(Config.NotifMode.values())
                         .withInitialValue(Config.get().notifMode)
-                        .withTooltip((status) -> Tooltip.create(
-                                localized("option", "global.notif_mode." 
-                                        + status.name() + ".tooltip")))
+                        .withTooltip((mode) -> Tooltip.create(localized(
+                                "option", "global.notif_mode." + mode.name() + ".tooltip")))
                         .create(x, 0, buttonWidth, height,
                                 localized("option", "global.notif_mode"),
                                 (button, status) -> Config.get().notifMode = status));
@@ -164,26 +161,25 @@ public class GlobalOptionList extends OptionList {
                                 localized("option", "global.restyle_mode." + status.name()))
                         .withValues(Config.RestyleMode.values())
                         .withInitialValue(Config.get().restyleMode)
-                        .withTooltip((status) -> Tooltip.create(
-                                localized("option", "global.restyle_mode."
-                                        + status.name() + ".tooltip")))
+                        .withTooltip((mode) -> Tooltip.create(localized(
+                                "option", "global.restyle_mode." + mode.name() + ".tooltip")))
                         .create(x + width - buttonWidth, 0, buttonWidth, height,
                                 localized("option", "global.restyle_mode"),
                                 (button, status) -> Config.get().restyleMode = status));
             }
         }
 
-        private static class SenderDetectionModeEntry extends MainOptionList.Entry {
-            SenderDetectionModeEntry(int x, int width, int height) {
+        private static class SenderModeEntry extends MainOptionList.Entry {
+            SenderModeEntry(int x, int width, int height) {
                 super();
 
                 elements.add(CycleButton.<Config.SenderDetectionMode>builder((status) ->
                                 localized("option", "global.sender_detection_mode." + status.name()))
                         .withValues(Config.SenderDetectionMode.values())
                         .withInitialValue(Config.get().senderDetectionMode)
-                        .withTooltip((status) -> Tooltip.create(
-                                localized("option", "global.sender_detection_mode."
-                                        + status.name() + ".tooltip")))
+                        .withTooltip((mode) -> Tooltip.create(localized(
+                                "option", "global.sender_detection_mode."
+                                        + mode.name() + ".tooltip")))
                         .create(x, 0, width, height,
                                 localized("option", "global.sender_detection_mode"),
                                 (button, status) -> 
@@ -201,7 +197,7 @@ public class GlobalOptionList extends OptionList {
                         (button) -> {
                             int cpHeight = HsvColorPicker.MIN_HEIGHT;
                             int cpWidth = HsvColorPicker.MIN_WIDTH;
-                            list.screen.setOverlayWidget(new HsvColorPicker(
+                            list.screen.setOverlay(new HsvColorPicker(
                                     x + width / 2 - cpWidth / 2,
                                     list.screen.height / 2 - cpHeight / 2,
                                     cpWidth, cpHeight,
@@ -209,11 +205,11 @@ public class GlobalOptionList extends OptionList {
                                     (val) -> Config.get().defaultColor = val,
                                     (widget) -> {
                                         list.screen.removeOverlayWidget();
-                                        list.reload();
+                                        list.init();
                                     }));
                         })
                         .pos(x, 0)
-                        .size(width - colorFieldWidth - SPACING, height)
+                        .size(width - colorFieldWidth - SPACE, height)
                         .build();
                 elements.add(mainButton);
 
@@ -261,17 +257,17 @@ public class GlobalOptionList extends OptionList {
                         "soundCategory." + source.getName()))
                         .withValues(SoundSource.values())
                         .withInitialValue(Config.get().soundSource)
-                        .withTooltip((status) -> Tooltip.create(
-                                localized("option", "sound.source.tooltip")))
-                        .create(x, 0, width - list.smallWidgetWidth - SPACING, height,
+                        .withTooltip((status) -> Tooltip.create(localized(
+                                "option", "sound.source.tooltip")))
+                        .create(x, 0, width - list.smallWidgetWidth - SPACE, height,
                                 localized("option", "sound.source"),
                                 (button, status) -> Config.get().soundSource = status));
 
                 elements.add(Button.builder(Component.literal("\uD83D\uDD0A"),
                                 (button) -> Minecraft.getInstance().setScreen(new SoundOptionsScreen(
                                         list.screen, Minecraft.getInstance().options)))
-                        .tooltip(Tooltip.create(
-                                localized("option", "sound.source.minecraft_volume")))
+                        .tooltip(Tooltip.create(localized(
+                                "option", "sound.source.minecraft_volume")))
                         .pos(x + width - list.smallWidgetWidth, 0)
                         .size(list.smallWidgetWidth, height)
                         .build());
@@ -293,9 +289,9 @@ public class GlobalOptionList extends OptionList {
                         Component.literal("\u274C").withStyle(ChatFormatting.RED),
                         (button) -> {
                             Config.get().prefixes.remove(index);
-                            list.reload();
+                            list.init();
                         })
-                        .pos(x + width + SPACING, 0)
+                        .pos(x + width + SPACE, 0)
                         .size(list.smallWidgetWidth, height)
                         .build());
             }

@@ -52,6 +52,8 @@ public class TextField extends EditBox {
     public static final long CLICK_CHAIN_TIME = 250L;
     public static final int TEXT_COLOR_DEFAULT = 0xE0E0E0;
     public static final int TEXT_COLOR_ERROR = 0xFF5555;
+    public static final int TEXT_COLOR_HINT = 0x555555;
+    public static final int TEXT_COLOR_PREVIEW = 0x888888;
     
     private final Font font;
     
@@ -339,7 +341,7 @@ public class TextField extends EditBox {
                     if (Integer.parseInt(str) < 0) throw new NumberFormatException();
                     return Optional.empty();
                 } catch (NumberFormatException ignored) {
-                    return Optional.of(localized("option", "field.error.posint")
+                    return Optional.of(localized("option", "field.error.pos_int")
                             .withStyle(ChatFormatting.RED));
                 }
             }

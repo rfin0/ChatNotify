@@ -28,6 +28,7 @@ public class FakeTextField extends TextField {
         this.onClick = onClick;
         this.active = false;
         this.setResponder((str) -> {});
+        this.setTextColor(TEXT_COLOR_PREVIEW);
     }
 
     @Override

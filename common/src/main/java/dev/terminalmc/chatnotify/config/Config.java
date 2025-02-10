@@ -305,6 +305,11 @@ public class Config {
         return instance;
     }
 
+    public static Config reloadAndSave() {
+        instance = null;
+        return getAndSave();
+    }
+
     // Load and save
 
     public static @NotNull Config load() {
