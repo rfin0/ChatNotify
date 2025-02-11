@@ -48,6 +48,8 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
  */
 public class AdvancedOptionList extends DragReorderList {
     private final Notification notif;
+    private OptionList.Entry.ActionButtonEntry addExclTrigEntry;
+    private OptionList.Entry.ActionButtonEntry addRespMsgEntry;
 
     public AdvancedOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
                               int entryHeight, int entrySpacing, Notification notif) {
@@ -57,6 +59,22 @@ public class AdvancedOptionList extends DragReorderList {
                         Entry.ResponseFieldEntry.class, notif::moveResponseMessage
                 )));
         this.notif = notif;
+        
+        addExclTrigEntry = new OptionList.Entry.ActionButtonEntry(
+                entryX, entryWidth, entryHeight, Component.literal("+"), null, -1,
+                (button) -> {
+                    notif.exclusionTriggers.add(new Trigger());
+                    init();
+                    ensureVisible(addExclTrigEntry);
+                });
+        
+        addRespMsgEntry = new OptionList.Entry.ActionButtonEntry(
+                entryX, entryWidth, entryHeight, Component.literal("+"), null, -1,
+                (button) -> {
+                    notif.responseMessages.add(new ResponseMessage());
+                    init();
+                    ensureVisible(addRespMsgEntry);
+                });
     }
 
     @Override
@@ -107,12 +125,8 @@ public class AdvancedOptionList extends DragReorderList {
                 addEntry(new Entry.ExclusionFieldEntry(dynEntryX, dynEntryWidth, entryHeight,
                         this, notif, notif.exclusionTriggers.get(i), i));
             }
-            addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
-                    Component.literal("+"), null, -1,
-                    (button) -> {
-                        notif.exclusionTriggers.add(new Trigger());
-                        init();
-                    }));
+            addExclTrigEntry.setBounds(entryX, entryWidth, entryHeight);
+            addEntry(addExclTrigEntry);
         }
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
@@ -130,12 +144,8 @@ public class AdvancedOptionList extends DragReorderList {
                 addEntry(e);
                 addEntry(new SpaceEntry(e));
             }
-            addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
-                    Component.literal("+"), null, -1,
-                    (button) -> {
-                        notif.responseMessages.add(new ResponseMessage());
-                        init();
-                    }));
+            addRespMsgEntry.setBounds(entryX, entryWidth, entryHeight);
+            addEntry(addRespMsgEntry);
         }
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,

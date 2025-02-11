@@ -54,12 +54,23 @@ import static dev.terminalmc.chatnotify.util.Localization.translationKey;
 public class MainOptionList extends DragReorderList {
     private String filterString = "";
     private @Nullable Pattern filterPattern = null;
+    private OptionList.Entry.ActionButtonEntry addNotifEntry;
 
     public MainOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
                           int entryHeight, int entrySpacing) {
         super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, () -> {}, 
                 new HashMap<>(Map.of(Entry.NotifConfigEntry.class, (source, dest) ->
                         Config.get().changeNotifPriority(++source, ++dest))));
+        
+        addNotifEntry = new OptionList.Entry.ActionButtonEntry(
+                entryX, entryWidth, entryHeight, Component.literal("+"), null, -1,
+                (button) -> {
+                    Config.get().addNotif();
+                    filterString = "";
+                    filterPattern = null;
+                    init();
+                    ensureVisible(addNotifEntry);
+                });
     }
 
     @Override
@@ -71,14 +82,8 @@ public class MainOptionList extends DragReorderList {
         addEntry(new Entry.TitleAndSearchEntry(entryX, entryWidth, entryHeight, this));
 
         refreshNotifSubList();
-        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
-                Component.literal("+"), null, -1,
-                (button) -> {
-                    Config.get().addNotif();
-                    filterString = "";
-                    filterPattern = null;
-                    init();
-                }));
+        addNotifEntry.setBounds(entryX, entryWidth, entryHeight);
+        addEntry(addNotifEntry);
     }
 
     protected void refreshNotifSubList() {

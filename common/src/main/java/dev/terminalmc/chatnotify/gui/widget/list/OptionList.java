@@ -227,12 +227,14 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         }
 
         public static class ActionButtonEntry extends Entry {
+            private final Button button;
+            
             public ActionButtonEntry(int x, int width, int height, Component message,
                                      @Nullable Tooltip tooltip, int tooltipDelay,
                                      Button.OnPress onPress) {
                 super();
 
-                Button button = Button.builder(message, onPress)
+                button = Button.builder(message, onPress)
                         .pos(x, 0)
                         .size(width, height)
                         .build();
@@ -240,6 +242,11 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
                 if (tooltipDelay >= 0) button.setTooltipDelay(Duration.ofMillis(tooltipDelay));
 
                 elements.add(button);
+            }
+            
+            public void setBounds(int x, int width, int height) {
+                button.setPosition(x, 0);
+                button.setSize(width, height);
             }
         }
 

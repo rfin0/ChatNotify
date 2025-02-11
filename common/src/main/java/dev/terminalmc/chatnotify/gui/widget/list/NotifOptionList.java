@@ -48,6 +48,7 @@ public class NotifOptionList extends DragReorderList {
     private final Notification notif;
     private String filterString = "";
     private @Nullable Pattern filterPattern = null;
+    private OptionList.Entry.ActionButtonEntry addTriggerEntry;
 
     public NotifOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
                            int entryHeight, int entrySpacing, Notification notif) {
@@ -57,6 +58,16 @@ public class NotifOptionList extends DragReorderList {
                                 moveTrigger(notif, source, dest))));
         this.notif = notif;
         notif.editing = true;
+        
+        addTriggerEntry = new OptionList.Entry.ActionButtonEntry(
+                entryX, entryWidth, entryHeight, Component.literal("+"), null, -1,
+                (button) -> {
+                    notif.triggers.add(new Trigger());
+                    filterString = "";
+                    filterPattern = null;
+                    init();
+                    ensureVisible(addTriggerEntry);
+                });
     }
 
     @Override
@@ -64,14 +75,8 @@ public class NotifOptionList extends DragReorderList {
         addEntry(new Entry.TitleAndSearchEntry(entryX, entryWidth, entryHeight, this));
 
         refreshTriggerSubList();
-        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
-                Component.literal("+"), null, -1,
-                (button) -> {
-                    notif.triggers.add(new Trigger());
-                    filterString = "";
-                    filterPattern = null;
-                    init();
-                }));
+        addTriggerEntry.setBounds(entryX, entryWidth, entryHeight);
+        addEntry(addTriggerEntry);
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "notif"), null, -1));
