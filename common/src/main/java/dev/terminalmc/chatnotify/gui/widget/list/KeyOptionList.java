@@ -68,25 +68,25 @@ public class KeyOptionList extends OptionList {
 
     @Override
     protected void addEntries() {
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "key.trigger", "\u2139"),
                 Tooltip.create(localized("option", "key.trigger.tooltip")), -1));
 
-        addEntry(new Entry.TriggerFieldEntry(dynEntryX, dynEntryWidth, entryHeight, trigger));
+        addEntry(new Entry.TriggerOption(dynWideEntryX, dynWideEntryWidth, entryHeight, trigger));
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "key.group.chat"), null, -1));
         addKeyEntries(CHAT_KEYS);
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "key.group.player"), null, -1));
         addKeyEntries(PLAYER_KEYS);
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "key.group.advancement"), null, -1));
         addKeyEntries(ADVANCEMENT_KEYS);
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "key.group.command"), null, -1));
         addKeyEntries(COMMAND_KEYS);
     }
@@ -102,8 +102,8 @@ public class KeyOptionList extends OptionList {
 
     private abstract static class Entry extends OptionList.Entry {
 
-        private static class TriggerFieldEntry extends Entry {
-            TriggerFieldEntry(int x, int width, int height, Trigger trigger) {
+        private static class TriggerOption extends Entry {
+            TriggerOption(int x, int width, int height, Trigger trigger) {
                 super();
                 TextField triggerField = new TextField(x, 0, width, height);
                 if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();

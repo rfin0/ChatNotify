@@ -30,14 +30,14 @@ import java.util.stream.Collectors;
 /**
  * Extends {@link OptionList} to add support for re-ordering entries within
  * a contiguous sub-list of a particular entry type.
- * 
+ *
  * <p>Works with multiple sub-lists, adjacent or otherwise (not overlapping),
  * but each list must be of a different {@link Entry} child class.</p>
  *
- * <p>Supports {@link SpaceEntry} entries.</p>
- * 
+ * <p>Supports {@link Entry.Space} enabling double-size entries.</p>
+ *
  * <p>Supports 'trailer' entries, where the trailer is an instance of a
- * different </p>
+ * different class.</p>
  */
 public abstract class DragReorderList extends OptionList {
     private final Map<Class<? extends Entry>, BiFunction<Integer,Integer,Boolean>> clsFunMap;
@@ -113,11 +113,11 @@ public abstract class DragReorderList extends OptionList {
             if (index < children().size()) {
                 // Verify that the trailer is a valid trailer class
                 Class<? extends Entry> trailerCls = children().get(index + 1).getClass();
-                if (!trailerCls.equals(SpaceEntry.class) && !trailerCls.equals(trailerClass)) {
+                if (!trailerCls.equals(Entry.Space.class) && !trailerCls.equals(trailerClass)) {
                     ChatNotify.LOG.error("Cannot drag entry of type '{}' at index {}. " +
                             "hasTrailer is true but trailer is class '{}'. " +
                                     "Allowed trailer types: '{}', '{}'.",
-                            SpaceEntry.class, trailerClass);
+                            Entry.Space.class, trailerClass);
                     return false;
                 }
             } else {
@@ -133,7 +133,7 @@ public abstract class DragReorderList extends OptionList {
         for (int i = start; i <= end; i++) {
             if (children().get(i).getClass().equals(cls)) {
                 Class<? extends Entry> trailerCls = children().get(i + 1).getClass();
-                if (trailerCls.equals(trailerClass) || trailerCls.equals(SpaceEntry.class)) {
+                if (trailerCls.equals(trailerClass) || trailerCls.equals(Entry.Space.class)) {
                     i++; // Skip the trailer
                 }
             } else {
@@ -142,7 +142,7 @@ public abstract class DragReorderList extends OptionList {
                                 "contiguous sub-list from {} to {}. Allowed trailer types: " +
                                 "'{}', '{}'.", 
                         cls, children().indexOf(entry), children().get(i).getClass(), i, 
-                        start, end, SpaceEntry.class, trailerClass);
+                        start, end, Entry.Space.class, trailerClass);
                 return false;
             }
         }
@@ -261,7 +261,7 @@ public abstract class DragReorderList extends OptionList {
             else {
                 // Within the sub-list, but it's still possible that there are
                 // invalid elements here so we need to check
-                if (hoveredEntry.getClass().equals(OptionList.SpaceEntry.class) 
+                if (hoveredEntry.getClass().equals(OptionList.Entry.Space.class) 
                         || hoveredEntry.getClass().equals(trailerClass)) {
                     // Targeting a trailer, check that the main entry is valid
                     // and switch to it

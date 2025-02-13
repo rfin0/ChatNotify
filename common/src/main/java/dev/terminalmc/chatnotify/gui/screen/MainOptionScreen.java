@@ -61,7 +61,7 @@ public class MainOptionScreen extends OptionScreen {
                         (button) -> Minecraft.getInstance().setScreen(new ConfirmScreen(
                                 (confirm) -> {
                                     if (confirm) {
-                                        Config.reloadAndSave();
+                                        Config.reload();
                                         Minecraft.getInstance().setScreen(this);
                                         onClose();
                                     } else {
@@ -83,20 +83,11 @@ public class MainOptionScreen extends OptionScreen {
                 .pos(x2, y)
                 .size(w, h)
                 .build());
-        
-        /*
-        To allow cancelling a save (without implementing deep-copy methods in 
-        all config classes), you have two basic options:
-        
-        a) edit the active instance, and if you have to cancel, re-read the
-        file to create a new instance, or
-        
-        b) when opening config editor, re-read the file to create a new 
-        instance, edit that instance, and if you have to cancel, discard it.
-        
-        Here we use the first option, as it is more performant (on average) and
-        the side effects of editing the active config instance can be mitigated
-        fairly easily.
-         */
+    }
+
+    @Override
+    public void onClose() {
+        super.onClose();
+        Config.save();
     }
 }

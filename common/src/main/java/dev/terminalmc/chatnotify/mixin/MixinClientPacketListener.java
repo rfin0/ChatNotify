@@ -74,7 +74,7 @@ public class MixinClientPacketListener {
     @Inject(method = "handleLogin", at = @At("TAIL"))
     public void getProfileName(ClientboundLoginPacket packet, CallbackInfo ci) {
         if (Minecraft.getInstance().player == null) return;
-        String name = Minecraft.getInstance().player.getName().getString();
+        String name = FormatUtil.stripCodes(Minecraft.getInstance().player.getName().getString());
         Config.get().setProfileName(name);
         Config.get().setDisplayName(name);
     }

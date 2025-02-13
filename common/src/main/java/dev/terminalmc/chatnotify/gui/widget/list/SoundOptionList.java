@@ -33,7 +33,6 @@ import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundSource;
 import org.jetbrains.annotations.Nullable;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
@@ -123,42 +122,42 @@ public class SoundOptionList extends OptionList {
 
     @Override
     protected void addEntries() {
-        addEntry(new Entry.SoundFieldEntry(entryX, entryWidth, entryHeight, sound, this));
+        addEntry(new Entry.SoundField(entryX, entryWidth, entryHeight, sound, this));
 
-        addEntry(new OptionList.Entry.DoubleSliderEntry(entryX, entryWidth, entryHeight, 0, 1, 2,
+        addEntry(new OptionList.Entry.DoubleSlider(entryX, entryWidth, entryHeight, 0, 1, 2,
                 localized("option", "sound.volume").getString(), null,
                 CommonComponents.OPTION_OFF.getString(), null,
                 () -> (double)sound.getVolume(), (value) -> sound.setVolume(value.floatValue())));
 
-        addEntry(new OptionList.Entry.DoubleSliderEntry(entryX, entryWidth, entryHeight, 0.5, 2, 2,
+        addEntry(new OptionList.Entry.DoubleSlider(entryX, entryWidth, entryHeight, 0.5, 2, 2,
                 localized("option", "sound.pitch").getString(), null, null, null,
                 () -> (double)sound.getPitch(), (value) -> sound.setPitch(value.floatValue())));
 
-        addEntry(new OptionList.Entry.SilentActionButtonEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.SilentActionButton(entryX, entryWidth, entryHeight,
                 Component.literal("> ").withStyle(ChatFormatting.YELLOW)
                         .append(localized("option", "sound.test").withStyle(ChatFormatting.WHITE))
                         .append(" <"), null, -1,
                 button -> playNotifSound()));
 
-        addEntry(new Entry.SoundSourceEntry(entryX, entryWidth, entryHeight, this));
+        addEntry(new Entry.SoundSource(entryX, entryWidth, entryHeight, this));
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "sound.group.noteblock"), null, -1));
         addSoundEntries(NOTEBLOCK_SOUNDS);
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "sound.group.power"), null, -1));
         addSoundEntries(POWER_SOUNDS);
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "sound.group.explosion"), null, -1));
         addSoundEntries(EXPLOSION_SOUNDS);
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "sound.group.illager"), null, -1));
         addSoundEntries(VILLAGER_SOUNDS);
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "sound.group.misc"), null, -1));
         addSoundEntries(MISC_SOUNDS);
     }
@@ -174,8 +173,8 @@ public class SoundOptionList extends OptionList {
 
     private void refreshSoundField() {
         OptionList.Entry entry = getEntry(0);
-        if (entry instanceof Entry.SoundFieldEntry soundFieldEntry) {
-            soundFieldEntry.updateValue();
+        if (entry instanceof Entry.SoundField soundField) {
+            soundField.updateValue();
         }
     }
 
@@ -197,18 +196,18 @@ public class SoundOptionList extends OptionList {
 
     private abstract static class Entry extends OptionList.Entry {
 
-        private static class SoundFieldEntry extends Entry {
+        private static class SoundField extends Entry {
             private final Sound sound;
             private final TextField soundField;
 
-            SoundFieldEntry(int x, int width, int height, Sound sound, SoundOptionList list) {
+            SoundField(int x, int width, int height, Sound sound, SoundOptionList list) {
                 super();
                 this.sound = sound;
 
                 soundField = new FakeTextField(x, 0, width, height,
                         () -> {
                             int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
-                            int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynEntryWidth);
+                            int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                             int wX = x + (width / 2) - (wWidth / 2);
                             int wY = list.getY();
                             list.screen.setOverlay(new DropdownTextField(
@@ -232,14 +231,14 @@ public class SoundOptionList extends OptionList {
             }
         }
 
-        private static class SoundSourceEntry extends MainOptionList.Entry {
-            SoundSourceEntry(int x, int width, int height, SoundOptionList list) {
+        private static class SoundSource extends MainOptionList.Entry {
+            SoundSource(int x, int width, int height, SoundOptionList list) {
                 super();
                 int mainButtonWidth = width - list.smallWidgetWidth - 1;
 
-                elements.add(CycleButton.<SoundSource>builder(source -> Component.translatable(
+                elements.add(CycleButton.<net.minecraft.sounds.SoundSource>builder(source -> Component.translatable(
                                 "soundCategory." + source.getName()))
-                        .withValues(SoundSource.values())
+                        .withValues(net.minecraft.sounds.SoundSource.values())
                         .withInitialValue(Config.get().soundSource)
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option", "sound.source.tooltip")))

@@ -48,19 +48,19 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
  */
 public class AdvancedOptionList extends DragReorderList {
     private final Notification notif;
-    private OptionList.Entry.ActionButtonEntry addExclTrigEntry;
-    private OptionList.Entry.ActionButtonEntry addRespMsgEntry;
+    private OptionList.Entry.ActionButton addExclTrigEntry;
+    private OptionList.Entry.ActionButton addRespMsgEntry;
 
     public AdvancedOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
                               int entryHeight, int entrySpacing, Notification notif) {
         super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, () -> {},
                 new HashMap<>(Map.of(
-                        Entry.ExclusionFieldEntry.class, notif::moveExclusionTrigger,
-                        Entry.ResponseFieldEntry.class, notif::moveResponseMessage
+                        Entry.ExclusionOptions.class, notif::moveExclusionTrigger,
+                        Entry.ResponseOptions.class, notif::moveResponseMessage
                 )));
         this.notif = notif;
         
-        addExclTrigEntry = new OptionList.Entry.ActionButtonEntry(
+        addExclTrigEntry = new OptionList.Entry.ActionButton(
                 entryX, entryWidth, entryHeight, Component.literal("+"), null, -1,
                 (button) -> {
                     notif.exclusionTriggers.add(new Trigger());
@@ -68,7 +68,7 @@ public class AdvancedOptionList extends DragReorderList {
                     ensureVisible(addExclTrigEntry);
                 });
         
-        addRespMsgEntry = new OptionList.Entry.ActionButtonEntry(
+        addRespMsgEntry = new OptionList.Entry.ActionButton(
                 entryX, entryWidth, entryHeight, Component.literal("+"), null, -1,
                 (button) -> {
                     notif.responseMessages.add(new ResponseMessage());
@@ -81,16 +81,16 @@ public class AdvancedOptionList extends DragReorderList {
     protected void addEntries() {
         Minecraft mc = Minecraft.getInstance();
         
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.control"), null, -1));
-        addEntry(new Entry.CheckOwnModeEntry(entryX, entryWidth, entryHeight, notif));
+        addEntry(new Entry.Controls(entryX, entryWidth, entryHeight, notif));
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.msg", "\u2139"),
                 Tooltip.create(localized("option", "advanced.msg.info.format_codes")
                         .append("\n\n")
                         .append(localized("option", "advanced.msg.info.regex_groups"))), -1));
-        addEntry(new Entry.MessageConfigEntry(dynEntryX, dynEntryWidth, entryHeight,
+        addEntry(new Entry.CustomMessage(dynWideEntryX, dynWideEntryWidth, entryHeight,
                 () -> notif.replacementMsg, (str) -> notif.replacementMsg = str,
                 () -> notif.replacementMsgEnabled, (val) -> notif.replacementMsgEnabled = val,
                 localized("option", "advanced.msg.replacement")
@@ -98,7 +98,7 @@ public class AdvancedOptionList extends DragReorderList {
                 localized("option", "advanced.msg.replacement").append(".\n")
                         .append(localized("option", "advanced.msg.replacement.tooltip"))
                         .append("\n\n").append(localized("option", "advanced.msg.info.blank_hide"))));
-        addEntry(new Entry.MessageConfigEntry(dynEntryX, dynEntryWidth, entryHeight,
+        addEntry(new Entry.CustomMessage(dynWideEntryX, dynWideEntryWidth, entryHeight,
                 () -> notif.statusBarMsg, (str) -> notif.statusBarMsg = str,
                 () -> notif.statusBarMsgEnabled, (val) -> notif.statusBarMsgEnabled = val,
                 localized("option", "advanced.msg.status_bar")
@@ -106,7 +106,7 @@ public class AdvancedOptionList extends DragReorderList {
                 localized("option", "advanced.msg.status_bar").append(".\n")
                         .append(localized("option", "advanced.msg.status_bar.tooltip"))
                         .append("\n\n").append(localized("option", "advanced.msg.info.blank_original"))));
-        addEntry(new Entry.MessageConfigEntry(dynEntryX, dynEntryWidth, entryHeight,
+        addEntry(new Entry.CustomMessage(dynWideEntryX, dynWideEntryWidth, entryHeight,
                 () -> notif.titleMsg, (str) -> notif.titleMsg = str,
                 () -> notif.titleMsgEnabled, (val) -> notif.titleMsgEnabled = val,
                 localized("option", "advanced.msg.title")
@@ -115,43 +115,43 @@ public class AdvancedOptionList extends DragReorderList {
                         .append(localized("option", "advanced.msg.title.tooltip"))
                         .append("\n\n").append(localized("option", "advanced.msg.info.blank_original"))));
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.exclusion", "\u2139"),
                 Tooltip.create(localized("option", "advanced.exclusion.tooltip")), -1));
-        addEntry(new Entry.ExclusionToggleEntry(entryX, entryWidth, entryHeight, notif, this));
+        addEntry(new Entry.ExclusionToggle(entryX, entryWidth, entryHeight, notif, this));
 
         if (notif.exclusionEnabled) {
             for (int i = 0; i < this.notif.exclusionTriggers.size(); i ++) {
-                addEntry(new Entry.ExclusionFieldEntry(dynEntryX, dynEntryWidth, entryHeight,
+                addEntry(new Entry.ExclusionOptions(dynWideEntryX, dynWideEntryWidth, entryHeight,
                         this, notif, notif.exclusionTriggers.get(i), i));
             }
             addExclTrigEntry.setBounds(entryX, entryWidth, entryHeight);
             addEntry(addExclTrigEntry);
         }
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.response", "\u2139"),
                 Tooltip.create(localized("option", "advanced.response.tooltip")
                         .append("\n")
                         .append(localized("option", "advanced.response.tooltip.warning")
                                 .withStyle(ChatFormatting.RED))), -1));
-        addEntry(new Entry.ResponseToggleEntry(entryX, entryWidth, entryHeight, notif, this));
+        addEntry(new Entry.ResponseToggle(entryX, entryWidth, entryHeight, notif, this));
 
         if (notif.responseEnabled) {
             for (int i = 0; i < notif.responseMessages.size(); i ++) {
-                Entry e = new Entry.ResponseFieldEntry(dynEntryX, dynEntryWidth, entryHeight, this,
+                Entry e = new Entry.ResponseOptions(dynWideEntryX, dynWideEntryWidth, entryHeight, this,
                         notif, notif.responseMessages.get(i), i);
                 addEntry(e);
-                addEntry(new SpaceEntry(e));
+                addEntry(new Entry.Space(e));
             }
             addRespMsgEntry.setBounds(entryX, entryWidth, entryHeight);
             addEntry(addRespMsgEntry);
         }
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.reset.broken"), null, -1));
 
-        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.ActionButton(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.reset.level_1"),
                 Tooltip.create(localized("option", "advanced.reset.level_1.tooltip")),
                 -1,
@@ -160,7 +160,7 @@ public class AdvancedOptionList extends DragReorderList {
                     init();
                 }));
 
-        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.ActionButton(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.reset.level_2"),
                 Tooltip.create(localized("option", "advanced.reset.level_2.tooltip")),
                 -1,
@@ -177,7 +177,7 @@ public class AdvancedOptionList extends DragReorderList {
                         localized("option", "advanced.reset.level_2"),
                         localized("option", "advanced.reset.level_2.confirm")))));
 
-        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.ActionButton(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.reset.level_3"),
                 Tooltip.create(localized("option", "advanced.reset.level_3.tooltip")),
                 -1,
@@ -199,8 +199,8 @@ public class AdvancedOptionList extends DragReorderList {
 
     private abstract static class Entry extends OptionList.Entry {
 
-        private static class CheckOwnModeEntry extends Entry {
-            CheckOwnModeEntry(int x, int width, int height, Notification notif) {
+        private static class Controls extends Entry {
+            Controls(int x, int width, int height, Notification notif) {
                 super();
 
                 elements.add(CycleButton.<Notification.CheckOwnMode>builder((status) ->
@@ -216,11 +216,11 @@ public class AdvancedOptionList extends DragReorderList {
             }
         }
 
-        private static class MessageConfigEntry extends NotifOptionList.Entry {
-            MessageConfigEntry(int x, int width, int height,
-                               Supplier<String> textSupplier, Consumer<String> textConsumer,
-                               Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
-                               Component hint, Component tooltip) {
+        private static class CustomMessage extends NotifOptionList.Entry {
+            CustomMessage(int x, int width, int height,
+                          Supplier<String> textSupplier, Consumer<String> textConsumer,
+                          Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
+                          Component hint, Component tooltip) {
                 super();
                 int statusButtonWidth = Math.max(24, height);
                 int fieldWidth = width - statusButtonWidth - SPACE;
@@ -236,8 +236,8 @@ public class AdvancedOptionList extends DragReorderList {
 
                 // Status button
                 elements.add(CycleButton.booleanBuilder(
-                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                        CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .displayOnlyValue()
                         .withInitialValue(statusSupplier.get())
                         .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
@@ -246,13 +246,13 @@ public class AdvancedOptionList extends DragReorderList {
             }
         }
 
-        private static class ExclusionToggleEntry extends Entry {
-            ExclusionToggleEntry(int x, int width, int height, Notification notif,
-                                 AdvancedOptionList list) {
+        private static class ExclusionToggle extends Entry {
+            ExclusionToggle(int x, int width, int height, Notification notif,
+                            AdvancedOptionList list) {
                 super();
                 elements.add(CycleButton.booleanBuilder(
                         Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
-                                Component.translatable("options.off").withStyle(ChatFormatting.RED))
+                            Component.translatable("options.off").withStyle(ChatFormatting.RED))
                         .withInitialValue(notif.exclusionEnabled)
                         .create(x, 0, width, height, localized("option", "advanced.status"),
                                 (button, status) -> {
@@ -262,9 +262,9 @@ public class AdvancedOptionList extends DragReorderList {
             }
         }
 
-        private static class ExclusionFieldEntry extends Entry {
-            ExclusionFieldEntry(int x, int width, int height, AdvancedOptionList list,
-                                Notification notif, Trigger trigger, int index) {
+        private static class ExclusionOptions extends Entry {
+            ExclusionOptions(int x, int width, int height, AdvancedOptionList list,
+                             Notification notif, Trigger trigger, int index) {
                 super();
                 int fieldSpacing = 1;
                 int triggerFieldWidth = width - list.tinyWidgetWidth - fieldSpacing;
@@ -322,13 +322,13 @@ public class AdvancedOptionList extends DragReorderList {
             }
         }
 
-        private static class ResponseToggleEntry extends Entry {
-            ResponseToggleEntry(int x, int width, int height, Notification notif,
-                                AdvancedOptionList listWidget) {
+        private static class ResponseToggle extends Entry {
+            ResponseToggle(int x, int width, int height, Notification notif,
+                           AdvancedOptionList listWidget) {
                 super();
                 elements.add(CycleButton.booleanBuilder(
-                        Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
-                                Component.translatable("options.off").withStyle(ChatFormatting.RED))
+                        Component.translatable("options.on").withStyle(ChatFormatting.GREEN), 
+                            Component.translatable("options.off").withStyle(ChatFormatting.RED))
                         .withInitialValue(notif.responseEnabled)
                         .create(x, 0, width, height, localized("option", "advanced.status"),
                                 (button, status) -> {
@@ -338,9 +338,9 @@ public class AdvancedOptionList extends DragReorderList {
             }
         }
 
-        private static class ResponseFieldEntry extends Entry {
-            ResponseFieldEntry(int x, int width, int height, AdvancedOptionList list,
-                               Notification notif, ResponseMessage response, int index) {
+        private static class ResponseOptions extends Entry {
+            ResponseOptions(int x, int width, int height, AdvancedOptionList list,
+                            Notification notif, ResponseMessage response, int index) {
                 super();
                 int fieldSpacing = 1;
                 int timeFieldWidth = Minecraft.getInstance().font.width("00000");
@@ -380,7 +380,7 @@ public class AdvancedOptionList extends DragReorderList {
                     FakeTextField keyField1 = new FakeTextField(movingX, 0, keyFieldWidth, height,
                             () -> {
                                 int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
-                                int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynEntryWidth);
+                                int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                                 int wX = x + (width / 2) - (wWidth / 2);
                                 int wY = list.getY();
                                 list.screen.setOverlay(new DropdownTextField(
@@ -405,7 +405,7 @@ public class AdvancedOptionList extends DragReorderList {
                     FakeTextField keyField2 = new FakeTextField(movingX, 0, keyFieldWidth, height,
                             () -> {
                                 int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
-                                int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynEntryWidth);
+                                int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                                 int wX = x + (width / 2) - (wWidth / 2);
                                 int wY = list.getY();
                                 list.screen.setOverlay(new DropdownTextField(

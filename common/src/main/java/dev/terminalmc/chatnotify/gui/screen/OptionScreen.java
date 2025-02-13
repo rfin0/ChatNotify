@@ -51,7 +51,7 @@ public class OptionScreen extends OptionsSubScreen {
     /**
      * Space on either side of list entries for the scrollbar.
      */
-    public static final int SCROLL_BAR_MARGIN = 10;
+    public static final int SCROLL_BAR_MARGIN = 20;
     /**
      * Standard horizontal space between list entry elements.
      */

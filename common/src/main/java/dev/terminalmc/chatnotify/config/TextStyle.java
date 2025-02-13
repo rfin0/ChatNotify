@@ -128,7 +128,7 @@ public class TextStyle {
     // Validation
 
     TextStyle validate() {
-        if (color < 0 || color > 16777215) color = colorDefault;
+        if (color < 0 || color > 0xFFFFFF) color = colorDefault;
         return this;
     }
 

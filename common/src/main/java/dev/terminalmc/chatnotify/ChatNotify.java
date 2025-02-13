@@ -19,6 +19,7 @@ package dev.terminalmc.chatnotify;
 import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.compat.commandkeys.CommandKeysWrapper;
 import dev.terminalmc.chatnotify.config.*;
+import dev.terminalmc.chatnotify.util.FormatUtil;
 import dev.terminalmc.chatnotify.util.ModLogger;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -142,6 +143,14 @@ public class ChatNotify {
                     }
                 }
             }
+        }
+    }
+    
+    public static void updateUsernameNotif(Config config) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null) {
+            config.setProfileName(FormatUtil.stripCodes(mc.player.getName().getString()));
+            config.setDisplayName(FormatUtil.stripCodes(mc.player.getDisplayName().getString()));
         }
     }
 }

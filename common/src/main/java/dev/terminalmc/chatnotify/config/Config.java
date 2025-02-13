@@ -305,9 +305,12 @@ public class Config {
         return instance;
     }
 
-    public static Config reloadAndSave() {
+    public static Config reload() {
         instance = null;
-        return getAndSave();
+        get();
+        ChatNotify.responseMessages.clear();
+        ChatNotify.updateUsernameNotif(instance);
+        return instance;
     }
 
     // Load and save
@@ -381,21 +384,24 @@ public class Config {
      * Validation method to be called after config editing and before saving.
      */
     private Config validate() {
-        if (defaultColor < 0 || defaultColor > 16777215) defaultColor = defaultColorDefault;
+        if (defaultColor < 0 || defaultColor > 0xFFFFFF) defaultColor = defaultColorDefault;
         defaultSound.validate();
 
         // Remove blank prefixes and sort by decreasing length
         prefixes.removeIf(String::isBlank);
         prefixes.sort(Comparator.comparingInt(String::length).reversed());
+        
+        // Validate username notification
+        validateUserNotif();
 
         // Cleanup notifications and remove any blanks except first
         notifications.removeIf((n) -> {
             n.validate();
             return (
                     n != notifications.getFirst()
-                            && n.triggers.isEmpty()
-                            && n.exclusionTriggers.isEmpty()
-                            && n.responseMessages.isEmpty()
+                    && n.triggers.isEmpty()
+                    && n.exclusionTriggers.isEmpty()
+                    && n.responseMessages.isEmpty()
             );
         });
 

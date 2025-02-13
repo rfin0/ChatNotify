@@ -30,7 +30,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.FastColor;
 
 import java.awt.*;
@@ -48,15 +47,15 @@ public class GlobalOptionList extends OptionList {
 
     @Override
     protected void addEntries() {
-        addEntry(new Entry.DetectionAndDebugModeEntry(entryX, entryWidth, entryHeight));
-        addEntry(new Entry.SelfNotifyAndSendModeEntry(entryX, entryWidth, entryHeight));
-        addEntry(new Entry.NotifAndRestyleModeEntry(entryX, entryWidth, entryHeight));
-        addEntry(new Entry.SenderModeEntry(entryX, entryWidth, entryHeight));
-        addEntry(new Entry.DefaultColorEntry(entryX, entryWidth, entryHeight, this));
-        addEntry(new Entry.DefaultSoundEntry(entryX, entryWidth, entryHeight, this));
-        addEntry(new Entry.SoundSourceEntry(entryX, entryWidth, entryHeight, this));
+        addEntry(new Entry.Controls1(dynEntryX, dynEntryWidth, entryHeight));
+        addEntry(new Entry.Controls2(dynEntryX, dynEntryWidth, entryHeight));
+        addEntry(new Entry.Controls3(dynEntryX, dynEntryWidth, entryHeight));
+        addEntry(new Entry.Controls4(dynEntryX, dynEntryWidth, entryHeight));
+        addEntry(new Entry.DefaultColor(dynEntryX, dynEntryWidth, entryHeight, this));
+        addEntry(new Entry.DefaultSound(dynEntryX, dynEntryWidth, entryHeight, this));
+        addEntry(new Entry.SoundSource(dynEntryX, dynEntryWidth, entryHeight, this));
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "global.prefixes", "\u2139"),
                 Tooltip.create(localized("option", "global.prefixes.tooltip")), -1));
 
@@ -64,7 +63,7 @@ public class GlobalOptionList extends OptionList {
         for (int i = 0; i < max; i++) {
             addEntry(new Entry.PrefixFieldEntry(entryX, entryWidth, entryHeight, this, i));
         }
-        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.ActionButton(entryX, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
                     Config.get().prefixes.add("");
@@ -84,8 +83,8 @@ public class GlobalOptionList extends OptionList {
 
     private abstract static class Entry extends OptionList.Entry {
 
-        private static class DetectionAndDebugModeEntry extends MainOptionList.Entry {
-            DetectionAndDebugModeEntry(int x, int width, int height) {
+        private static class Controls1 extends MainOptionList.Entry {
+            Controls1(int x, int width, int height) {
                 super();
                 int buttonWidth = (width - SPACE) / 2;
 
@@ -113,8 +112,8 @@ public class GlobalOptionList extends OptionList {
             }
         }
 
-        private static class SelfNotifyAndSendModeEntry extends MainOptionList.Entry {
-            SelfNotifyAndSendModeEntry(int x, int width, int height) {
+        private static class Controls2 extends MainOptionList.Entry {
+            Controls2(int x, int width, int height) {
                 super();
                 int buttonWidth = (width - SPACE) / 2;
 
@@ -142,8 +141,8 @@ public class GlobalOptionList extends OptionList {
             }
         }
 
-        private static class NotifAndRestyleModeEntry extends MainOptionList.Entry {
-            NotifAndRestyleModeEntry(int x, int width, int height) {
+        private static class Controls3 extends MainOptionList.Entry {
+            Controls3(int x, int width, int height) {
                 super();
                 int buttonWidth = (width - SPACE) / 2;
 
@@ -169,8 +168,8 @@ public class GlobalOptionList extends OptionList {
             }
         }
 
-        private static class SenderModeEntry extends MainOptionList.Entry {
-            SenderModeEntry(int x, int width, int height) {
+        private static class Controls4 extends MainOptionList.Entry {
+            Controls4(int x, int width, int height) {
                 super();
 
                 elements.add(CycleButton.<Config.SenderDetectionMode>builder((status) ->
@@ -187,8 +186,8 @@ public class GlobalOptionList extends OptionList {
             }
         }
 
-        private static class DefaultColorEntry extends MainOptionList.Entry {
-            DefaultColorEntry(int x, int width, int height, GlobalOptionList list) {
+        private static class DefaultColor extends MainOptionList.Entry {
+            DefaultColor(int x, int width, int height, GlobalOptionList list) {
                 super();
                 int colorFieldWidth = Minecraft.getInstance().font.width("#FFAAFF+++");
 
@@ -228,7 +227,7 @@ public class GlobalOptionList extends OptionList {
                         float[] hsv = new float[3];
                         Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
                                 FastColor.ARGB32.blue(color), hsv);
-                        if (hsv[2] < 0.1) colorField.setTextColor(16777215);
+                        if (hsv[2] < 0.1) colorField.setTextColor(0xFFFFFF);
                         else colorField.setTextColor(color);
                     }
                 });
@@ -237,8 +236,8 @@ public class GlobalOptionList extends OptionList {
             }
         }
 
-        private static class DefaultSoundEntry extends MainOptionList.Entry {
-            DefaultSoundEntry(int x, int width, int height, GlobalOptionList list) {
+        private static class DefaultSound extends MainOptionList.Entry {
+            DefaultSound(int x, int width, int height, GlobalOptionList list) {
                 super();
                 elements.add(Button.builder(localized("option", "global.default_sound",
                                         Config.get().defaultSound.getId()),
@@ -249,13 +248,13 @@ public class GlobalOptionList extends OptionList {
             }
         }
 
-        private static class SoundSourceEntry extends MainOptionList.Entry {
-            SoundSourceEntry(int x, int width, int height, GlobalOptionList list) {
+        private static class SoundSource extends MainOptionList.Entry {
+            SoundSource(int x, int width, int height, GlobalOptionList list) {
                 super();
 
-                elements.add(CycleButton.<SoundSource>builder(source -> Component.translatable(
+                elements.add(CycleButton.<net.minecraft.sounds.SoundSource>builder(source -> Component.translatable(
                         "soundCategory." + source.getName()))
-                        .withValues(SoundSource.values())
+                        .withValues(net.minecraft.sounds.SoundSource.values())
                         .withInitialValue(Config.get().soundSource)
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option", "sound.source.tooltip")))

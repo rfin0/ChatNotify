@@ -48,18 +48,18 @@ public class NotifOptionList extends DragReorderList {
     private final Notification notif;
     private String filterString = "";
     private @Nullable Pattern filterPattern = null;
-    private OptionList.Entry.ActionButtonEntry addTriggerEntry;
+    private OptionList.Entry.ActionButton addTriggerEntry;
 
     public NotifOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
                            int entryHeight, int entrySpacing, Notification notif) {
         super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, 
                 () -> notif.editing = false, new HashMap<>(Map.of(
-                        Entry.TriggerFieldEntry.class, (source, dest) ->
+                        Entry.TriggerOptions.class, (source, dest) ->
                                 moveTrigger(notif, source, dest))));
         this.notif = notif;
         notif.editing = true;
         
-        addTriggerEntry = new OptionList.Entry.ActionButtonEntry(
+        addTriggerEntry = new OptionList.Entry.ActionButton(
                 entryX, entryWidth, entryHeight, Component.literal("+"), null, -1,
                 (button) -> {
                     notif.triggers.add(new Trigger());
@@ -72,32 +72,32 @@ public class NotifOptionList extends DragReorderList {
 
     @Override
     protected void addEntries() {
-        addEntry(new Entry.TitleAndSearchEntry(entryX, entryWidth, entryHeight, this));
+        addEntry(new Entry.TriggerListHeader(entryX, entryWidth, entryHeight, this));
 
         refreshTriggerSubList();
         addTriggerEntry.setBounds(entryX, entryWidth, entryHeight);
         addEntry(addTriggerEntry);
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "notif"), null, -1));
 
-        addEntry(new Entry.SoundConfigEntry(entryX, entryWidth, entryHeight, notif, this));
-        addEntry(new Entry.ColorConfigEntry(entryX, entryWidth, entryHeight, this,
+        addEntry(new Entry.SoundOptions(entryX, entryWidth, entryHeight, notif, this));
+        addEntry(new Entry.ColorOptions(entryX, entryWidth, entryHeight, this,
                 () -> notif.textStyle.color, (val) -> notif.textStyle.color = val,
                 () -> notif.textStyle.doColor, (val) -> notif.textStyle.doColor = val,
                 localized("option", "notif.color")));
-        addEntry(new Entry.FormatConfigEntry(entryX, entryWidth, entryHeight, notif, true));
-        addEntry(new Entry.FormatConfigEntry(entryX, entryWidth, entryHeight, notif, false));
+        addEntry(new Entry.FormatOptions(entryX, entryWidth, entryHeight, notif, true));
+        addEntry(new Entry.FormatOptions(entryX, entryWidth, entryHeight, notif, false));
 
-        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.ActionButton(entryX, entryWidth, entryHeight,
                 localized("option", "advanced"),
                 Tooltip.create(localized("option", "advanced.tooltip")), 500,
                 (button) -> openAdvancedConfig()));
     }
     
     protected void refreshTriggerSubList() {
-        children().removeIf((entry) -> entry instanceof Entry.TriggerFieldEntry 
-                || entry instanceof Entry.StyleTargetFieldEntry);
+        children().removeIf((entry) -> entry instanceof Entry.TriggerOptions
+                || entry instanceof Entry.StyleTargetOptions);
         // Add in reverse order at index 1 (entry 0 is title/search)
         int start = 1;
         boolean isUser = notif.equals(Config.get().getUserNotif());
@@ -105,15 +105,15 @@ public class NotifOptionList extends DragReorderList {
             Trigger trigger = notif.triggers.get(i);
             if (filterPattern == null || filterPattern.matcher(trigger.string).find()) {
                 if (isUser && i <= 1) {
-                    children().add(start, new Entry.TriggerDisplayFieldEntry(
-                            dynEntryX, dynEntryWidth, entryHeight, trigger.string, i == 0));
+                    children().add(start, new Entry.LockedTriggerOptions(
+                            dynWideEntryX, dynWideEntryWidth, entryHeight, trigger.string, i == 0));
                 } else {
                     if (trigger.styleTarget.enabled) {
-                        children().add(start, new Entry.StyleTargetFieldEntry(
-                                dynEntryX, dynEntryWidth, entryHeight, this, trigger.styleTarget));
+                        children().add(start, new Entry.StyleTargetOptions(
+                                dynWideEntryX, dynWideEntryWidth, entryHeight, this, trigger.styleTarget));
                     }
-                    children().add(start, new Entry.TriggerFieldEntry(
-                            dynEntryX, dynEntryWidth, entryHeight, this, notif, trigger, i));
+                    children().add(start, new Entry.TriggerOptions(
+                            dynWideEntryX, dynWideEntryWidth, entryHeight, this, notif, trigger, i));
                 }
             }
         }
@@ -161,8 +161,8 @@ public class NotifOptionList extends DragReorderList {
 
     abstract static class Entry extends OptionList.Entry {
         
-        private static class TitleAndSearchEntry extends Entry {
-            TitleAndSearchEntry(int x, int width, int height, NotifOptionList list) {
+        private static class TriggerListHeader extends Entry {
+            TriggerListHeader(int x, int width, int height, NotifOptionList list) {
                 super();
                 int searchFieldWidth = 100;
                 int titleWidth = width - searchFieldWidth - SPACE;
@@ -192,8 +192,8 @@ public class NotifOptionList extends DragReorderList {
             }
         }
 
-        private static class TriggerDisplayFieldEntry extends Entry {
-            TriggerDisplayFieldEntry(int x, int width, int height, String value, boolean first) {
+        private static class LockedTriggerOptions extends Entry {
+            LockedTriggerOptions(int x, int width, int height, String value, boolean first) {
                 super();
 
                 TextField displayField = new TextField(x, 0, width, height);
@@ -208,9 +208,9 @@ public class NotifOptionList extends DragReorderList {
             }
         }
 
-        private static class TriggerFieldEntry extends Entry {
-            TriggerFieldEntry(int x, int width, int height, NotifOptionList list,
-                              Notification notif, Trigger trigger, int index) {
+        private static class TriggerOptions extends Entry {
+            TriggerOptions(int x, int width, int height, NotifOptionList list,
+                           Notification notif, Trigger trigger, int index) {
                 super();
                 int triggerFieldWidth = width - (list.tinyWidgetWidth * 3);
                 boolean keyTrigger = trigger.type == Trigger.Type.KEY;
@@ -230,7 +230,7 @@ public class NotifOptionList extends DragReorderList {
                 Button dragButton = Button.builder(Component.literal("\u2191\u2193"),
                                 (button) -> {
                                     this.setDragging(true);
-                                    list.startDragging(this, StyleTargetFieldEntry.class,
+                                    list.startDragging(this, StyleTargetOptions.class,
                                             trigger.styleTarget.enabled);
                                 })
                         .pos(x - list.smallWidgetWidth - SPACE, 0)
@@ -327,9 +327,9 @@ public class NotifOptionList extends DragReorderList {
             }
         }
 
-        private static class StyleTargetFieldEntry extends Entry {
-            StyleTargetFieldEntry(int x, int width, int height, NotifOptionList list,
-                                  StyleTarget styleTarget) {
+        private static class StyleTargetOptions extends Entry {
+            StyleTargetOptions(int x, int width, int height, NotifOptionList list,
+                               StyleTarget styleTarget) {
                 super();
                 int stringFieldWidth = width - (list.tinyWidgetWidth * 4);
                 int movingX = x + list.tinyWidgetWidth;
@@ -386,9 +386,9 @@ public class NotifOptionList extends DragReorderList {
             }
         }
 
-        private static class SoundConfigEntry extends Entry {
-            SoundConfigEntry(int x, int width, int height, Notification notif,
-                             NotifOptionList list) {
+        private static class SoundOptions extends Entry {
+            SoundOptions(int x, int width, int height, Notification notif,
+                         NotifOptionList list) {
                 super();
                 int statusButtonWidth = Math.max(24, height);
                 int mainButtonWidth = width - statusButtonWidth - SPACE;
@@ -411,8 +411,8 @@ public class NotifOptionList extends DragReorderList {
             }
         }
 
-        private static class FormatConfigEntry extends Entry {
-            private FormatConfigEntry(int x, int width, int height, Notification notif, boolean first) {
+        private static class FormatOptions extends Entry {
+            private FormatOptions(int x, int width, int height, Notification notif, boolean first) {
                 super();
                 if (first) createFirst(x, width, height, notif);
                 else createSecond(x, width, height, notif);
@@ -504,18 +504,18 @@ public class NotifOptionList extends DragReorderList {
             }
         }
 
-        static class ColorConfigEntry extends Entry {
-            ColorConfigEntry(int x, int width, int height, OptionList list,
-                             Supplier<Integer> supplier, Consumer<Integer> consumer,
-                             Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
-                             MutableComponent text) {
+        static class ColorOptions extends Entry {
+            ColorOptions(int x, int width, int height, OptionList list,
+                         Supplier<Integer> supplier, Consumer<Integer> consumer,
+                         Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
+                         MutableComponent text) {
                 this(x, width, height, list, supplier, consumer, statusSupplier, statusConsumer, text, true);
             }
 
-            ColorConfigEntry(int x, int width, int height, OptionList list,
-                             Supplier<Integer> supplier, Consumer<Integer> consumer,
-                             Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
-                             MutableComponent text, boolean showStatusButton) {
+            ColorOptions(int x, int width, int height, OptionList list,
+                         Supplier<Integer> supplier, Consumer<Integer> consumer,
+                         Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
+                         MutableComponent text, boolean showStatusButton) {
                 super();
                 int statusButtonWidth = Math.max(24, height);
                 int colorFieldWidth = Minecraft.getInstance().font.width("#FFAAFF+++");
@@ -557,7 +557,7 @@ public class NotifOptionList extends DragReorderList {
                         float[] hsv = new float[3];
                         Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
                                 FastColor.ARGB32.blue(color), hsv);
-                        if (hsv[2] < 0.1) colorField.setTextColor(16777215);
+                        if (hsv[2] < 0.1) colorField.setTextColor(0xFFFFFF);
                         else colorField.setTextColor(color);
                     }
                 });

@@ -72,30 +72,30 @@ public class TriggerOptionList extends OptionList {
     @Override
     protected void addEntries() {
         // Trigger editor
-        addSpacedEntry(new Entry.TriggerFieldEntry(
-                dynEntryX, dynEntryWidth, entryHeight + itemHeight, this, trigger));
+        addSpacedEntry(new Entry.TriggerOptions(
+                dynWideEntryX, dynWideEntryWidth, entryHeight + itemHeight, this, trigger));
         if (trigger.styleTarget.enabled) {
-            addEntry(new Entry.StyleTargetFieldEntry(dynEntryX, dynEntryWidth, entryHeight,
+            addEntry(new Entry.StyleTargetOptions(dynWideEntryX, dynWideEntryWidth, entryHeight,
                     this, trigger.styleTarget));
         }
 
         // Text display field
-        textDisplayField = new MultiLineTextField(dynEntryX, 0, dynEntryWidth, entryHeight,
+        textDisplayField = new MultiLineTextField(dynWideEntryX, 0, dynWideEntryWidth, entryHeight,
                 localized("option", "trigger.display.text.hint"));
         textDisplayField.setValue(displayText);
-        addSpacedEntry(new Entry.MessageFieldEntry(
-                dynEntryX, dynEntryWidth, entryHeight + itemHeight,
+        addSpacedEntry(new Entry.DisplayField(
+                dynWideEntryX, dynWideEntryWidth, entryHeight + itemHeight,
                 textDisplayField, localized("option", "trigger.display.text")));
         
         // Key display field
-        keyDisplayField = new TextField(dynEntryX, 0, dynEntryWidth, entryHeight);
+        keyDisplayField = new TextField(dynWideEntryX, 0, dynWideEntryWidth, entryHeight);
         keyDisplayField.setMaxLength(256);
         keyDisplayField.setValue(displayKey);
-        addEntry(new Entry.MessageFieldEntry(dynEntryX, dynEntryWidth, entryHeight, keyDisplayField,
+        addEntry(new Entry.DisplayField(dynWideEntryX, dynWideEntryWidth, entryHeight, keyDisplayField,
                 localized("option", "trigger.display.key")));
 
         // Filter, restyle and color controls
-        addEntry(new Entry.ControlsEntry(dynEntryX, dynEntryWidth, entryHeight, this));
+        addEntry(new Entry.Controls(dynWideEntryX, dynWideEntryWidth, entryHeight, this));
 
         // Chat message list
         addChatMessages(this.recentChat);
@@ -158,13 +158,13 @@ public class TriggerOptionList extends OptionList {
         
         // Add message entries
         displayChat.forEach((pair) -> {
-            Entry.MessageEntry entry = new Entry.MessageEntry(dynEntryX, dynEntryWidth,
+            Entry.MessageEntry entry = new Entry.MessageEntry(dynWideEntryX, dynWideEntryWidth,
                     this, pair.getFirst(), pair.getSecond());
             addEntry(entry);
             int requiredHeight = 
-                    mc.font.wordWrapHeight(pair.getFirst().getString(), dynEntryWidth) - itemHeight;
+                    mc.font.wordWrapHeight(pair.getFirst().getString(), dynWideEntryWidth) - itemHeight;
             while (requiredHeight > 0) {
-                SpaceEntry spaceEntry = new SpaceEntry(entry);
+                Entry.Space spaceEntry = new Entry.Space(entry);
                 addEntry(spaceEntry);
                 requiredHeight -= itemHeight;
             }
@@ -172,7 +172,7 @@ public class TriggerOptionList extends OptionList {
         
         // If no message entries, add note
         if (!(children().getLast() instanceof Entry.MessageEntry)) {
-            addEntry(new OptionList.Entry.TextEntry(dynEntryX, dynEntryWidth, entryHeight,
+            addEntry(new OptionList.Entry.Text(dynWideEntryX, dynWideEntryWidth, entryHeight,
                     localized("option", "trigger.recent_messages.none"), null, -1));
         }
     }
@@ -189,9 +189,9 @@ public class TriggerOptionList extends OptionList {
 
     abstract static class Entry extends OptionList.Entry {
 
-        private static class TriggerFieldEntry extends Entry {
-            TriggerFieldEntry(int x, int width, int height, TriggerOptionList list, 
-                              Trigger trigger) {
+        private static class TriggerOptions extends Entry {
+            TriggerOptions(int x, int width, int height, TriggerOptionList list,
+                           Trigger trigger) {
                 super();
                 int triggerFieldWidth = width - (list.tinyWidgetWidth * 2);
                 boolean keyTrigger = trigger.type == Trigger.Type.KEY;
@@ -239,8 +239,8 @@ public class TriggerOptionList extends OptionList {
                     trigger.string = str.strip();
                     if (list.children().size() > 4) {
                         list.children().removeIf((entry) -> entry instanceof MessageEntry 
-                                || entry instanceof TextEntry 
-                                || (entry instanceof SpaceEntry && list.children().indexOf(entry) > 4));
+                                || entry instanceof Text 
+                                || (entry instanceof Space && list.children().indexOf(entry) > 4));
                         list.addChatMessages(list.recentChat);
                     }
                 });
@@ -271,9 +271,9 @@ public class TriggerOptionList extends OptionList {
             }
         }
 
-        private static class StyleTargetFieldEntry extends Entry {
-            StyleTargetFieldEntry(int x, int width, int height, TriggerOptionList list,
-                                  StyleTarget styleTarget) {
+        private static class StyleTargetOptions extends Entry {
+            StyleTargetOptions(int x, int width, int height, TriggerOptionList list,
+                               StyleTarget styleTarget) {
                 super();
                 int stringFieldWidth = width - (list.tinyWidgetWidth * 4);
                 int movingX = x + list.tinyWidgetWidth;
@@ -313,8 +313,8 @@ public class TriggerOptionList extends OptionList {
                 stringField.setResponder((string) -> {
                     styleTarget.string = string.strip();
                     list.children().removeIf((entry) -> entry instanceof MessageEntry
-                            || entry instanceof TextEntry
-                            || (entry instanceof SpaceEntry && list.children().indexOf(entry) > 4));
+                            || entry instanceof Text
+                            || (entry instanceof Space && list.children().indexOf(entry) > 4));
                     list.addChatMessages(list.recentChat);
                 });
                 stringField.setTooltip(Tooltip.create(localized(
@@ -336,8 +336,8 @@ public class TriggerOptionList extends OptionList {
             }
         }
 
-        private static class ControlsEntry extends MainOptionList.Entry {
-            ControlsEntry(int x, int width, int height, TriggerOptionList list) {
+        private static class Controls extends MainOptionList.Entry {
+            Controls(int x, int width, int height, TriggerOptionList list) {
                 super();
                 int buttonWidth = (width - SPACE * 2) / 3;
                 int movingX = x;
@@ -388,8 +388,8 @@ public class TriggerOptionList extends OptionList {
             }
         }
 
-        private static class MessageFieldEntry extends Entry {
-            MessageFieldEntry(int x, int width, int height, AbstractWidget widget, Component label) {
+        private static class DisplayField extends Entry {
+            DisplayField(int x, int width, int height, AbstractWidget widget, Component label) {
                 super();
                 int labelWidth = 40;
                 int fieldWidth = width - labelWidth - SPACE;

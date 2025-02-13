@@ -54,15 +54,15 @@ import static dev.terminalmc.chatnotify.util.Localization.translationKey;
 public class MainOptionList extends DragReorderList {
     private String filterString = "";
     private @Nullable Pattern filterPattern = null;
-    private OptionList.Entry.ActionButtonEntry addNotifEntry;
+    private OptionList.Entry.ActionButton addNotifEntry;
 
     public MainOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
                           int entryHeight, int entrySpacing) {
         super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, () -> {}, 
-                new HashMap<>(Map.of(Entry.NotifConfigEntry.class, (source, dest) ->
+                new HashMap<>(Map.of(Entry.NotifOptions.class, (source, dest) ->
                         Config.get().changeNotifPriority(++source, ++dest))));
         
-        addNotifEntry = new OptionList.Entry.ActionButtonEntry(
+        addNotifEntry = new OptionList.Entry.ActionButton(
                 entryX, entryWidth, entryHeight, Component.literal("+"), null, -1,
                 (button) -> {
                     Config.get().addNotif();
@@ -75,11 +75,11 @@ public class MainOptionList extends DragReorderList {
 
     @Override
     protected void addEntries() {
-        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.ActionButton(entryX, entryWidth, entryHeight,
                 localized("option", "global"), null, -1,
                 (button -> openGlobalConfig())));
 
-        addEntry(new Entry.TitleAndSearchEntry(entryX, entryWidth, entryHeight, this));
+        addEntry(new Entry.NotifListHeader(entryX, entryWidth, entryHeight, this));
 
         refreshNotifSubList();
         addNotifEntry.setBounds(entryX, entryWidth, entryHeight);
@@ -87,7 +87,7 @@ public class MainOptionList extends DragReorderList {
     }
 
     protected void refreshNotifSubList() {
-        children().removeIf((entry) -> entry instanceof Entry.NotifConfigEntry);
+        children().removeIf((entry) -> entry instanceof Entry.NotifOptions);
         // Add in reverse order at index 2 (entry 0 is global options, entry 1
         // is title/search)
         int start = 2;
@@ -96,11 +96,11 @@ public class MainOptionList extends DragReorderList {
             if (filterPattern == null || notifs.get(i).triggers.stream().anyMatch(
                     (trigger) -> filterPattern.matcher(trigger.string).find())) {
                 if (i == 0) {
-                    children().add(start, new Entry.LockedNotifConfigEntry(dynEntryX, dynEntryWidth,
-                            entryHeight, this, notifs, 0));
+                    children().add(start, new Entry.LockedNotifOptions(
+                            dynWideEntryX, dynWideEntryWidth, entryHeight, this, notifs, 0));
                 } else {
-                    children().add(start, new Entry.NotifConfigEntry(dynEntryX, dynEntryWidth,
-                            entryHeight, this, notifs, i));
+                    children().add(start, new Entry.NotifOptions(
+                            dynWideEntryX, dynWideEntryWidth, entryHeight, this, notifs, i));
                 }
             }
         }
@@ -151,8 +151,8 @@ public class MainOptionList extends DragReorderList {
 
     public static class Entry extends OptionList.Entry {
 
-        private static class TitleAndSearchEntry extends Entry {
-            TitleAndSearchEntry(int x, int width, int height, MainOptionList list) {
+        private static class NotifListHeader extends Entry {
+            NotifListHeader(int x, int width, int height, MainOptionList list) {
                 super();
                 int searchFieldWidth = 100;
                 int titleWidth = width - searchFieldWidth - SPACE;
@@ -182,9 +182,9 @@ public class MainOptionList extends DragReorderList {
             }
         }
 
-        private static class NotifConfigEntry extends Entry {
-            NotifConfigEntry(int x, int width, int height, MainOptionList list,
-                             List<Notification> notifs, int index) {
+        private static class NotifOptions extends Entry {
+            NotifOptions(int x, int width, int height, MainOptionList list,
+                         List<Notification> notifs, int index) {
                 super();
                 Notification notif = notifs.get(index);
                 int SPACING_NARROW = 2;
@@ -413,7 +413,7 @@ public class MainOptionList extends DragReorderList {
                             float[] hsv = new float[3];
                             Color.RGBtoHSB(FastColor.ARGB32.red(color), FastColor.ARGB32.green(color),
                                     FastColor.ARGB32.blue(color), hsv);
-                            if (hsv[2] < 0.1) colorField.setTextColor(16777215);
+                            if (hsv[2] < 0.1) colorField.setTextColor(0xFFFFFF);
                             else colorField.setTextColor(color);
                             // Update status button color
                             colorEditButton.setMessage(
@@ -568,9 +568,9 @@ public class MainOptionList extends DragReorderList {
             }
         }
 
-        private static class LockedNotifConfigEntry extends NotifConfigEntry {
-            LockedNotifConfigEntry(int x, int width, int height, MainOptionList list,
-                                   List<Notification> notifs, int index) {
+        private static class LockedNotifOptions extends NotifOptions {
+            LockedNotifOptions(int x, int width, int height, MainOptionList list,
+                               List<Notification> notifs, int index) {
                 super(x, width, height, list, notifs, index);
             }
         }

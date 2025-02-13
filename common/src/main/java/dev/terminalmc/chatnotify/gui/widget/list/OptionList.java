@@ -26,7 +26,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.network.chat.Component;
-import dev.terminalmc.chatnotify.gui.widget.slider.DoubleSlider;
 import dev.terminalmc.chatnotify.gui.widget.SilentButton;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -63,9 +62,11 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     protected final int entrySpacing;
     
     protected int rowWidth;
+    protected int dynWideEntryWidth;
     protected int dynEntryWidth;
     
     protected int entryX;
+    protected int dynWideEntryX;
     protected int dynEntryX;
 
     protected int smallWidgetWidth;
@@ -92,10 +93,12 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
      * changed.</p>
      */
     protected void updateElementBounds() {
-        this.dynEntryWidth = Math.max(entryWidth, (int)(width / 100F * 70F));
+        this.dynWideEntryWidth = Math.max(entryWidth, (int)(width / 100F * 70F));
+        this.dynEntryWidth = Math.max(entryWidth, (int)(width / 100F * 50F));
         this.entryX = width / 2 - (entryWidth / 2);
+        this.dynWideEntryX = width / 2 - (dynWideEntryWidth / 2);
         this.dynEntryX = width / 2 - (dynEntryWidth / 2);
-        this.rowWidth = Math.max(entryWidth, dynEntryWidth)
+        this.rowWidth = Math.max(entryWidth, dynWideEntryWidth)
                 + (OptionScreen.SCROLL_BAR_MARGIN * 2)
                 + (OptionScreen.HANGING_WIDGET_MARGIN * 2);
         this.smallWidgetWidth = Math.max(16, entryHeight);
@@ -123,10 +126,19 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     public void onClose() {
         onClose.run();
     }
-    
+
+    public void addEntry(int index, Entry entry) {
+        children().add(index, entry);
+    }
+
     public void addSpacedEntry(Entry entry) {
         super.addEntry(entry);
-        super.addEntry(new SpaceEntry(entry));
+        super.addEntry(new Entry.Space(entry));
+    }
+
+    public void addSpacedEntry(int index, Entry entry) {
+        addEntry(index, entry);
+        addEntry(index + 1, new Entry.Space(entry));
     }
 
     /**
@@ -205,9 +217,11 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
             });
         }
 
-        public static class TextEntry extends Entry {
-            public TextEntry(int x, int width, int height, Component message,
-                             @Nullable Tooltip tooltip, int tooltipDelay) {
+        // Generic entry implementations
+
+        public static class Text extends Entry {
+            public Text(int x, int width, int height, Component message,
+                        @Nullable Tooltip tooltip, int tooltipDelay) {
                 super();
 
                 AbstractStringWidget widget;
@@ -226,12 +240,12 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
             }
         }
 
-        public static class ActionButtonEntry extends Entry {
+        public static class ActionButton extends Entry {
             private final Button button;
             
-            public ActionButtonEntry(int x, int width, int height, Component message,
-                                     @Nullable Tooltip tooltip, int tooltipDelay,
-                                     Button.OnPress onPress) {
+            public ActionButton(int x, int width, int height, Component message,
+                                @Nullable Tooltip tooltip, int tooltipDelay,
+                                Button.OnPress onPress) {
                 super();
 
                 button = Button.builder(message, onPress)
@@ -250,10 +264,10 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
             }
         }
 
-        public static class SilentActionButtonEntry extends Entry {
-            public SilentActionButtonEntry(int x, int width, int height, Component message,
-                                           @Nullable Tooltip tooltip, int tooltipDelay,
-                                           Button.OnPress onPress) {
+        public static class SilentActionButton extends Entry {
+            public SilentActionButton(int x, int width, int height, Component message,
+                                      @Nullable Tooltip tooltip, int tooltipDelay,
+                                      Button.OnPress onPress) {
                 super();
 
                 Button silentButton = new SilentButton(x, 0, width, height, message, onPress);
@@ -264,69 +278,69 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
             }
         }
 
-        public static class DoubleSliderEntry extends Entry {
-            public DoubleSliderEntry(int x, int width, int height, double min, double max, int precision,
-                                     @Nullable String messagePrefix, @Nullable String messageSuffix,
-                                     @Nullable String valueNameMin, @Nullable String valueNameMax,
-                                     Supplier<Double> source, Consumer<Double> dest) {
+        public static class DoubleSlider extends Entry {
+            public DoubleSlider(int x, int width, int height, double min, double max, int precision,
+                                @Nullable String messagePrefix, @Nullable String messageSuffix,
+                                @Nullable String valueNameMin, @Nullable String valueNameMax,
+                                Supplier<Double> source, Consumer<Double> dest) {
                 super();
-                elements.add(new DoubleSlider(x, 0, width, height, min, max, precision,
+                elements.add(new dev.terminalmc.chatnotify.gui.widget.slider.DoubleSlider(x, 0, width, height, min, max, precision,
                         messagePrefix, messageSuffix, valueNameMin, valueNameMax, source, dest));
             }
         }
-    }
 
-    /**
-     * The {@link AbstractSelectionList} class (second-degree superclass of
-     * {@link OptionList}) is hard-coded to only support fixed spacing of
-     * entries. This is an invisible entry which defers all actions to the
-     * given {@link Entry}, thereby allowing that entry to span multiple slots
-     * of the {@link OptionList}.
-     */
-    public static class SpaceEntry extends Entry {
-        private final Entry entry;
+        /**
+         * The {@link AbstractSelectionList} class (second-degree superclass of
+         * {@link OptionList}) is hard-coded to only support fixed spacing of
+         * entries. This is an invisible entry which defers all actions to the
+         * given {@link Entry}, thereby allowing that entry to span multiple slots
+         * of the {@link OptionList}.
+         */
+        public static class Space extends Entry {
+            private final Entry entry;
 
-        public SpaceEntry(Entry entry) {
-            super();
-            this.entry = entry;
-        }
+            public Space(Entry entry) {
+                super();
+                this.entry = entry;
+            }
 
-        @Override
-        public boolean isDragging() {
-            return entry.isDragging();
-        }
+            @Override
+            public boolean isDragging() {
+                return entry.isDragging();
+            }
 
-        @Override
-        public void setDragging(boolean dragging) {
-            entry.setDragging(dragging);
-        }
+            @Override
+            public void setDragging(boolean dragging) {
+                entry.setDragging(dragging);
+            }
 
-        @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            return entry.mouseClicked(mouseX, mouseY, button);
-        }
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int button) {
+                return entry.mouseClicked(mouseX, mouseY, button);
+            }
 
-        @Override
-        public boolean mouseDragged(double mouseX, double mouseY, int button,
-                                    double deltaX, double deltaY) {
-            return entry.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-        }
+            @Override
+            public boolean mouseDragged(double mouseX, double mouseY, int button,
+                                        double deltaX, double deltaY) {
+                return entry.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+            }
 
-        public void setFocused(GuiEventListener listener) {
-            entry.setFocused(listener);
-        }
+            public void setFocused(GuiEventListener listener) {
+                entry.setFocused(listener);
+            }
 
-        public GuiEventListener getFocused() {
-            return entry.getFocused();
-        }
+            public GuiEventListener getFocused() {
+                return entry.getFocused();
+            }
 
-        public ComponentPath focusPathAtIndex(@NotNull FocusNavigationEvent event, int i) {
-            if (entry.children().isEmpty()) {
-                return null;
-            } else {
-                ComponentPath $$2 = entry.children().get(
-                        Math.min(i, entry.children().size() - 1)).nextFocusPath(event);
-                return ComponentPath.path(entry, $$2);
+            public ComponentPath focusPathAtIndex(@NotNull FocusNavigationEvent event, int i) {
+                if (entry.children().isEmpty()) {
+                    return null;
+                } else {
+                    ComponentPath $$2 = entry.children().get(
+                            Math.min(i, entry.children().size() - 1)).nextFocusPath(event);
+                    return ComponentPath.path(entry, $$2);
+                }
             }
         }
     }

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.10
+
+- Fixed an issue with saving on ESC introduced in v2.3.9 
+- Fixed username notification not updating after config reload
+- Increased scrollbar margin
+- Improved UI slightly
+
 ## 2.3.9
 
 - Added duplicate trigger detection
