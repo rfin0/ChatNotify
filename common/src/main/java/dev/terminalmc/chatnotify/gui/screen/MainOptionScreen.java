@@ -76,10 +76,7 @@ public class MainOptionScreen extends OptionScreen {
         
         addRenderableWidget(Button.builder(
                 CommonComponents.GUI_DONE, 
-                (button) -> {
-                    Config.save();
-                    onClose();
-                })
+                (button) -> onClose())
                 .pos(x2, y)
                 .size(w, h)
                 .build());
