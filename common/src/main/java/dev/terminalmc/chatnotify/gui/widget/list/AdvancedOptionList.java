@@ -114,6 +114,14 @@ public class AdvancedOptionList extends DragReorderList {
                 localized("option", "advanced.msg.title").append(".\n")
                         .append(localized("option", "advanced.msg.title.tooltip"))
                         .append("\n\n").append(localized("option", "advanced.msg.info.blank_original"))));
+        addEntry(new Entry.CustomMessage(dynWideEntryX, dynWideEntryWidth, entryHeight,
+                () -> notif.toastMsg, (str) -> notif.toastMsg = str,
+                () -> notif.toastMsgEnabled, (val) -> notif.toastMsgEnabled = val,
+                localized("option", "advanced.msg.toast")
+                        .withColor(TextField.TEXT_COLOR_HINT),
+                localized("option", "advanced.msg.toast").append(".\n")
+                        .append(localized("option", "advanced.msg.toast.tooltip"))
+                        .append("\n\n").append(localized("option", "advanced.msg.info.blank_original"))));
 
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "advanced.exclusion", "\u2139"),

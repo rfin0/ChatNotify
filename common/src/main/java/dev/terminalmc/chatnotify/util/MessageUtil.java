@@ -20,6 +20,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.ChatNotify;
 import dev.terminalmc.chatnotify.compat.chatheads.ChatHeadsWrapper;
 import dev.terminalmc.chatnotify.config.*;
+import dev.terminalmc.chatnotify.gui.toast.NotificationToast;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -260,6 +261,7 @@ public class MessageUtil {
                 // the entire message. Reset match by subsMatcher.find(0)
                 showStatusBarMsg(notif, msg, subsMatcher);
                 showTitleMsg(notif, msg, subsMatcher);
+                showToastMsg(notif, msg, subsMatcher);
 
                 // If replacement enabled, process
                 if (notif.replacementMsgEnabled) {
@@ -385,6 +387,22 @@ public class MessageUtil {
                     ? msg
                     : convertMsg(notif.titleMsg, matcher);
             Minecraft.getInstance().gui.setTitle(displayMsg);
+        }
+    }
+
+    /**
+     * Displays the toast message for the {@link Notification}, if enabled.
+     * @param notif the {@link Notification}.
+     * @param msg the original message.
+     * @param matcher the {@link Matcher} for the trigger, if a regex trigger
+     *                was used, {@code null} otherwise.
+     */
+    private static void showToastMsg(Notification notif, Component msg, Matcher matcher) {
+        if (notif.toastMsgEnabled) {
+            Component displayMsg = notif.toastMsg.isBlank()
+                    ? msg
+                    : convertMsg(notif.toastMsg, matcher);
+            Minecraft.getInstance().getToasts().addToast(new NotificationToast(displayMsg));
         }
     }
 

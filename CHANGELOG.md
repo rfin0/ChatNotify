@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.11
+
+- Added toast notification option
+
 ## 2.3.10
 
 - Fixed an issue with saving on ESC introduced in v2.3.9 

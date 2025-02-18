@@ -49,7 +49,7 @@ import java.util.function.Supplier;
  * elements.</p>
  */
 public class Notification {
-    public static final int VERSION = 5;
+    public static final int VERSION = 6;
     public final int version = VERSION;
 
     /**
@@ -134,6 +134,14 @@ public class Notification {
     public static final boolean titleMsgEnabledDefault = false;
 
     /**
+     * Optional message to display in a toast popup.
+     */
+    public String toastMsg;
+    public static final String toastMsgDefault = "";
+    public boolean toastMsgEnabled;
+    public static final boolean toastMsgEnabledDefault = false;
+
+    /**
      * The list of {@link Trigger}s which can activate this instance.
      */
     public final List<Trigger> triggers;
@@ -172,6 +180,8 @@ public class Notification {
             boolean statusBarMsgEnabled,
             String titleMsg,
             boolean titleMsgEnabled,
+            String toastMsg,
+            boolean toastMsgEnabled,
             List<Trigger> triggers,
             List<Trigger> exclusionTriggers,
             List<ResponseMessage> responseMessages
@@ -188,6 +198,8 @@ public class Notification {
         this.statusBarMsgEnabled = statusBarMsgEnabled;
         this.titleMsg = titleMsg;
         this.titleMsgEnabled = titleMsgEnabled;
+        this.toastMsg = toastMsg;
+        this.toastMsgEnabled = toastMsgEnabled;
         this.triggers = triggers;
         this.exclusionTriggers = exclusionTriggers;
         this.responseMessages = responseMessages;
@@ -211,6 +223,8 @@ public class Notification {
                 statusBarMsgEnabledDefault,
                 titleMsgDefault,
                 titleMsgEnabledDefault,
+                toastMsgDefault,
+                toastMsgEnabledDefault,
                 new ArrayList<>(List.of(
                         new Trigger("Profile name"),
                         new Trigger("Display name")
@@ -238,6 +252,8 @@ public class Notification {
                 statusBarMsgEnabledDefault,
                 titleMsgDefault,
                 titleMsgEnabledDefault,
+                toastMsgDefault,
+                toastMsgEnabledDefault,
                 new ArrayList<>(List.of(
                         new Trigger("")
                 )),
@@ -405,6 +421,12 @@ public class Notification {
             boolean titleMsgEnabled = JsonUtil.getOrDefault(obj, "titleMsgEnabled",
                     titleMsgEnabledDefault, silent);
 
+            String toastMsg = JsonUtil.getOrDefault(obj, "toastMsg",
+                    toastMsgDefault, silent);
+
+            boolean toastMsgEnabled = JsonUtil.getOrDefault(obj, "toastMsgEnabled",
+                    toastMsgEnabledDefault, silent);
+
             List<Trigger> triggers = JsonUtil.getOrDefault(ctx, obj, "triggers",
                     Trigger.class, triggersDefault.get(), silent);
 
@@ -434,6 +456,8 @@ public class Notification {
                     statusBarMsgEnabled,
                     titleMsg,
                     titleMsgEnabled,
+                    toastMsg,
+                    toastMsgEnabled,
                     triggers,
                     exclusionTriggers,
                     responseMessages

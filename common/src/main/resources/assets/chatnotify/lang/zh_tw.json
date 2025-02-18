@@ -14,6 +14,8 @@
   "option.chatnotify.advanced.msg.status_bar.tooltip": "Displayed above the hotbar for a few seconds.",
   "option.chatnotify.advanced.msg.title": "Title message",
   "option.chatnotify.advanced.msg.title.tooltip": "Displayed in the middle of the screen for a few seconds.",
+  "option.chatnotify.advanced.msg.toast": "Toast message",
+  "option.chatnotify.advanced.msg.toast.tooltip": "Displayed in a toast popup for a few seconds.",
   "option.chatnotify.advanced.reset.broken": "全部都壞了嗎？",
   "option.chatnotify.advanced.reset.level_1": "重設進階選項",
   "option.chatnotify.advanced.reset.level_1.tooltip": "重設此通知的所有進階設定。",
