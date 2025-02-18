@@ -327,8 +327,8 @@ public class MainOptionList extends DragReorderList {
                     triggerField.withValidator(new TextField.Validator.UniqueTrigger(
                             () -> Config.get().getNotifs(), (n) -> n.triggers, notif, trigger));
                     triggerField.setMaxLength(240);
-                    triggerField.setValue(trigger.string);
                     triggerField.setResponder((str) -> trigger.string = str.strip());
+                    triggerField.setValue(trigger.string);
                     triggerField.setTooltip(Tooltip.create(localized(
                             "option", "main.trigger.field.tooltip")));
                     triggerField.setTooltipDelay(Duration.ofMillis(500));
@@ -473,7 +473,11 @@ public class MainOptionList extends DragReorderList {
                         .displayOnlyValue()
                         .withInitialValue(notif.enabled)
                         .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
-                                Component.empty(), (button, status) -> notif.enabled = status));
+                                Component.empty(), (button, status) -> {
+                                    notif.enabled = status;
+                                    // Update trigger duplicate indicators
+                                    list.refreshNotifSubList();
+                                }));
                 
                 if (index != 0) {
                     // Delete button (right-side extension)

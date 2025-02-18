@@ -386,19 +386,30 @@ public class TextField extends EditBox {
                 int i = 0;
                 for (Notification n : notifSupplier.get()) {
                     i++; // 1-indexed for users
-                    int j = 0;
-                    for (Trigger t : triggerSupplier.apply(n)) {
-                        j++;
-                        if (!t.equals(trigger) && t.string.equals(str) && t.type.equals(trigger.type)) {
-                            if (n.equals(notif)) {
-                                return Optional.of(localized("option", "field.error.trigger.duplicate.here",
-                                        Component.literal(String.valueOf(j)).withStyle(ChatFormatting.GOLD))
-                                        .withStyle(ChatFormatting.RED));
-                            } else {
-                                return Optional.of(localized("option", "field.error.trigger.duplicate",
-                                        Component.literal(String.valueOf(j)).withStyle(ChatFormatting.GOLD),
-                                        Component.literal(String.valueOf(i)).withStyle(ChatFormatting.GOLD))
-                                        .withStyle(ChatFormatting.RED));
+                    if (n.enabled) {
+                        int j = 0;
+                        for (Trigger t : triggerSupplier.apply(n)) {
+                            j++;
+                            if (
+                                    !t.equals(trigger)
+                                    && t.string.equals(str)
+                                    && t.type.equals(trigger.type)
+                            ) {
+                                if (n.equals(notif)) {
+                                    return Optional.of(localized(
+                                            "option", "field.error.trigger.duplicate.here",
+                                            Component.literal(String.valueOf(j))
+                                                    .withStyle(ChatFormatting.GOLD))
+                                            .withStyle(ChatFormatting.RED));
+                                } else {
+                                    return Optional.of(localized(
+                                            "option","field.error.trigger.duplicate",
+                                            Component.literal(String.valueOf(j))
+                                                    .withStyle(ChatFormatting.GOLD),
+                                            Component.literal(String.valueOf(i))
+                                                    .withStyle(ChatFormatting.GOLD))
+                                            .withStyle(ChatFormatting.RED));
+                                }
                             }
                         }
                     }

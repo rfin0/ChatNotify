@@ -3,6 +3,7 @@
 ## 2.3.11
 
 - Added toast notification option
+- Stopped trigger duplicate detection evaluating disabled notifications
 
 ## 2.3.10
 
