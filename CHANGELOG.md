@@ -4,6 +4,7 @@
 
 - Added toast notification option
 - Stopped trigger duplicate detection evaluating disabled notifications
+- Improved config directory detection
 
 ## 2.3.10
 
