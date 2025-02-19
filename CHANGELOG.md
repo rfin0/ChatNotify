@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.12
+
+- Fixed re-ordering of triggers in username notification
+
 ## 2.3.11
 
 - Added toast notification option

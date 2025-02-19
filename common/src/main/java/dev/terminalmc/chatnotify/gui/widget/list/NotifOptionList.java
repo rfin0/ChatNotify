@@ -100,21 +100,15 @@ public class NotifOptionList extends DragReorderList {
                 || entry instanceof Entry.StyleTargetOptions);
         // Add in reverse order at index 1 (entry 0 is title/search)
         int start = 1;
-        boolean isUser = notif.equals(Config.get().getUserNotif());
         for (int i = notif.triggers.size() - 1; i >= 0; i--) {
             Trigger trigger = notif.triggers.get(i);
             if (filterPattern == null || filterPattern.matcher(trigger.string).find()) {
-                if (isUser && i <= 1) {
-                    children().add(start, new Entry.LockedTriggerOptions(
-                            dynWideEntryX, dynWideEntryWidth, entryHeight, trigger.string, i == 0));
-                } else {
-                    if (trigger.styleTarget.enabled) {
-                        children().add(start, new Entry.StyleTargetOptions(
-                                dynWideEntryX, dynWideEntryWidth, entryHeight, this, trigger.styleTarget));
-                    }
-                    children().add(start, new Entry.TriggerOptions(
-                            dynWideEntryX, dynWideEntryWidth, entryHeight, this, notif, trigger, i));
+                if (trigger.styleTarget.enabled) {
+                    children().add(start, new Entry.StyleTargetOptions(
+                            dynWideEntryX, dynWideEntryWidth, entryHeight, this, trigger.styleTarget));
                 }
+                children().add(start, new Entry.TriggerOptions(
+                        dynWideEntryX, dynWideEntryWidth, entryHeight, this, notif, trigger, i));
             }
         }
         clampScrollAmount();
@@ -149,10 +143,13 @@ public class NotifOptionList extends DragReorderList {
     // Re-ordering util
     
     private static boolean moveTrigger(Notification notif, int source, int dest) {
-        if (notif.equals(Config.get().getUserNotif())) {
-            // Offset to compensate for username triggers
-            source += 2;
-            dest += 2;
+        if (notif == Config.get().getUserNotif()) {
+            // Don't allow re-ordering of username triggers
+            if (source <= 1) {
+                return false;
+            } else if (dest <= 1) {
+                dest = 2;
+            }
         }
         return notif.moveTrigger(source, dest);
     }
@@ -166,7 +163,7 @@ public class NotifOptionList extends DragReorderList {
                 super();
                 int searchFieldWidth = 100;
                 int titleWidth = width - searchFieldWidth - SPACE;
-
+                
                 StringWidget titleWidget = new StringWidget(x, 0, titleWidth, height,
                         localized("option", "notif.triggers", "\u2139"), list.mc.font);
                 titleWidget.setTooltip(Tooltip.create(localized(
@@ -192,26 +189,24 @@ public class NotifOptionList extends DragReorderList {
             }
         }
 
-        private static class LockedTriggerOptions extends Entry {
-            LockedTriggerOptions(int x, int width, int height, String value, boolean first) {
-                super();
-
-                TextField displayField = new TextField(x, 0, width, height);
-                displayField.setValue(value);
-                displayField.setTooltip(Tooltip.create(first
-                        ? localized("option", "notif.trigger.special.profile_name.tooltip")
-                        : localized("option", "notif.trigger.special.display_name.tooltip")));
-                displayField.setTooltipDelay(Duration.ofMillis(500));
-                displayField.setEditable(false);
-                displayField.active = false;
-                elements.add(displayField);
-            }
-        }
-
         private static class TriggerOptions extends Entry {
             TriggerOptions(int x, int width, int height, NotifOptionList list,
                            Notification notif, Trigger trigger, int index) {
                 super();
+                if (notif == Config.get().getUserNotif() && index <= 1) {
+                    // Non-editable display field for username triggers
+                    TextField displayField = new TextField(x, 0, width, height);
+                    displayField.setValue(trigger.string);
+                    displayField.setTooltip(Tooltip.create(index == 0
+                            ? localized("option", "notif.trigger.special.profile_name.tooltip")
+                            : localized("option", "notif.trigger.special.display_name.tooltip")));
+                    displayField.setTooltipDelay(Duration.ofMillis(500));
+                    displayField.setEditable(false);
+                    displayField.active = false;
+                    elements.add(displayField);
+                    return;
+                }
+                
                 int triggerFieldWidth = width - (list.tinyWidgetWidth * 3);
                 boolean keyTrigger = trigger.type == Trigger.Type.KEY;
                 if (keyTrigger) triggerFieldWidth -= list.tinyWidgetWidth;
