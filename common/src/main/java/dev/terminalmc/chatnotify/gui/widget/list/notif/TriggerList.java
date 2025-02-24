@@ -229,7 +229,7 @@ public class TriggerList extends DragReorderList {
                         .displayOnlyValue()
                         .withInitialValue(trigger.type)
                         .withTooltip((type) -> Tooltip.create(localized(
-                                "option", "trigger.type." + type + ".tooltip")))
+                                "option", "notif.trigger.type." + type + ".tooltip")))
                         .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
                                 (button, type) -> {
                                     trigger.type = type;
@@ -247,7 +247,7 @@ public class TriggerList extends DragReorderList {
                             .size(list.tinyWidgetWidth, height)
                             .build();
                     keySelectButton.setTooltip(Tooltip.create(localized(
-                            "option", "trigger.open.key_selector.tooltip")));
+                            "option", "notif.trigger.open.key_selector.tooltip")));
                     keySelectButton.setTooltipDelay(Duration.ofMillis(500));
                     elements.add(keySelectButton);
                     movingX += list.tinyWidgetWidth;
@@ -261,7 +261,7 @@ public class TriggerList extends DragReorderList {
                 triggerField.setMaxLength(240);
                 triggerField.setResponder((str) -> trigger.string = str.strip());
                 triggerField.setValue(trigger.string);
-                triggerField.setHint(localized("option", "trigger.field.hint"));
+                triggerField.setHint(localized("option", "notif.trigger.field.hint"));
                 elements.add(triggerField);
                 movingX += triggerFieldWidth;
 
@@ -272,7 +272,7 @@ public class TriggerList extends DragReorderList {
                         .size(list.tinyWidgetWidth, height)
                         .build();
                 editorButton.setTooltip(Tooltip.create(localized(
-                        "option", "trigger.open.trigger_editor.tooltip")));
+                        "option", "notif.trigger.open.trigger_editor.tooltip")));
                 editorButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(editorButton);
                 movingX += list.tinyWidgetWidth;
@@ -288,7 +288,7 @@ public class TriggerList extends DragReorderList {
                         .build();
                 if (!trigger.styleTarget.enabled) {
                     styleButton.setTooltip(Tooltip.create(localized(
-                            "option", "trigger.style_target.add.tooltip")));
+                            "option", "notif.trigger.style_target.add.tooltip")));
                     styleButton.setTooltipDelay(Duration.ofMillis(500));
                 } else {
                     styleButton.active = false;
@@ -334,7 +334,7 @@ public class TriggerList extends DragReorderList {
                         Component.literal("\u2139"), Minecraft.getInstance().font);
                 infoIcon.alignCenter();
                 infoIcon.setTooltip(Tooltip.create(localized(
-                        "option", "trigger.style_target.tooltip")));
+                        "option", "notif.trigger.style_target.tooltip")));
                 infoIcon.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(infoIcon);
                 movingX += list.tinyWidgetWidth;
@@ -346,7 +346,7 @@ public class TriggerList extends DragReorderList {
                         .displayOnlyValue()
                         .withInitialValue(styleTarget.type)
                         .withTooltip((type) -> Tooltip.create(localized(
-                                "option", "trigger.style_target.type." + type + ".tooltip")))
+                                "option", "notif.trigger.style_target.type." + type + ".tooltip")))
                         .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
                                 (button, type) -> {
                                     styleTarget.type = type;
@@ -362,7 +362,7 @@ public class TriggerList extends DragReorderList {
                 stringField.setMaxLength(240);
                 stringField.setValue(styleTarget.string);
                 stringField.setResponder((string) -> styleTarget.string = string.strip());
-                stringField.setHint(localized("option", "trigger.style_target.field.hint"));
+                stringField.setHint(localized("option", "notif.trigger.style_target.field.hint"));
                 elements.add(stringField);
                 movingX = x + width - list.tinyWidgetWidth;
 

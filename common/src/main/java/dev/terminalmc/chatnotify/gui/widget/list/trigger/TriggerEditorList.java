@@ -82,18 +82,18 @@ public class TriggerEditorList extends OptionList {
 
         // Text display field
         textDisplayField = new MultiLineTextField(dynWideEntryX, 0, dynWideEntryWidth, entryHeight,
-                localized("option", "trigger.editor.display.text.hint"));
+                localized("option", "notif.trigger.editor.display.text.hint"));
         textDisplayField.setValue(displayText);
         addSpacedEntry(new Entry.DisplayField(
                 dynWideEntryX, dynWideEntryWidth, entryHeight + itemHeight,
-                textDisplayField, localized("option", "trigger.editor.display.text")));
+                textDisplayField, localized("option", "notif.trigger.editor.display.text")));
         
         // Key display field
         keyDisplayField = new TextField(dynWideEntryX, 0, dynWideEntryWidth, entryHeight);
         keyDisplayField.setMaxLength(256);
         keyDisplayField.setValue(displayKey);
         addEntry(new Entry.DisplayField(dynWideEntryX, dynWideEntryWidth, entryHeight, keyDisplayField,
-                localized("option", "trigger.editor.display.key")));
+                localized("option", "notif.trigger.editor.display.key")));
 
         // Filter, restyle and color controls
         addEntry(new Entry.Controls(dynWideEntryX, dynWideEntryWidth, entryHeight, this));
@@ -174,7 +174,7 @@ public class TriggerEditorList extends OptionList {
         // If no message entries, add note
         if (!(children().getLast() instanceof Entry.MessageEntry)) {
             addEntry(new OptionList.Entry.Text(dynWideEntryX, dynWideEntryWidth, entryHeight,
-                    localized("option", "trigger.editor.recent_messages.none"), null, -1));
+                    localized("option", "notif.trigger.editor.recent_messages.none"), null, -1));
         }
     }
 
@@ -196,7 +196,7 @@ public class TriggerEditorList extends OptionList {
                         .displayOnlyValue()
                         .withInitialValue(trigger.type)
                         .withTooltip((type) -> Tooltip.create(localized(
-                                "option", "trigger.type." + type + ".tooltip")))
+                                "option", "notif.trigger.type." + type + ".tooltip")))
                         .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
                                 (button, type) -> {
                                     trigger.type = type;
@@ -208,7 +208,7 @@ public class TriggerEditorList extends OptionList {
                 
                 // Trigger field
                 MultiLineTextField triggerField = new MultiLineTextField(movingX, 0, 
-                        triggerFieldWidth, height, localized("option", "trigger.field.tooltip"));
+                        triggerFieldWidth, height, localized("option", "notif.trigger.field.hint"));
                 if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
                 triggerField.withValidator(new TextField.Validator.UniqueTrigger(
                         () -> Config.get().getNotifs(), (n) -> n.triggers, null, trigger));
@@ -222,9 +222,6 @@ public class TriggerEditorList extends OptionList {
                     }
                 });
                 triggerField.setValue(trigger.string);
-                triggerField.setTooltip(Tooltip.create(localized(
-                        "option", "trigger.field.tooltip")));
-                triggerField.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(triggerField);
                 movingX += triggerFieldWidth;
 
@@ -239,7 +236,7 @@ public class TriggerEditorList extends OptionList {
                         .build();
                 if (!trigger.styleTarget.enabled) {
                     styleButton.setTooltip(Tooltip.create(localized(
-                            "option", "trigger.style_target.add.tooltip")));
+                            "option", "notif.trigger.style_target.add.tooltip")));
                     styleButton.setTooltipDelay(Duration.ofMillis(500));
                 } else {
                     styleButton.active = false;
@@ -260,7 +257,7 @@ public class TriggerEditorList extends OptionList {
                         Component.literal("ℹ"), Minecraft.getInstance().font);
                 infoIcon.alignCenter();
                 infoIcon.setTooltip(Tooltip.create(localized(
-                        "option", "trigger.style_target.tooltip")));
+                        "option", "notif.trigger.style_target.tooltip")));
                 infoIcon.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(infoIcon);
                 movingX += list.tinyWidgetWidth;
@@ -272,7 +269,7 @@ public class TriggerEditorList extends OptionList {
                         .displayOnlyValue()
                         .withInitialValue(styleTarget.type)
                         .withTooltip((type) -> Tooltip.create(localized(
-                                "option", "trigger.style_target.type." + type + ".tooltip")))
+                                "option", "notif.trigger.style_target.type." + type + ".tooltip")))
                         .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
                                 (button, type) -> {
                                     styleTarget.type = type;
@@ -294,9 +291,7 @@ public class TriggerEditorList extends OptionList {
                             || (entry instanceof Space && list.children().indexOf(entry) > 4));
                     list.addChatMessages(list.recentChat);
                 });
-                stringField.setTooltip(Tooltip.create(localized(
-                        "option", "trigger.style_target.field.tooltip")));
-                stringField.setTooltipDelay(Duration.ofMillis(500));
+                stringField.setHint(localized("option", "notif.trigger.style_target.field.hint"));
                 elements.add(stringField);
                 movingX = x + width - list.tinyWidgetWidth;
 
@@ -324,7 +319,7 @@ public class TriggerEditorList extends OptionList {
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .withInitialValue(list.filter)
                         .create(movingX, 0, buttonWidth, height,
-                                localized("option", "trigger.editor.filter"),
+                                localized("option", "notif.trigger.editor.filter"),
                                 (button, status) -> {
                                     list.filter = status;
                                     list.init();
@@ -336,7 +331,7 @@ public class TriggerEditorList extends OptionList {
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .withInitialValue(list.restyle)
                         .create(movingX, 0, buttonWidth, height,
-                                localized("option", "trigger.editor.restyle"),
+                                localized("option", "notif.trigger.editor.restyle"),
                                 (button, status) -> {
                                     list.restyle = status;
                                     list.init();
@@ -404,7 +399,7 @@ public class TriggerEditorList extends OptionList {
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
                 list.setTextDisplayValue(FormatUtil.stripCodes(msg.getString()));
                 list.setKeyDisplayValue(msg.getContents() instanceof TranslatableContents tc
-                        ? tc.getKey() : localized("option", "trigger.editor.display.key.none").getString());
+                        ? tc.getKey() : localized("option", "notif.trigger.editor.display.key.none").getString());
                 list.setScrollAmount(0);
                 return true;
             }

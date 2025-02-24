@@ -59,12 +59,12 @@ public class TriggerOptionsScreen extends OptionScreen {
     }
 
     public enum Tab {
-        TRIGGER_EDITOR(localized("option", "trigger.editor"), (screen) ->
+        TRIGGER_EDITOR(localized("option", "notif.trigger.editor"), (screen) ->
                 new TriggerEditorList(Minecraft.getInstance(), 0, 0, 0,
                         BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                         screen.trigger, screen.textStyle
                 )),
-        KEY_SELECTOR(localized("option", "trigger.selector"), (screen) ->
+        KEY_SELECTOR(localized("option", "notif.trigger.selector"), (screen) ->
                 new KeySelectorList(Minecraft.getInstance(), 0, 0, 0,
                         BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT,
                         screen.trigger

@@ -68,8 +68,8 @@ public class KeySelectorList extends OptionList {
     @Override
     protected void addEntries() {
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
-                localized("option", "trigger.selector.list", "ℹ"),
-                Tooltip.create(localized("option", "trigger.selector.list.tooltip")), -1));
+                localized("option", "notif.trigger.selector.list", "ℹ"),
+                Tooltip.create(localized("option", "notif.trigger.selector.list.tooltip")), -1));
 
         addEntry(new Entry.TriggerOption(dynWideEntryX, dynWideEntryWidth, entryHeight, trigger));
 
@@ -109,7 +109,7 @@ public class KeySelectorList extends OptionList {
                 triggerField.setMaxLength(240);
                 triggerField.setValue(trigger.string);
                 triggerField.setResponder((str) -> trigger.string = str.strip());
-                triggerField.setHint(localized("option", "trigger.field.hint"));
+                triggerField.setHint(localized("option", "notif.trigger.field.hint"));
                 elements.add(triggerField);
             }
         }

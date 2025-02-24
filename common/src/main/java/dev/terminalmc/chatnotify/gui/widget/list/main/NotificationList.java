@@ -283,7 +283,7 @@ public class NotificationList extends DragReorderList {
                             .displayOnlyValue()
                             .withInitialValue(trigger.type)
                             .withTooltip((type) -> Tooltip.create(localized(
-                                    "option", "trigger.type." + type + ".tooltip")))
+                                    "option", "notif.trigger.type." + type + ".tooltip")))
                             .create(movingX, 0, list.tinyWidgetWidth, height, Component.empty(),
                                     (button, type) -> {
                                         trigger.type = type;
@@ -302,7 +302,7 @@ public class NotificationList extends DragReorderList {
                             .size(list.tinyWidgetWidth, height)
                             .build();
                     keySelectButton.setTooltip(Tooltip.create(localized(
-                            "option", "trigger.open.key_selector.tooltip")));
+                            "option", "notif.trigger.open.key_selector.tooltip")));
                     keySelectButton.setTooltipDelay(Duration.ofMillis(200));
                     elements.add(keySelectButton);
                     movingX += list.tinyWidgetWidth;
@@ -318,7 +318,7 @@ public class NotificationList extends DragReorderList {
                     triggerField.setMaxLength(240);
                     triggerField.setResponder((str) -> trigger.string = str.strip());
                     triggerField.setValue(trigger.string);
-                    triggerField.setHint(localized("option", "trigger.field.hint"));
+                    triggerField.setHint(localized("option", "notif.trigger.field.hint"));
                 } else {
                     triggerField = new FakeTextField(movingX, 0,
                             triggerFieldWidth, height, () -> list.openNotificationConfig(index));
@@ -336,7 +336,7 @@ public class NotificationList extends DragReorderList {
                             .size(list.tinyWidgetWidth, height)
                             .build();
                     editorButton.setTooltip(Tooltip.create(localized(
-                            "option", "trigger.open.trigger_editor.tooltip")));
+                            "option", "notif.trigger.open.trigger_editor.tooltip")));
                     editorButton.setTooltipDelay(Duration.ofMillis(200));
                     elements.add(editorButton);
                     movingX += list.tinyWidgetWidth + SPACING_NARROW;
