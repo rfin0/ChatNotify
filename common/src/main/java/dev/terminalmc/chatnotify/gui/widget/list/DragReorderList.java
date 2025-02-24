@@ -47,9 +47,9 @@ public abstract class DragReorderList extends OptionList {
     boolean hasTrailer;
 
     public DragReorderList(Minecraft mc, int width, int height, int y, int entryWidth,
-                           int entryHeight, int entrySpacing, Runnable onClose,
+                           int entryHeight, int entrySpacing,
                            Map<Class<? extends Entry>, BiFunction<Integer,Integer,Boolean>> clsFunMap) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, onClose);
+        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing);
         this.clsFunMap = clsFunMap;
     }
 

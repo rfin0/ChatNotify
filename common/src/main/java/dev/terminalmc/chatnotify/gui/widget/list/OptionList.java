@@ -53,10 +53,10 @@ import java.util.function.Supplier;
  * rendered at the same list level.</p>
  */
 public abstract class OptionList extends ContainerObjectSelectionList<OptionList.Entry> {
+    protected final Minecraft mc;
     protected OptionScreen screen;
 
     // Standard positional and dimensional values used by entries
-    protected final Minecraft mc;
     protected final int entryWidth;
     protected final int entryHeight;
     protected final int entrySpacing;
@@ -71,17 +71,14 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
 
     protected int smallWidgetWidth;
     protected int tinyWidgetWidth;
-    
-    protected final Runnable onClose;
 
     public OptionList(Minecraft mc, int width, int height, int y, int entryWidth,
-                      int entryHeight, int entrySpacing, Runnable onClose) {
+                      int entryHeight, int entrySpacing) {
         super(mc, width, height, y, entryHeight + entrySpacing);
         this.mc = mc;
         this.entryWidth = entryWidth;
         this.entryHeight = entryHeight;
         this.entrySpacing = entrySpacing;
-        this.onClose = onClose;
         updateElementBounds();
     }
 
@@ -119,12 +116,12 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         setScrollAmount(scrollAmount);
     }
 
-    public void setScreen(OptionScreen screen) {
-        this.screen = screen;
+    public OptionScreen getScreen() {
+        return screen;
     }
 
-    public void onClose() {
-        onClose.run();
+    public void setScreen(OptionScreen screen) {
+        this.screen = screen;
     }
 
     public void addEntry(int index, Entry entry) {

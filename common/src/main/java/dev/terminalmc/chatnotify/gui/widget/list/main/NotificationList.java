@@ -14,24 +14,27 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list;
+package dev.terminalmc.chatnotify.gui.widget.list.main;
 
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.Trigger;
+import dev.terminalmc.chatnotify.gui.screen.NotifOptionsScreen;
 import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
+import dev.terminalmc.chatnotify.gui.screen.TriggerOptionsScreen;
 import dev.terminalmc.chatnotify.gui.widget.ConfirmButton;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.RightClickableButton;
 import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
+import dev.terminalmc.chatnotify.gui.widget.list.DragReorderList;
+import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import dev.terminalmc.chatnotify.util.ColorUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FastColor;
@@ -45,20 +48,15 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
-import static dev.terminalmc.chatnotify.util.Localization.translationKey;
 
-/**
- * Contains a button linking to global options, and a dynamic list of buttons
- * linked to {@link Notification} instances.
- */
-public class MainOptionList extends DragReorderList {
+public class NotificationList extends DragReorderList {
     private String filterString = "";
     private @Nullable Pattern filterPattern = null;
     private OptionList.Entry.ActionButton addNotifEntry;
 
-    public MainOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
-                          int entryHeight, int entrySpacing) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, () -> {}, 
+    public NotificationList(Minecraft mc, int width, int height, int y, int entryWidth,
+                            int entryHeight, int entrySpacing) {
+        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, 
                 new HashMap<>(Map.of(Entry.NotifOptions.class, (source, dest) ->
                         Config.get().changeNotifPriority(++source, ++dest))));
         
@@ -75,11 +73,7 @@ public class MainOptionList extends DragReorderList {
 
     @Override
     protected void addEntries() {
-        addEntry(new OptionList.Entry.ActionButton(entryX, entryWidth, entryHeight,
-                localized("option", "global"), null, -1,
-                (button -> openGlobalConfig())));
-
-        addEntry(new Entry.NotifListHeader(entryX, entryWidth, entryHeight, this));
+        addEntry(new Entry.NotifListHeader(dynEntryX, dynEntryWidth, entryHeight, this));
 
         refreshNotifSubList();
         addNotifEntry.setBounds(entryX, entryWidth, entryHeight);
@@ -88,9 +82,8 @@ public class MainOptionList extends DragReorderList {
 
     protected void refreshNotifSubList() {
         children().removeIf((entry) -> entry instanceof Entry.NotifOptions);
-        // Add in reverse order at index 2 (entry 0 is global options, entry 1
-        // is title/search)
-        int start = 2;
+        // Add in reverse order at index 1 (entry 0 is title/search)
+        int start = 1;
         List<Notification> notifs = Config.get().getNotifs();
         for (int i = notifs.size() - 1; i >= 0; i--) {
             if (filterPattern == null || notifs.get(i).triggers.stream().anyMatch(
@@ -109,42 +102,27 @@ public class MainOptionList extends DragReorderList {
     
     // Sub-screen opening
 
-    private void openGlobalConfig() {
-        mc.setScreen(new OptionScreen(mc.screen, localized("option", "global"), 
-                new GlobalOptionList(mc, width, height, getY(), entryWidth, entryHeight,
-                        entrySpacing)));
-    }
-
     private void openNotificationConfig(int index) {
         Notification notif = Config.get().getNotifs().get(index);
         notif.editing = true;
-        mc.setScreen(new OptionScreen(mc.screen, localized("option", "notif"),
-                new NotifOptionList(mc, width, height, getY(), entryWidth, entryHeight,
-                        entrySpacing, notif)));
+        mc.setScreen(new NotifOptionsScreen(mc.screen, notif, NotifOptionsScreen.Tab.TRIGGERS));
     }
 
     private void openTriggerConfig(Notification notif, Trigger trigger) {
         notif.editing = true;
-        Runnable onClose = () -> notif.editing = false;
-        mc.setScreen(new OptionScreen(mc.screen, localized("option", "trigger"),
-                new TriggerOptionList(mc, width, height, getY(), entryWidth, entryHeight,
-                        entrySpacing, onClose, trigger, notif.textStyle)));
+        mc.setScreen(new TriggerOptionsScreen(mc.screen, trigger, notif.textStyle,
+                () -> notif.editing = false, TriggerOptionsScreen.Tab.TRIGGER_EDITOR));
     }
 
     private void openKeyConfig(Notification notif, Trigger trigger) {
         notif.editing = true;
-        Runnable onClose = () -> notif.editing = false;
-        mc.setScreen(new OptionScreen(mc.screen, localized("option", "key"),
-                new KeyOptionList(mc, width, height, getY(), entryWidth, entryHeight,
-                        onClose, trigger)));
+        mc.setScreen(new TriggerOptionsScreen(mc.screen, trigger, notif.textStyle,
+                () -> notif.editing = false, TriggerOptionsScreen.Tab.KEY_SELECTOR));
     }
-
+    
     private void openSoundConfig(Notification notif) {
         notif.editing = true;
-        Runnable onClose = () -> notif.editing = false;
-        mc.setScreen(new OptionScreen(mc.screen, localized("option", "sound"),
-                new SoundOptionList(mc, width, height, getY(), entryWidth, entryHeight,
-                        onClose, notif.sound)));
+        mc.setScreen(new NotifOptionsScreen(mc.screen, notif, NotifOptionsScreen.Tab.SOUND));
     }
 
     // Custom entries
@@ -152,22 +130,33 @@ public class MainOptionList extends DragReorderList {
     public static class Entry extends OptionList.Entry {
 
         private static class NotifListHeader extends Entry {
-            NotifListHeader(int x, int width, int height, MainOptionList list) {
+            NotifListHeader(int x, int width, int height, NotificationList list) {
                 super();
-                int searchFieldWidth = 100;
-                int titleWidth = width - searchFieldWidth - SPACE;
+                int cappedWidth = Math.min(width, OptionScreen.BASE_ROW_WIDTH);
+                if (cappedWidth < width) {
+                    x += (width - cappedWidth) / 2;
+                    width = cappedWidth;
+                }
+                Component title = localized("option", "notif.trigger.list", "ℹ");
+                int titleWidth = Minecraft.getInstance().font.width(title) + 8;
+                int searchFieldMinWidth = 50;
+                int searchFieldWidth = width - titleWidth - SPACE;
+                if (searchFieldWidth < searchFieldMinWidth) {
+                    int diff = searchFieldMinWidth - searchFieldWidth;
+                    searchFieldWidth += diff;
+                    titleWidth -= diff;
+                }
 
                 StringWidget titleWidget = new StringWidget(x, 0, titleWidth, height,
-                        localized("option", "main.notifs", "\u2139"), list.mc.font);
+                        localized("option", "notif.list", "ℹ"), list.mc.font);
                 titleWidget.setTooltip(Tooltip.create(localized(
-                        "option", "main.notifs.tooltip")));
+                        "option", "notif.list.tooltip")));
                 elements.add(titleWidget);
 
                 TextField searchField = new TextField(x + width - searchFieldWidth, 0,
                         searchFieldWidth, height);
                 searchField.setMaxLength(64);
-                searchField.setHint(localized("option", "notif.triggers.search.hint")
-                        .withColor(TextField.TEXT_COLOR_HINT));
+                searchField.setHint(localized("common", "search"));
                 searchField.setValue(list.filterString);
                 searchField.setResponder((str) -> {
                     list.filterString = str;
@@ -183,7 +172,7 @@ public class MainOptionList extends DragReorderList {
         }
 
         private static class NotifOptions extends Entry {
-            NotifOptions(int x, int width, int height, MainOptionList list,
+            NotifOptions(int x, int width, int height, NotificationList list,
                          List<Notification> notifs, int index) {
                 super();
                 Notification notif = notifs.get(index);
@@ -274,7 +263,7 @@ public class MainOptionList extends DragReorderList {
                     elements.add(indicatorButton);
 
                     // Drag reorder button (left-side extension)
-                    Button dragButton = Button.builder(Component.literal("\u2191\u2193"),
+                    Button dragButton = Button.builder(Component.literal("↑↓"),
                                     (button) -> {
                                         this.setDragging(true);
                                         list.startDragging(this, null, false);
@@ -329,9 +318,7 @@ public class MainOptionList extends DragReorderList {
                     triggerField.setMaxLength(240);
                     triggerField.setResponder((str) -> trigger.string = str.strip());
                     triggerField.setValue(trigger.string);
-                    triggerField.setTooltip(Tooltip.create(localized(
-                            "option", "main.trigger.field.tooltip")));
-                    triggerField.setTooltipDelay(Duration.ofMillis(500));
+                    triggerField.setHint(localized("option", "trigger.field.hint"));
                 } else {
                     triggerField = new FakeTextField(movingX, 0,
                             triggerFieldWidth, height, () -> list.openNotificationConfig(index));
@@ -343,13 +330,13 @@ public class MainOptionList extends DragReorderList {
                 
                 if (singleTrig) {
                     // Trigger editor button
-                    Button editorButton = Button.builder(Component.literal("\u270e"),
+                    Button editorButton = Button.builder(Component.literal("✎"),
                                     (button) -> list.openTriggerConfig(notif, trigger))
                             .pos(movingX, 0)
                             .size(list.tinyWidgetWidth, height)
                             .build();
                     editorButton.setTooltip(Tooltip.create(localized(
-                            "option", "notif.open.trigger_editor.tooltip")));
+                            "option", "trigger.open.trigger_editor.tooltip")));
                     editorButton.setTooltipDelay(Duration.ofMillis(200));
                     elements.add(editorButton);
                     movingX += list.tinyWidgetWidth + SPACING_NARROW;
@@ -364,7 +351,7 @@ public class MainOptionList extends DragReorderList {
                             list.init();
                         });
                 editButton.setTooltip(Tooltip.create(localized(
-                        "option", "main.notif.options.tooltip")));
+                        "option", "notif.open.options.tooltip")));
                 editButton.setTooltipDelay(Duration.ofMillis(200));
                 elements.add(editButton);
                 movingX += list.smallWidgetWidth + SPACING_NARROW;
@@ -396,10 +383,10 @@ public class MainOptionList extends DragReorderList {
                             list.init();
                         });
                 colorEditButton.setTooltip(Tooltip.create(localized(
-                        "option", "main.color.status.tooltip." 
+                        "option", "notif.color.status.tooltip." 
                                 + (notif.textStyle.doColor ? "enabled" : "disabled"))
                         .append("\n")
-                        .append(localized("option", "main.click_edit"))));
+                        .append(localized("option", "notif.click_edit"))));
                 colorEditButton.setTooltipDelay(Duration.ofMillis(200));
                 if (showColorField) {
                     TextField colorField = new TextField(movingX, 0, colorFieldWidth, height);
@@ -422,7 +409,7 @@ public class MainOptionList extends DragReorderList {
                     });
                     colorField.setValue(TextColor.fromRgb(notif.textStyle.color).formatValue());
                     colorField.setTooltip(Tooltip.create(localized(
-                            "option", "main.color.field.tooltip")));
+                            "option", "notif.color.field.tooltip")));
                     colorField.setTooltipDelay(Duration.ofMillis(500));
                     elements.add(colorField);
                     movingX += colorFieldWidth;
@@ -440,7 +427,7 @@ public class MainOptionList extends DragReorderList {
                     soundField.setResponder(notif.sound::setId);
                     soundField.setValue(notif.sound.getId());
                     soundField.setTooltip(Tooltip.create(localized(
-                            "option", "main.sound.field.tooltip")));
+                            "option", "notif.sound.field.tooltip")));
                     soundField.setTooltipDelay(Duration.ofMillis(500));
                     elements.add(soundField);
                     movingX += soundFieldWidth;
@@ -459,10 +446,10 @@ public class MainOptionList extends DragReorderList {
                             list.init();
                         });
                 soundEditButton.setTooltip(Tooltip.create(localized(
-                        "option", "main.sound.status.tooltip." 
+                        "option", "notif.sound.status.tooltip." 
                                 + (notif.sound.isEnabled() ? "enabled" : "disabled"))
                         .append("\n")
-                        .append(localized("option", "main.click_edit"))));
+                        .append(localized("option", "notif.click_edit"))));
                 soundEditButton.setTooltipDelay(Duration.ofMillis(200));
                 elements.add(soundEditButton);
 
@@ -484,8 +471,8 @@ public class MainOptionList extends DragReorderList {
                     elements.add(new ConfirmButton(
                             x + width + SPACE, 0,
                             list.smallWidgetWidth, height,
-                            Component.literal("\u274C"),
-                            Component.literal("\u274C").withStyle(ChatFormatting.RED), 
+                            Component.literal("❌"),
+                            Component.literal("❌").withStyle(ChatFormatting.RED), 
                             (button) -> {
                                 if (Config.get().removeNotif(index)) {
                                     list.init();
@@ -506,7 +493,7 @@ public class MainOptionList extends DragReorderList {
 
                 if (notif.triggers.isEmpty() || notif.triggers.getFirst().string.isBlank()) {
                     label = Component.literal("> ").withStyle(ChatFormatting.YELLOW).append(
-                            localized("option", "main.notif.label.configure")
+                            localized("option", "notif.label.configure")
                                     .withStyle(ChatFormatting.WHITE)).append(" <");
                 }
                 else {
@@ -516,7 +503,7 @@ public class MainOptionList extends DragReorderList {
 
                     // Compile all trigger strings, ignoring duplicates
                     for (Trigger trig : notif.triggers) {
-                        String str = StringUtil.stripColor(getString(trig));
+                        String str = StringUtil.stripColor(trig.string);
                         if (!usedStrings.contains(str)) {
                             strList.add(first ? str : separator + str);
                             usedStrings.add(str);
@@ -553,16 +540,6 @@ public class MainOptionList extends DragReorderList {
                 return label;
             }
 
-            private static String getString(Trigger trigger) {
-                if (trigger.type == Trigger.Type.KEY) {
-                    String key = translationKey("option", "key.id") + "." + trigger.string;
-                    return localized("option", "main.notif.label.key", 
-                            I18n.exists(key) ? I18n.get(key) : trigger.string).getString();
-                } else {
-                    return trigger.string;
-                }
-            }
-
             private static String compileLabel(List<String> list) {
                 StringBuilder builder = new StringBuilder();
                 for (String s : list) {
@@ -573,7 +550,7 @@ public class MainOptionList extends DragReorderList {
         }
 
         private static class LockedNotifOptions extends NotifOptions {
-            LockedNotifOptions(int x, int width, int height, MainOptionList list,
+            LockedNotifOptions(int x, int width, int height, NotificationList list,
                                List<Notification> notifs, int index) {
                 super(x, width, height, list, notifs, index);
             }

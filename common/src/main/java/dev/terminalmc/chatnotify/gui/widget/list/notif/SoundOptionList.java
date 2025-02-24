@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list;
+package dev.terminalmc.chatnotify.gui.widget.list.notif;
 
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Sound;
@@ -22,6 +22,8 @@ import dev.terminalmc.chatnotify.gui.widget.field.DropdownTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
 import dev.terminalmc.chatnotify.gui.widget.SilentButton;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
+import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
+import dev.terminalmc.chatnotify.gui.widget.list.main.NotificationList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -115,8 +117,8 @@ public class SoundOptionList extends OptionList {
     private @Nullable SoundInstance lastSound;
 
     public SoundOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
-                           int entryHeight, Runnable onClose, Sound sound) {
-        super(mc, width, height, y, entryWidth, entryHeight, 1, onClose);
+                           int entryHeight, Sound sound) {
+        super(mc, width, height, y, entryWidth, entryHeight, 1);
         this.sound = sound;
     }
 
@@ -125,40 +127,41 @@ public class SoundOptionList extends OptionList {
         addEntry(new Entry.SoundField(entryX, entryWidth, entryHeight, sound, this));
 
         addEntry(new OptionList.Entry.DoubleSlider(entryX, entryWidth, entryHeight, 0, 1, 2,
-                localized("option", "sound.volume").getString(), null,
+                localized("option", "notif.sound.volume").getString(), null,
                 CommonComponents.OPTION_OFF.getString(), null,
                 () -> (double)sound.getVolume(), (value) -> sound.setVolume(value.floatValue())));
 
         addEntry(new OptionList.Entry.DoubleSlider(entryX, entryWidth, entryHeight, 0.5, 2, 2,
-                localized("option", "sound.pitch").getString(), null, null, null,
+                localized("option", "notif.sound.pitch").getString(), null, null, null,
                 () -> (double)sound.getPitch(), (value) -> sound.setPitch(value.floatValue())));
 
         addEntry(new OptionList.Entry.SilentActionButton(entryX, entryWidth, entryHeight,
                 Component.literal("> ").withStyle(ChatFormatting.YELLOW)
-                        .append(localized("option", "sound.test").withStyle(ChatFormatting.WHITE))
+                        .append(localized("option", "notif.sound.test")
+                                .withStyle(ChatFormatting.WHITE))
                         .append(" <"), null, -1,
                 button -> playNotifSound()));
 
         addEntry(new Entry.SoundSource(entryX, entryWidth, entryHeight, this));
 
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
-                localized("option", "sound.group.noteblock"), null, -1));
+                localized("sound", "group.noteblock"), null, -1));
         addSoundEntries(NOTEBLOCK_SOUNDS);
 
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
-                localized("option", "sound.group.power"), null, -1));
+                localized("sound", "group.power"), null, -1));
         addSoundEntries(POWER_SOUNDS);
 
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
-                localized("option", "sound.group.explosion"), null, -1));
+                localized("sound", "group.explosion"), null, -1));
         addSoundEntries(EXPLOSION_SOUNDS);
 
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
-                localized("option", "sound.group.illager"), null, -1));
+                localized("sound", "group.illager"), null, -1));
         addSoundEntries(VILLAGER_SOUNDS);
 
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
-                localized("option", "sound.group.misc"), null, -1));
+                localized("sound", "group.misc"), null, -1));
         addSoundEntries(MISC_SOUNDS);
     }
 
@@ -203,8 +206,11 @@ public class SoundOptionList extends OptionList {
             SoundField(int x, int width, int height, Sound sound, SoundOptionList list) {
                 super();
                 this.sound = sound;
+                int statusButtonWidth = 25;
+                int fieldWidth = width - statusButtonWidth - SPACE_SMALL;
 
-                soundField = new FakeTextField(x, 0, width, height,
+                // Sound preview field
+                soundField = new FakeTextField(x, 0, fieldWidth, height,
                         () -> {
                             int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
                             int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
@@ -224,6 +230,15 @@ public class SoundOptionList extends OptionList {
                 soundField.setMaxLength(240);
                 soundField.setValue(sound.getId());
                 elements.add(soundField);
+
+                // Status button
+                elements.add(CycleButton.booleanBuilder(
+                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        .displayOnlyValue()
+                        .withInitialValue(sound.isEnabled())
+                        .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
+                                Component.empty(), (button, status) -> sound.setEnabled(status)));
             }
 
             public void updateValue() {
@@ -231,7 +246,7 @@ public class SoundOptionList extends OptionList {
             }
         }
 
-        private static class SoundSource extends MainOptionList.Entry {
+        private static class SoundSource extends NotificationList.Entry {
             SoundSource(int x, int width, int height, SoundOptionList list) {
                 super();
                 int mainButtonWidth = width - list.smallWidgetWidth - 1;
@@ -241,9 +256,9 @@ public class SoundOptionList extends OptionList {
                         .withValues(net.minecraft.sounds.SoundSource.values())
                         .withInitialValue(Config.get().soundSource)
                         .withTooltip((status) -> Tooltip.create(localized(
-                                "option", "sound.source.tooltip")))
+                                "option", "notif.sound.source.tooltip")))
                         .create(x, 0, mainButtonWidth, height,
-                                localized("option", "sound.source"),
+                                localized("option", "notif.sound.source"),
                                 (button, status) -> Config.get().soundSource = status));
 
                 elements.add(Button.builder(
@@ -251,7 +266,7 @@ public class SoundOptionList extends OptionList {
                                 (button) -> Minecraft.getInstance().setScreen(new SoundOptionsScreen(
                                         list.screen, Minecraft.getInstance().options)))
                         .tooltip(Tooltip.create(localized(
-                                "option", "sound.source.minecraft_volume")))
+                                "option", "notif.sound.open.minecraft_volume.tooltip")))
                         .pos(x + width - list.smallWidgetWidth, 0)
                         .size(list.smallWidgetWidth, height)
                         .build());
@@ -265,7 +280,7 @@ public class SoundOptionList extends OptionList {
                 int buttonWidth = (width - SPACE_TINY) / 2;
                 
                 elements.add(new SilentButton(x, 0, buttonWidth, height,
-                        localized("option", "sound.id." + soundId1),
+                        localized("sound", "id." + soundId1),
                         (button) -> {
                             sound.setId(soundId1);
                             list.refreshSoundField();
@@ -274,7 +289,7 @@ public class SoundOptionList extends OptionList {
 
                 if (soundId2 != null) {
                     elements.add(new SilentButton(x + width - buttonWidth, 0, buttonWidth, height,
-                            localized("option", "sound.id." + soundId2),
+                            localized("sound", "id." + soundId2),
                             (button) -> {
                                 sound.setId(soundId2);
                                 list.refreshSoundField();

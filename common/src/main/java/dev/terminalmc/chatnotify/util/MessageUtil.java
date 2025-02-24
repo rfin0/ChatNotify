@@ -226,6 +226,21 @@ public class MessageUtil {
                     case KEY -> keySearch(msg, trig.string);
                 };
                 if (!hit) continue;
+                
+                // Inclusion search
+                boolean inMiss = false;
+                if (notif.inclusionEnabled) {
+                    for (Trigger inTrig : notif.inclusionTriggers) {
+                        if (trig.string.isBlank()) continue;
+                        inMiss = (!switch(inTrig.type) {
+                            case NORMAL -> normalSearch(cleanOwnedStr, inTrig.string).find();
+                            case REGEX -> inTrig.pattern == null || inTrig.pattern.matcher(cleanStr).find();
+                            case KEY -> keySearch(msg, inTrig.string);
+                        });
+                        if (inMiss) break;
+                    }
+                }
+                if (inMiss) continue;
 
                 // Exclusion search
                 boolean exHit = false;

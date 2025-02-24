@@ -18,11 +18,11 @@ package dev.terminalmc.chatnotify.gui.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
+import dev.terminalmc.chatnotify.gui.widget.HorizontalList;
 import dev.terminalmc.chatnotify.gui.widget.OverlayWidget;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import dev.terminalmc.chatnotify.mixin.accessor.ScreenAccessor;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -30,6 +30,10 @@ import net.minecraft.client.gui.screens.options.OptionsSubScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Contains one tightly-coupled {@link OptionList}, which is used to display
@@ -39,7 +43,7 @@ import org.jetbrains.annotations.NotNull;
  * all other widgets to avoid rendering and click conflicts but is still simpler
  * than screen switching.</p>
  */
-public class OptionScreen extends OptionsSubScreen {
+public abstract class OptionScreen extends OptionsSubScreen {
     public static final int HEADER_MARGIN = 32;
     public static final int FOOTER_MARGIN = 32;
     /**
@@ -79,18 +83,53 @@ public class OptionScreen extends OptionsSubScreen {
             - (SCROLL_BAR_MARGIN * 2)
             - (HANGING_WIDGET_MARGIN * 2);
     
+    public static final int TAB_LIST_HEIGHT = HEADER_MARGIN - 4;
+    public static final int TAB_LIST_Y = 2;
+    public static final int TAB_LIST_MARGIN = 24;
     
-    protected final OptionList list;
-    private OverlayWidget overlay = null;
+    public static final int MIN_TAB_WIDTH = 40;
+    public static final int MAX_TAB_WIDTH = 120;
+    public static final int TAB_HEIGHT = 20;
+    public static final int TAB_SPACING = 4;
+    
+    protected final HorizontalList<Button> tabs;
+    private @Nullable OptionList list;
+    private @Nullable OverlayWidget overlay = null;
 
     /**
      * The {@link OptionList} passed here is not required to have the correct 
      * bounds as it will be resized and initialized prior to being displayed.
      */
-    public OptionScreen(Screen lastScreen, Component title, OptionList list) {
-        super(lastScreen, Minecraft.getInstance().options, title);
+    public OptionScreen(Screen lastScreen) {
+        super(lastScreen, Minecraft.getInstance().options, Component.empty());
+        this.tabs = new HorizontalList<>(TAB_LIST_MARGIN, TAB_LIST_Y,
+                width - TAB_LIST_MARGIN * 2, TAB_LIST_HEIGHT, TAB_SPACING);
+        this.tabs.topScrollbar = true;
+    }
+    
+    protected void setTabs(List<TabButton> tabList, int index) {
+        for (TabButton tab : tabList) {
+            tabs.addEntry(Button.builder(tab.title, (button) -> {
+                tabs.entries().forEach((b) -> b.active = true);
+                button.active = false;
+                setList(tab.listSupplier.get());
+            }).size(Math.clamp(Minecraft.getInstance().font.width(tab.title) + 8,
+                    MIN_TAB_WIDTH, MAX_TAB_WIDTH), TAB_HEIGHT).build());
+        }
+
+        this.tabs.getEntry(index).active = false;
+        this.list = tabList.get(index).listSupplier().get();
+        this.list.setScreen(this);
+    }
+    
+    public record TabButton(Component title, Supplier<@NotNull OptionList> listSupplier) {
+        
+    }
+    
+    private void setList(@NotNull OptionList list) {
         this.list = list;
         this.list.setScreen(this);
+        init();
     }
     
     @Override
@@ -98,7 +137,7 @@ public class OptionScreen extends OptionsSubScreen {
         clearWidgets();
         clearFocus();
         
-        addTitle();
+        addHeader();
         addContents();
         addFooter();
         
@@ -112,24 +151,19 @@ public class OptionScreen extends OptionsSubScreen {
         init();
     }
 
-    @Override
-    protected void addTitle() {
-        Font font = Minecraft.getInstance().font;
-        int w = font.width(title);
-        int h = font.lineHeight;
-        int x = (width / 2) - (w / 2);
-        int y = Math.max(
-                0, // Top of screen
-                (HEADER_MARGIN / 2) - (h / 2) // Center of margin
-        );
-        addRenderableWidget(new StringWidget(x, y , w, h, title, font).alignLeft());
+    protected void addHeader() {
+        tabs.setWidth(width - 24 * 2);
+        addRenderableWidget(tabs);
     }
 
     @Override
     protected void addContents() {
         // Option list
-        list.updateSizeAndPosition(width, height - HEADER_MARGIN - FOOTER_MARGIN, HEADER_MARGIN);
-        addRenderableWidget(list);
+        if (list != null) {
+            list.updateSizeAndPosition(width, height - HEADER_MARGIN - FOOTER_MARGIN,
+                    HEADER_MARGIN);
+            addRenderableWidget(list);
+        }
         
         // Overlay widget
         if (overlay != null) {
@@ -164,7 +198,6 @@ public class OptionScreen extends OptionsSubScreen {
         if (lastScreen instanceof OptionScreen screen) {
             screen.resize(Minecraft.getInstance(), width, height);
         }
-        list.onClose();
         super.onClose();
     }
 

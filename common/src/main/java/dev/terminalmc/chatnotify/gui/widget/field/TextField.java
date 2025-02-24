@@ -53,7 +53,7 @@ public class TextField extends EditBox {
     public static final int TEXT_COLOR_DEFAULT = 0xE0E0E0;
     public static final int TEXT_COLOR_ERROR = 0xFF5555;
     public static final int TEXT_COLOR_HINT = 0x555555;
-    public static final int TEXT_COLOR_PREVIEW = 0x888888;
+    public static final int TEXT_COLOR_PREVIEW = 0xAAAAAA;
     
     private final Font font;
     
@@ -152,6 +152,11 @@ public class TextField extends EditBox {
         super.setTextColor(normalTextColor);
         super.setTooltip(normalTooltip);
         return true;
+    }
+    
+    @Override
+    public void setHint(@NotNull Component hint) {
+        super.setHint(hint.copy().withColor(TEXT_COLOR_HINT));
     }
 
     @Override
@@ -312,7 +317,7 @@ public class TextField extends EditBox {
                 if (ColorUtil.parseColor(str) != null) {
                     return Optional.empty();
                 } else {
-                    return Optional.of(localized("option", "field.error.color")
+                    return Optional.of(localized("ui", "field.error.color")
                             .withStyle(ChatFormatting.RED));
                 }
             }
@@ -328,7 +333,7 @@ public class TextField extends EditBox {
                 if (sounds.contains(str) || (!str.contains(":") && sounds.contains(("minecraft:" + str)))) {
                     return Optional.empty();
                 } else {
-                    return Optional.of(localized("option", "field.error.sound")
+                    return Optional.of(localized("ui", "field.error.sound")
                             .withStyle(ChatFormatting.RED));
                 }
             }
@@ -341,7 +346,7 @@ public class TextField extends EditBox {
                     if (Integer.parseInt(str) < 0) throw new NumberFormatException();
                     return Optional.empty();
                 } catch (NumberFormatException ignored) {
-                    return Optional.of(localized("option", "field.error.pos_int")
+                    return Optional.of(localized("ui", "field.error.pos_int")
                             .withStyle(ChatFormatting.RED));
                 }
             }
@@ -359,7 +364,7 @@ public class TextField extends EditBox {
                 if (keys.contains(str)) {
                     return Optional.empty();
                 } else {
-                    return Optional.of(localized("option", "field.error.input_key")
+                    return Optional.of(localized("ui", "field.error.input_key")
                             .withStyle(ChatFormatting.RED));
                 }
             }
@@ -397,13 +402,13 @@ public class TextField extends EditBox {
                             ) {
                                 if (n.equals(notif)) {
                                     return Optional.of(localized(
-                                            "option", "field.error.trigger.duplicate.here",
+                                            "ui", "field.error.trigger.duplicate.here",
                                             Component.literal(String.valueOf(j))
                                                     .withStyle(ChatFormatting.GOLD))
                                             .withStyle(ChatFormatting.RED));
                                 } else {
                                     return Optional.of(localized(
-                                            "option","field.error.trigger.duplicate",
+                                            "ui","field.error.trigger.duplicate",
                                             Component.literal(String.valueOf(j))
                                                     .withStyle(ChatFormatting.GOLD),
                                             Component.literal(String.valueOf(i))

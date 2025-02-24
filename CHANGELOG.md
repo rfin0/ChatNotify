@@ -1,8 +1,8 @@
 # Changelog
 
-## 2.3.12
+## 2.3.12-alpha.1
 
-- Fixed re-ordering of triggers in username notification
+- Switched to tab-style options UI
 
 ## 2.3.11
 

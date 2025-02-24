@@ -17,32 +17,74 @@
 package dev.terminalmc.chatnotify.gui.screen;
 
 import dev.terminalmc.chatnotify.config.Config;
+import dev.terminalmc.chatnotify.gui.widget.list.main.GlobalOptionList;
+import dev.terminalmc.chatnotify.gui.widget.list.main.NotificationList;
+import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
-import dev.terminalmc.chatnotify.gui.widget.list.MainOptionList;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
 /**
- * The root {@link OptionScreen}, containing a {@link MainOptionList}.
+ * Root options screen, including global options and a list of
+ * {@link dev.terminalmc.chatnotify.config.Notification} configuration entries.
  * 
- * <p>Config is saved only when this {@link Screen} is closed.</p>
+ * <p>Config is saved only when this is closed.</p>
  */
-public class MainOptionScreen extends OptionScreen {
-    public MainOptionScreen(Screen lastScreen) {
-        super(lastScreen, localized("option", "main"),
-                new MainOptionList(
-                        Minecraft.getInstance(), 
-                        0,
-                        0,
-                        OptionScreen.HEADER_MARGIN,
-                        OptionScreen.BASE_LIST_ENTRY_WIDTH,
-                        OptionScreen.LIST_ENTRY_HEIGHT,
-                        OptionScreen.LIST_ENTRY_SPACING
+public class RootOptionsScreen extends OptionScreen {
+    private final Tab defaultTab;
+
+    public RootOptionsScreen(Screen lastScreen) {
+        this(lastScreen, Tab.NOTIFICATIONS);
+    }
+    
+    public RootOptionsScreen(Screen lastScreen, Tab defaultTab) {
+        super(lastScreen);
+        this.defaultTab = defaultTab;
+        addTabs();
+    }
+    
+    private void addTabs() {
+        List<TabButton> tabs = Arrays.stream(Tab.values()).map((tab) ->
+                new TabButton(tab.title, () -> tab.getList(this))).toList();
+        super.setTabs(tabs, Arrays.stream(Tab.values()).toList().indexOf(defaultTab));
+    }
+
+    public enum Tab {
+        NOTIFICATIONS(localized("option", "notif"), (screen) ->
+                new NotificationList(Minecraft.getInstance(), 0, 0, 0,
+                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
+                )),
+        GLOBAL_OPTIONS(localized("option", "global"), (screen) ->
+                new GlobalOptionList(Minecraft.getInstance(), 0, 0, 0,
+                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
                 ));
+
+        final Component title;
+        private final Function<RootOptionsScreen, @NotNull OptionList> supplier;
+        private @Nullable OptionList list = null;
+
+        Tab(Component title, Function<RootOptionsScreen, OptionList> supplier) {
+            this.title = title;
+            this.supplier = supplier;
+        }
+
+        public @NotNull OptionList getList(RootOptionsScreen screen) {
+            if (list == null) {
+                list = supplier.apply(screen);
+            }
+            return list;
+        }
     }
 
     @Override
@@ -68,8 +110,8 @@ public class MainOptionScreen extends OptionScreen {
                                         Minecraft.getInstance().setScreen(this);
                                     }
                                 }, 
-                                localized("option", "main.exit_without_saving"),
-                                localized("option", "main.exit_without_saving.confirm"))))
+                                localized("option", "root.exit_without_saving"),
+                                localized("option", "root.exit_without_saving.confirm"))))
                 .pos(x1, y)
                 .size(w, h)
                 .build());

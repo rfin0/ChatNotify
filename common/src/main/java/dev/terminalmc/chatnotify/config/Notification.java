@@ -86,6 +86,12 @@ public class Notification {
     }
 
     /**
+     * Whether this instance allows use of inclusion triggers.
+     */
+    public boolean inclusionEnabled;
+    public static final boolean inclusionEnabledDefault = false;
+
+    /**
      * Whether this instance allows use of exclusion triggers.
      */
     public boolean exclusionEnabled;
@@ -148,6 +154,17 @@ public class Notification {
     public static final Supplier<List<Trigger>> triggersDefault = ArrayList::new;
 
     /**
+     * The list of {@link Trigger}s which are required for activation of this 
+     * instance.
+     *
+     * <p><b>Note:</b> For simplicity, this list uses the same {@link Trigger}
+     * class as {@link Notification#triggers}. However, instances in this list
+     * will never use the {@link Trigger#styleTarget} field.</p>
+     */
+    public final List<Trigger> inclusionTriggers;
+    public static final Supplier<List<Trigger>> inclusionTriggersDefault = ArrayList::new;
+
+    /**
      * The list of {@link Trigger}s which can prevent activation of this 
      * instance.
      *
@@ -170,6 +187,7 @@ public class Notification {
     Notification(
             boolean enabled,
             CheckOwnMode checkOwnMode,
+            boolean inclusionEnabled,
             boolean exclusionEnabled,
             boolean responseEnabled,
             Sound sound,
@@ -183,11 +201,13 @@ public class Notification {
             String toastMsg,
             boolean toastMsgEnabled,
             List<Trigger> triggers,
+            List<Trigger> inclusionTriggers,
             List<Trigger> exclusionTriggers,
             List<ResponseMessage> responseMessages
     ) {
         this.enabled = enabled;
         this.checkOwnMode = checkOwnMode;
+        this.inclusionEnabled = exclusionEnabled;
         this.exclusionEnabled = exclusionEnabled;
         this.responseEnabled = responseEnabled;
         this.sound = sound;
@@ -201,6 +221,7 @@ public class Notification {
         this.toastMsg = toastMsg;
         this.toastMsgEnabled = toastMsgEnabled;
         this.triggers = triggers;
+        this.inclusionTriggers = inclusionTriggers;
         this.exclusionTriggers = exclusionTriggers;
         this.responseMessages = responseMessages;
     }
@@ -213,6 +234,7 @@ public class Notification {
         return new Notification(
                 enabledDefault,
                 CheckOwnMode.values()[0],
+                inclusionEnabledDefault,
                 exclusionEnabledDefault,
                 responseEnabledDefault,
                 soundDefault.get(),
@@ -229,6 +251,7 @@ public class Notification {
                         new Trigger("Profile name"),
                         new Trigger("Display name")
                 )),
+                inclusionTriggersDefault.get(),
                 exclusionTriggersDefault.get(),
                 responseMessagesDefault.get()
         );
@@ -242,6 +265,7 @@ public class Notification {
         return new Notification(
                 enabledDefault,
                 CheckOwnMode.values()[0],
+                inclusionEnabledDefault,
                 exclusionEnabledDefault,
                 responseEnabledDefault,
                 sound,
@@ -257,6 +281,7 @@ public class Notification {
                 new ArrayList<>(List.of(
                         new Trigger("")
                 )),
+                inclusionTriggersDefault.get(),
                 exclusionTriggersDefault.get(),
                 responseMessagesDefault.get()
         );
@@ -316,6 +341,21 @@ public class Notification {
     }
 
     /**
+     * Moves the inclusion {@link Trigger} at the source index to the
+     * destination index in the list.
+     * @param sourceIndex the index of the element to move.
+     * @param destIndex the desired final index of the element.
+     * @return {@code true} if the list was modified, {@code false} otherwise.
+     */
+    public boolean moveInclusionTrigger(int sourceIndex, int destIndex) {
+        if (sourceIndex != destIndex) {
+            inclusionTriggers.add(destIndex, inclusionTriggers.remove(sourceIndex));
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Moves the {@link ResponseMessage} at the source index to the destination
      * index in the list.
      * @param sourceIndex the index of the element to move.
@@ -328,27 +368,6 @@ public class Notification {
             return true;
         }
         return false;
-    }
-
-    // Reset
-
-    /**
-     * Sets all advanced settings to their respective defaults.
-     */
-    public void resetAdvanced() {
-        checkOwnMode = CheckOwnMode.values()[0];
-
-        replacementMsg = replacementMsgDefault;
-        replacementMsgEnabled = replacementMsgEnabledDefault;
-        statusBarMsg = statusBarMsgDefault;
-        statusBarMsgEnabled = statusBarMsgEnabledDefault;
-        titleMsg = titleMsgDefault;
-        titleMsgEnabled = titleMsgEnabledDefault;
-
-        exclusionEnabled = exclusionEnabledDefault;
-        exclusionTriggers.clear();
-        responseEnabled = responseEnabledDefault;
-        responseMessages.clear();
     }
 
     // Validation
@@ -388,6 +407,9 @@ public class Notification {
             boolean enabled = JsonUtil.getOrDefault(obj, "enabled",
                     enabledDefault, silent);
 
+            boolean inclusionEnabled = JsonUtil.getOrDefault(obj, "inclusionEnabled",
+                    inclusionEnabledDefault, silent);
+            
             boolean exclusionEnabled = JsonUtil.getOrDefault(obj, "exclusionEnabled",
                     exclusionEnabledDefault, silent);
 
@@ -430,6 +452,9 @@ public class Notification {
             List<Trigger> triggers = JsonUtil.getOrDefault(ctx, obj, "triggers",
                     Trigger.class, triggersDefault.get(), silent);
 
+            List<Trigger> inclusionTriggers = JsonUtil.getOrDefault(ctx, obj, "inclusionTriggers",
+                    Trigger.class, inclusionTriggersDefault.get(), silent);
+            
             List<Trigger> exclusionTriggers = JsonUtil.getOrDefault(ctx, obj, "exclusionTriggers",
                     Trigger.class, exclusionTriggersDefault.get(), silent);
 
@@ -446,6 +471,7 @@ public class Notification {
             return new Notification(
                     enabled,
                     checkOwnMode,
+                    inclusionEnabled,
                     exclusionEnabled,
                     responseEnabled,
                     sound,
@@ -459,6 +485,7 @@ public class Notification {
                     toastMsg,
                     toastMsgEnabled,
                     triggers,
+                    inclusionTriggers,
                     exclusionTriggers,
                     responseMessages
             ).validate();

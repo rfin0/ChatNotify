@@ -16,7 +16,7 @@
 
 package dev.terminalmc.chatnotify;
 
-import dev.terminalmc.chatnotify.gui.screen.MainOptionScreen;
+import dev.terminalmc.chatnotify.gui.screen.RootOptionsScreen;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -30,7 +30,7 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 public class ChatNotifyNeoForge {
     public ChatNotifyNeoForge() {
         ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory.class,
-                () -> (minecraft, parent) -> new MainOptionScreen(parent));
+                () -> (minecraft, parent) -> new RootOptionsScreen(parent));
         
         ChatNotify.init();
     }
