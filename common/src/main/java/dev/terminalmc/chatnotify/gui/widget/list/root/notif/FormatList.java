@@ -52,18 +52,18 @@ public class FormatList extends OptionList {
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "notif.format.list", "ℹ"),
                 Tooltip.create(localized("option", "notif.format.list.tooltip")), -1));
-        
+
         addEntry(new Entry.ColorOptions(entryX, entryWidth, entryHeight, this,
                 () -> notif.textStyle.color, (val) -> notif.textStyle.color = val,
                 () -> notif.textStyle.doColor, (val) -> notif.textStyle.doColor = val,
                 localized("option", "notif.format.color")));
-        
+
         addEntry(new Entry.FormatOptions(entryX, entryWidth, entryHeight, notif, true));
         addEntry(new Entry.FormatOptions(entryX, entryWidth, entryHeight, notif, false));
     }
-    
+
     // Utility
-    
+
     private void initList() {
         this.init();
     }
@@ -123,7 +123,7 @@ public class FormatList extends OptionList {
                 });
                 colorField.setValue(TextColor.fromRgb(supplier.get()).formatValue());
                 elements.add(colorField);
-                
+
                 // Status button
                 elements.add(CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
@@ -132,10 +132,10 @@ public class FormatList extends OptionList {
                         .withInitialValue(statusSupplier.get())
                         .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
                                 Component.empty(), (button, status) -> statusConsumer.accept(status)));
-                
+
             }
         }
-        
+
         private static class FormatOptions extends Entry {
             private FormatOptions(int x, int width, int height, Notification notif, boolean first) {
                 super();
@@ -147,21 +147,21 @@ public class FormatList extends OptionList {
             private void createFirst(int x, int width, int height, Notification notif) {
                 int buttonWidth = (width - SPACE * 2) / 3;
 
-                CycleButton<TextStyle.FormatMode> boldButton = 
+                CycleButton<TextStyle.FormatMode> boldButton =
                         CycleButton.<TextStyle.FormatMode>builder(
-                                (state) -> getMessage(state, ChatFormatting.BOLD))
+                                        (state) -> getMessage(state, ChatFormatting.BOLD))
                                 .withValues(TextStyle.FormatMode.values())
                                 .withInitialValue(notif.textStyle.bold)
                                 .withTooltip(this::getTooltip)
-                                .create(x, 0, buttonWidth, height, 
-                                        localized("option", "notif.format.bold"), 
+                                .create(x, 0, buttonWidth, height,
+                                        localized("option", "notif.format.bold"),
                                         (button, state) -> notif.textStyle.bold = state);
                 boldButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(boldButton);
 
-                CycleButton<TextStyle.FormatMode> italicButton = 
+                CycleButton<TextStyle.FormatMode> italicButton =
                         CycleButton.<TextStyle.FormatMode>builder(
-                                (state) -> getMessage(state, ChatFormatting.ITALIC))
+                                        (state) -> getMessage(state, ChatFormatting.ITALIC))
                                 .withValues(TextStyle.FormatMode.values())
                                 .withInitialValue(notif.textStyle.italic)
                                 .withTooltip(this::getTooltip)
@@ -171,9 +171,9 @@ public class FormatList extends OptionList {
                 italicButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(italicButton);
 
-                CycleButton<TextStyle.FormatMode> underlineButton = 
+                CycleButton<TextStyle.FormatMode> underlineButton =
                         CycleButton.<TextStyle.FormatMode>builder(
-                                (state) -> getMessage(state, ChatFormatting.UNDERLINE))
+                                        (state) -> getMessage(state, ChatFormatting.UNDERLINE))
                                 .withValues(TextStyle.FormatMode.values())
                                 .withInitialValue(notif.textStyle.underlined)
                                 .withTooltip(this::getTooltip)
@@ -188,9 +188,9 @@ public class FormatList extends OptionList {
             private void createSecond(int x, int width, int height, Notification notif) {
                 int buttonWidth = (width - SPACE) / 2;
 
-                CycleButton<TextStyle.FormatMode> strikethroughButton = 
+                CycleButton<TextStyle.FormatMode> strikethroughButton =
                         CycleButton.<TextStyle.FormatMode>builder(
-                                (state) -> getMessage(state, ChatFormatting.STRIKETHROUGH))
+                                        (state) -> getMessage(state, ChatFormatting.STRIKETHROUGH))
                                 .withValues(TextStyle.FormatMode.values())
                                 .withInitialValue(notif.textStyle.strikethrough)
                                 .withTooltip(this::getTooltip)
@@ -200,9 +200,9 @@ public class FormatList extends OptionList {
                 strikethroughButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(strikethroughButton);
 
-                CycleButton<TextStyle.FormatMode> obfuscateButton = 
+                CycleButton<TextStyle.FormatMode> obfuscateButton =
                         CycleButton.<TextStyle.FormatMode>builder(
-                                (state) -> getMessage(state, ChatFormatting.OBFUSCATED))
+                                        (state) -> getMessage(state, ChatFormatting.OBFUSCATED))
                                 .withValues(TextStyle.FormatMode.values())
                                 .withInitialValue(notif.textStyle.obfuscated)
                                 .withTooltip(this::getTooltip)

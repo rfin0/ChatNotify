@@ -32,18 +32,6 @@ public class StyleTarget {
     public final int version = VERSION;
 
     /**
-     * Whether this instance is eligible for editing or usage.
-     */
-    public boolean enabled;
-    public static final boolean enabledDefault = false;
-
-    /**
-     * The target string.
-     */
-    public @NotNull String string;
-    public static final @NotNull String stringDefault = "";
-
-    /**
      * A regex {@link Pattern} compiled from {@link Trigger#string}, or 
      * {@code null} if {@link StyleTarget#type} is not {@link Type#REGEX} or 
      * the string could not be compiled.
@@ -56,6 +44,20 @@ public class StyleTarget {
      * string could not be parsed.
      */
     public transient final List<Integer> groupIndexes = new ArrayList<>();
+
+    // Options
+
+    /**
+     * Whether this instance is eligible for editing or usage.
+     */
+    public boolean enabled;
+    public static final boolean enabledDefault = false;
+
+    /**
+     * The target string.
+     */
+    public @NotNull String string;
+    public static final @NotNull String stringDefault = "";
 
     /**
      * Controls how {@link Trigger#string} is interpreted.
@@ -141,6 +143,9 @@ public class StyleTarget {
 
     // Validation
 
+    /**
+     * Validates this instance. To be called after editing and before saving.
+     */
     StyleTarget validate() {
         return this;
     }
@@ -149,8 +154,7 @@ public class StyleTarget {
 
     public static class Deserializer implements JsonDeserializer<StyleTarget> {
         @Override
-        public @Nullable StyleTarget deserialize(JsonElement json, java.lang.reflect.Type typeOfT,
-                                                 JsonDeserializationContext ctx) throws JsonParseException {
+        public StyleTarget deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext ctx) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;

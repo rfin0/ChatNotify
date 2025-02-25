@@ -26,9 +26,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class JsonUtil {
-    public static final String LOG_STR = "Unable to deserialize key '{}' with type '{}': {}. Using default value.";
+    public static final String LOG_STR = "Unable to deserialize key '{}' with type '{}': {}. " +
+            "Using default value.";
     public static boolean hasChanged = false;
-    
+
     public static void reset() {
         hasChanged = false;
     }

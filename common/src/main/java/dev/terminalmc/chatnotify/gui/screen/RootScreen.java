@@ -18,8 +18,8 @@ package dev.terminalmc.chatnotify.gui.screen;
 
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.gui.widget.list.FilterList;
-import dev.terminalmc.chatnotify.gui.widget.list.root.ControlOptionList;
-import dev.terminalmc.chatnotify.gui.widget.list.root.DefaultOptionList;
+import dev.terminalmc.chatnotify.gui.widget.list.root.ControlList;
+import dev.terminalmc.chatnotify.gui.widget.list.root.DefaultList;
 import dev.terminalmc.chatnotify.gui.widget.list.root.PrefixList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -33,29 +33,32 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
 import static dev.terminalmc.chatnotify.util.Localization.translationKey;
 
 /**
- * Root options screen, including global options and a list of
- * {@link dev.terminalmc.chatnotify.config.Notification} configuration entries.
- * 
- * <p>Config is saved only when this is closed.</p>
+ * Supports a series of
+ * {@link dev.terminalmc.chatnotify.gui.widget.list.OptionList}s for mod
+ * configuration, and one to display the list of
+ * {@link dev.terminalmc.chatnotify.config.Notification}s with widgets for
+ * superficial configuration.
+ *
+ * <p><b>Note:</b> Configuration is saved only when this screen is closed.</p>
  */
-public class RootOptionsScreen extends OptionScreen {
-    
-    public RootOptionsScreen(Screen lastScreen) {
+public class RootScreen extends OptionScreen {
+
+    public RootScreen(Screen lastScreen) {
         this(lastScreen, TabKey.NOTIFICATION.key);
     }
-    
-    public RootOptionsScreen(Screen lastScreen, String defaultKey) {
+
+    public RootScreen(Screen lastScreen, String defaultKey) {
         super(lastScreen);
         addTabs(defaultKey);
     }
-    
+
     private void addTabs(String defaultKey) {
         List<Tab> tabs = List.of(
                 new Tab(TabKey.NOTIFICATION.key, (screen) -> new FilterList<>(
                         Minecraft.getInstance(), 0, 0, 0,
                         BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                         FilterList.Entry.NotifOptions.class,
-                        (source, dest) -> Config.get().changeNotifPriority(++source, ++dest),
+                        (source, dest) -> Config.get().moveNotif(++source, ++dest),
                         localized("option", "notif.list", "ℹ"),
                         localized("option", "notif.list.tooltip"),
                         null,
@@ -63,18 +66,18 @@ public class RootOptionsScreen extends OptionScreen {
                         () -> Config.get().getNotifs(),
                         (x, width, height, list, notif, index) -> index == 0
                                 ? new FilterList.Entry.NotifOptions.Locked(
-                                        x, width, height, list, notif)
+                                x, width, height, list, notif)
                                 : new FilterList.Entry.NotifOptions(
-                                        x, width, height, list, notif, index),
+                                x, width, height, list, notif, index),
                         null,
                         () -> Config.get().addNotif()
                 )),
                 new Tab(TabKey.CONTROL.key, (screen) ->
-                        new ControlOptionList(Minecraft.getInstance(), 0, 0, 0,
+                        new ControlList(Minecraft.getInstance(), 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
                         )),
                 new Tab(TabKey.DEFAULT.key, (screen) ->
-                        new DefaultOptionList(Minecraft.getInstance(), 0, 0, 0,
+                        new DefaultList(Minecraft.getInstance(), 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
                         )),
                 new Tab(TabKey.PREFIX.key, (screen) ->
@@ -108,7 +111,8 @@ public class RootOptionsScreen extends OptionScreen {
                 height - h, // Bottom of screen
                 height - FOOTER_MARGIN / 2 - h / 2 // Center of margin
         );
-        
+
+        // Cancel button
         addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL,
                         (button) -> Minecraft.getInstance().setScreen(new ConfirmScreen(
                                 (confirm) -> {
@@ -119,16 +123,17 @@ public class RootOptionsScreen extends OptionScreen {
                                     } else {
                                         Minecraft.getInstance().setScreen(this);
                                     }
-                                }, 
+                                },
                                 localized("option", "root.exit_without_saving"),
                                 localized("option", "root.exit_without_saving.confirm"))))
                 .pos(x1, y)
                 .size(w, h)
                 .build());
-        
+
+        // Done button
         addRenderableWidget(Button.builder(
-                CommonComponents.GUI_DONE, 
-                (button) -> onClose())
+                        CommonComponents.GUI_DONE,
+                        (button) -> onClose())
                 .pos(x2, y)
                 .size(w, h)
                 .build());

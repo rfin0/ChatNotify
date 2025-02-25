@@ -40,7 +40,7 @@ import static dev.terminalmc.chatnotify.config.Config.SenderDetectionMode.COMBIN
 public class MessageUtil {
     private static boolean debug = false;
     private static boolean ownMsg = false;
-    
+
     /**
      * Initiates the message processing algorithm.
      * @param msg The original message.
@@ -50,14 +50,14 @@ public class MessageUtil {
     public static @Nullable Component processMessage(Component msg) {
         debug = Config.get().debugMode.equals(Config.DebugMode.ALL);
         ownMsg = false;
-        
+
         String str = msg.getString();
         if (str.isBlank()) return msg; // Ignore blank messages
-        
+
         // Save message for trigger editor
         if (ChatNotify.unmodifiedChat.size() > 30) ChatNotify.unmodifiedChat.poll();
         ChatNotify.unmodifiedChat.add(msg);
-        
+
         if (debug) {
             ChatNotify.LOG.warn("Processing new message");
             ChatNotify.LOG.warn("Original text:");
@@ -68,11 +68,11 @@ public class MessageUtil {
 
         // Remove format codes from string before searching
         String cleanStr = FormatUtil.stripCodes(str);
-        
+
         // Check owner
         String cleanOwnedStr = checkOwner(cleanStr);
         ownMsg = !cleanOwnedStr.equals(cleanStr);
-        
+
         // Process notifications
         msg = tryNotify(msg.copy(), cleanStr, cleanOwnedStr);
 
@@ -87,7 +87,7 @@ public class MessageUtil {
                 ChatNotify.LOG.warn(msg.toString());
             }
         }
-        
+
         return msg;
     }
 
@@ -98,7 +98,7 @@ public class MessageUtil {
      * <p>If the global option {@link Config#senderDetectionMode} is set to 
      * {@link Config.SenderDetectionMode#COMBINED} and the ChatHeads mod is
      * available, it will be queried to determine the message owner.</p>
-     * 
+     *
      * <p>Otherwise, the message will be compared to recently sent messages 
      * and checked for triggers of the username notification to determine
      * whether it was sent by the mod user.</p>
@@ -129,7 +129,7 @@ public class MessageUtil {
                             if (matcher.find()) {
                                 if (debug) ChatNotify.LOG.warn("Matched trigger '{}'", t.string);
                                 // Modify message according to config
-                                cleanOwnedStr = cleanStr.substring(0, matcher.start()) 
+                                cleanOwnedStr = cleanStr.substring(0, matcher.start())
                                         + cleanStr.substring(matcher.end());
                                 break;
                             }
@@ -145,8 +145,8 @@ public class MessageUtil {
             for (int i = 0; i < recentMessages.size(); i++) {
                 // Find last occurrence of recent message
                 // Case-insensitive to allow for servers with all-caps prevention
-                Matcher recentMatcher = Pattern.compile("(?iU)" + 
-                                Pattern.quote(recentMessages.get(i).getSecond())).matcher(cleanStr);
+                Matcher recentMatcher = Pattern.compile("(?iU)" +
+                        Pattern.quote(recentMessages.get(i).getSecond())).matcher(cleanStr);
                 int recentStart = -1;
                 while(recentMatcher.find()) {
                     recentStart = recentMatcher.start();
@@ -159,14 +159,14 @@ public class MessageUtil {
                     for (Trigger t : Config.get().getUserNotif().triggers) {
                         Matcher triggerMatcher = normalSearch(prefix, t.string);
                         if (triggerMatcher.find()) {
-                            if (debug) ChatNotify.LOG.warn("Matched trigger '{}' at index {}", 
+                            if (debug) ChatNotify.LOG.warn("Matched trigger '{}' at index {}",
                                     t.string, triggerMatcher.start());
                             recentMessages.remove(i); // Remove stored message
                             // Modify message according to config
-                            cleanOwnedStr = 
+                            cleanOwnedStr =
                                     cleanStr.substring(0, triggerMatcher.start()
-                                            + triggerMatcher.group(1).length()) 
-                                    + cleanStr.substring(triggerMatcher.end()
+                                            + triggerMatcher.group(1).length())
+                                            + cleanStr.substring(triggerMatcher.end()
                                             - triggerMatcher.group(2).length());
                             break;
                         }
@@ -196,16 +196,16 @@ public class MessageUtil {
      * @return a re-styled copy of the message, or the original message if
      * restyling was not possible.
      */
-    private static @Nullable Component tryNotify(Component msg, String cleanStr, 
+    private static @Nullable Component tryNotify(Component msg, String cleanStr,
                                                  String cleanOwnedStr) {
         boolean restyleAll = Config.get().restyleMode.equals(Config.RestyleMode.ALL_INSTANCES);
         boolean anyActivated = false;
         boolean anySoundPlayed = false;
-        
+
         // Check each notification, in order
         for (Notification notif : Config.get().getNotifs()) {
             if (!notif.canActivate(ownMsg)) continue;
-            
+
             // Trigger search
             for (Trigger trig : notif.triggers) {
                 if (trig.string.isBlank()) continue;
@@ -226,7 +226,7 @@ public class MessageUtil {
                     case KEY -> keySearch(msg, trig.string);
                 };
                 if (!hit) continue;
-                
+
                 // Inclusion search
                 boolean inMiss = false;
                 if (notif.inclusionEnabled) {
@@ -256,19 +256,19 @@ public class MessageUtil {
                     }
                 }
                 if (exHit) continue;
-                
+
                 // Activate notification
                 anyActivated = true;
-                
+
                 // Play sound
                 if (!anySoundPlayed || Config.get().notifMode.equals(Config.NotifMode.ALL)) {
                     anySoundPlayed = playSound(notif);
                 }
-                
+
                 // Send response messages
                 Matcher subsMatcher = trig.type == Trigger.Type.REGEX ? matcher : null;
                 sendResponses(notif, subsMatcher);
-                
+
                 // Restyle
                 msg = StyleUtil.restyle(msg, cleanStr, trig, matcher, notif.textStyle, restyleAll);
 
@@ -288,7 +288,7 @@ public class MessageUtil {
                     // No other notifications can activate on a blank message
                     if (str.isBlank()) return null;
                 }
-                
+
                 break;
             }
             // If only activating single, return early
@@ -431,7 +431,7 @@ public class MessageUtil {
             int totalDelay = 0;
             for (ResponseMessage msg : notif.responseMessages) {
                 msg.sendingString = msg.string;
-                if (msg.type.equals(ResponseMessage.Type.REGEX) 
+                if (msg.type.equals(ResponseMessage.Type.REGEX)
                         && matcher != null && matcher.find(0)) {
                     // Capturing group substitution
                     for (int i = 0; i <= matcher.groupCount(); i++) {

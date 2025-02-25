@@ -18,6 +18,7 @@ package dev.terminalmc.chatnotify.gui.widget;
 
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A {@link Button} that must be pressed twice to complete an action.
@@ -26,24 +27,36 @@ public class ConfirmButton extends Button {
     private Component message;
     private Component confirmMessage;
     private boolean hasBeenPressed;
-    
-    public ConfirmButton(int x, int y, int width, int height, Component message, 
+
+    public ConfirmButton(int x, int y, int width, int height, Component message,
                          Component confirmMessage, OnPress onPress) {
         super(x, y, width, height, message, onPress, DEFAULT_NARRATION);
         this.message = message;
         this.confirmMessage = confirmMessage;
     }
-    
+
     public void reset() {
         hasBeenPressed = false;
-        this.setMessage(message);
+        super.setMessage(message);
+    }
+
+    @Override
+    public void setMessage(@NotNull Component message) {
+        this.message = message;
+        if (!hasBeenPressed) super.setMessage(message);
+    }
+    
+    @SuppressWarnings("unused")
+    public void setConfirmMessage(@NotNull Component confirmMessage) {
+        this.confirmMessage = confirmMessage;
+        if (hasBeenPressed) super.setMessage(confirmMessage);
     }
 
     @Override
     public void onPress() {
         if (!hasBeenPressed) {
             hasBeenPressed = true;
-            this.setMessage(confirmMessage);
+            super.setMessage(confirmMessage);
         } else {
             super.onPress();
         }

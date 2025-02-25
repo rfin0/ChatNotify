@@ -53,6 +53,7 @@ public class DoubleSlider extends AbstractSliderButton {
         updateMessage();
     }
 
+    @SuppressWarnings("unused")
     public void refresh() {
         value = (source.get() - min) / range;
         updateMessage();

@@ -21,8 +21,6 @@ import dev.terminalmc.chatnotify.util.JsonUtil;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Type;
-
 public class Sound {
     public static final int VERSION = 1;
     public final int version = VERSION;
@@ -40,13 +38,13 @@ public class Sound {
     private static final String idDefault = "block.note_block.bell";
 
     /**
-     * The sound volume, from {@code 0} to {@code 1} inclusive.
+     * The sound volume, in the range {@code 0-1} inclusive.
      */
     private float volume;
     private static final float volumeDefault = 1.0F;
 
     /**
-     * The sound pitch, from {@code 0.5} to {@code 2} inclusive.
+     * The sound pitch, in the range {@code 0.5-2} inclusive.
      */
     private float pitch;
     private static final float pitchDefault = 1.0F;
@@ -87,10 +85,6 @@ public class Sound {
         this.pitch = pSound.pitch;
     }
 
-    /**
-     * @return {@code true} if this instance is eligible for activation, 
-     * {@code false} otherwise.
-     */
     public boolean isEnabled() {
         return enabled;
     }
@@ -98,8 +92,8 @@ public class Sound {
     /**
      * Enables or disables this instance.
      *
-     * <p>{@link Sound#volume} is 0 and {@code enabled} is true, sets 
-     * {@link Sound#volume} to 1.</p>
+     * <p>{@link Sound#volume} is {@code 0} and {@code enabled} is true, sets 
+     * {@link Sound#volume} to {@code 1}.</p>
      */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
@@ -118,16 +112,11 @@ public class Sound {
     /**
      * Sets the sound {@link ResourceLocation} string to the specified value
      * if it represents a valid {@link ResourceLocation}.
-     * @param id the {@link ResourceLocation} string.
-     * @return {@code true} if {@code id} represents a valid 
-     * {@link ResourceLocation}, {@code false} otherwise.
      */
-    public boolean setId(String id) {
+    public void setId(String id) {
         if (validId(id)) {
             this.id = id;
-            return true;
         }
-        return false;
     }
 
     /**
@@ -137,9 +126,6 @@ public class Sound {
         return ResourceLocation.tryParse(id);
     }
 
-    /**
-     * @return the sound volume, from {@code 0} to {@code 1} inclusive.
-     */
     public float getVolume() {
         return volume;
     }
@@ -153,8 +139,8 @@ public class Sound {
      * <p>If {@code volume} is not {@code 0} and {@link Sound#enabled} is 
      * {@code false}, sets {@link Sound#enabled} to {@code true}.</p>
      *
-     * @throws IllegalArgumentException if {@code volume} is less than {@code 0}
-     * or greater than {@code 1}.
+     * @throws IllegalArgumentException if {@code volume} is out of range
+     * ({@code volume < 0 || volume > 1}).
      */
     public void setVolume(float volume) {
         if (volume < 0 || volume > 1) throw new IllegalArgumentException(
@@ -164,17 +150,14 @@ public class Sound {
         else if (!this.enabled) this.enabled = true;
     }
 
-    /**
-     * @return the sound pitch, from {@code 0.5} to {@code 2} inclusive.
-     */
     public float getPitch() {
         return pitch;
     }
 
     /**
      * Sets the sound pitch.
-     * @throws IllegalArgumentException if {@code pitch} is less than 
-     * {@code 0.5} or greater than {@code 2}.
+     * @throws IllegalArgumentException if {@code pitch} out of range
+     * ({@code pitch < 0.5 || pitch > 2}).
      */
     public void setPitch(float pitch) {
         if (pitch < 0.5 || pitch > 2) throw new IllegalArgumentException(
@@ -184,6 +167,9 @@ public class Sound {
 
     // Validation
 
+    /**
+     * Validates this instance. To be called after editing and before saving.
+     */
     Sound validate() {
         if (volume < 0 || volume > 1) volume = volumeDefault;
         if (pitch < 0.5 || pitch > 2) pitch = pitchDefault;
@@ -192,7 +178,7 @@ public class Sound {
 
     /**
      * @return {@code true} if {@code id} represents a valid
-     * {@link ResourceLocation}, {@code false} otherwise.
+     * {@link ResourceLocation}.
      */
     public static boolean validId(String id) {
         return ResourceLocation.tryParse(id) != null;
@@ -202,8 +188,7 @@ public class Sound {
 
     public static class Deserializer implements JsonDeserializer<Sound> {
         @Override
-        public Sound deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
-                throws JsonParseException {
+        public Sound deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext ctx) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;

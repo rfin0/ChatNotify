@@ -28,15 +28,17 @@ import java.util.List;
 import static dev.terminalmc.chatnotify.util.Localization.translationKey;
 
 /**
- * Options screen for a {@link Trigger}.
+ * Supports two {@link dev.terminalmc.chatnotify.gui.widget.list.OptionList}s;
+ * one to allow enhanced editing of a {@link Trigger}, and another to allow
+ * selection of translation keys.
  */
-public class TriggerOptionsScreen extends OptionScreen {
+public class TriggerScreen extends OptionScreen {
     private final Trigger trigger;
     private final TextStyle textStyle;
     private final Runnable onClose;
-    
-    public TriggerOptionsScreen(Screen lastScreen, Trigger trigger, TextStyle textStyle,
-                                Runnable onClose, String defaultKey) {
+
+    public TriggerScreen(Screen lastScreen, Trigger trigger, TextStyle textStyle,
+                         Runnable onClose, String defaultKey) {
         super(lastScreen);
         this.trigger = trigger;
         this.textStyle = textStyle;
@@ -70,10 +72,10 @@ public class TriggerOptionsScreen extends OptionScreen {
         }
     }
 
-    private static TriggerOptionsScreen cast(OptionScreen screen) {
-        if (!(screen instanceof TriggerOptionsScreen s)) throw new IllegalArgumentException(
+    private static TriggerScreen cast(OptionScreen screen) {
+        if (!(screen instanceof TriggerScreen s)) throw new IllegalArgumentException(
                 String.format("Option list supplier for class %s cannot use screen type %s",
-                        TriggerOptionsScreen.class.getName(), screen.getClass().getName()));
+                        TriggerScreen.class.getName(), screen.getClass().getName()));
         return s;
     }
 

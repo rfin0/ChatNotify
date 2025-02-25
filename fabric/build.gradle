@@ -13,7 +13,7 @@ dependencies {
     // Fabric Loader and API
     modImplementation("net.fabricmc:fabric-loader:${fabric_loader_version}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_api_version}")
-    
+
     // JiJ MixinExtras
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${mixinextras_version}")))
 
@@ -22,7 +22,7 @@ dependencies {
 
     // ChatHeads
     modImplementation("maven.modrinth:Wb5oqrBJ:${chatheads_version}")
-    
+
     // CommandKeys
     modImplementation("maven.modrinth:65UyswbY:${commandkeys_version}")
 }

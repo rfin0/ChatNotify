@@ -34,7 +34,7 @@ import java.time.Instant;
 /**
  * Refer to {@link MixinChatComponent} for an overview of Minecraft's message
  * handling call stacks.
- * 
+ *
  * <p>ChatHeads' injection points are too late for these capture methods, so
  * if they are being used, {@link ChatHeadsWrapper#handleAddedMessage} must
  * be called manually.</p>
@@ -43,7 +43,7 @@ import java.time.Instant;
 public class MixinChatListener {
 
     @WrapMethod(method = "handleDisguisedChatMessage")
-    private void wrapHandleDisguisedChatMessage(Component message, ChatType.Bound boundChatType, 
+    private void wrapHandleDisguisedChatMessage(Component message, ChatType.Bound boundChatType,
                                                 Operation<Void> original) {
         if (Config.get().detectionMode.equals(Config.DetectionMode.PACKET)) {
             ChatHeadsWrapper.handleAddedMessage(message, boundChatType, null);
@@ -55,7 +55,7 @@ public class MixinChatListener {
     }
 
     @WrapMethod(method = "handleSystemMessage")
-    private void wrapHandleSystemMessage(Component message, boolean isOverlay, 
+    private void wrapHandleSystemMessage(Component message, boolean isOverlay,
                                          Operation<Void> original) {
         if (Config.get().detectionMode.equals(Config.DetectionMode.PACKET)) {
             ChatHeadsWrapper.handleAddedMessage(message, null, null);
@@ -68,14 +68,14 @@ public class MixinChatListener {
 
     // Unable to use handlePlayerChatMessage as that takes a PlayerChatMessage
     @WrapMethod(method = "showMessageToPlayer")
-    private boolean wrapShowMessageToPlayer(ChatType.Bound bound, 
-                                            PlayerChatMessage playerChatMessage, Component message, 
-                                            GameProfile gameProfile, boolean onlyShowSecureChat, 
+    private boolean wrapShowMessageToPlayer(ChatType.Bound bound,
+                                            PlayerChatMessage playerChatMessage, Component message,
+                                            GameProfile gameProfile, boolean onlyShowSecureChat,
                                             Instant timestamp, Operation<Boolean> original) {
         if (Config.get().detectionMode.equals(Config.DetectionMode.PACKET)) {
             ChatHeadsWrapper.handleAddedMessage(message, bound, ((Ownable)message).chatheads$getOwner());
             message = MessageUtil.processMessage(message);
-            if (message != null) return original.call(bound, playerChatMessage, message, 
+            if (message != null) return original.call(bound, playerChatMessage, message,
                     gameProfile, onlyShowSecureChat, timestamp);
             return false;
         } else {

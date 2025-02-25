@@ -56,13 +56,13 @@ public abstract class DragReorderList extends OptionList {
     /**
      * <p>You should mark the {@code entry} as being dragged via
      * {@link Entry#setDragging} before invoking this method.</p>
-     * 
+     *
      * <p>{@code entry} must be an instance of a class present in the map passed
      * in the constructor.</p>
      *
      * <p>{@code trailerClass} must be set if any entries in the contiguous list
      * may have trailer entries.</p>
-     * 
+     *
      * @param entry the entry being dragged.
      * @param trailerClass the class of entries which may be attached as
      *                     'trailers' to the primary entries.
@@ -107,7 +107,7 @@ public abstract class DragReorderList extends OptionList {
                             .collect(Collectors.joining(", ")));
             return false;
         }
-        
+
         if (hasTrailer) {
             // Verify that it's possible to have a trailer
             if (index < children().size()) {
@@ -115,7 +115,7 @@ public abstract class DragReorderList extends OptionList {
                 Class<? extends Entry> trailerCls = children().get(index + 1).getClass();
                 if (!trailerCls.equals(Entry.Space.class) && !trailerCls.equals(trailerClass)) {
                     ChatNotify.LOG.error("Cannot drag entry of type '{}' at index {}. " +
-                            "hasTrailer is true but trailer is class '{}'. " +
+                                    "hasTrailer is true but trailer is class '{}'. " +
                                     "Allowed trailer types: '{}', '{}'.",
                             Entry.Space.class, trailerClass);
                     return false;
@@ -126,7 +126,7 @@ public abstract class DragReorderList extends OptionList {
                 return false;
             }
         }
-        
+
         // Verify that the sub-list with type matching entry is contiguous
         int start = getListStart(cls);
         int end = getListEnd(cls);
@@ -137,16 +137,16 @@ public abstract class DragReorderList extends OptionList {
                     i++; // Skip the trailer
                 }
             } else {
-                ChatNotify.LOG.error("Cannot drag entry of type '{}' at index {}. " + 
+                ChatNotify.LOG.error("Cannot drag entry of type '{}' at index {}. " +
                                 "Encountered unexpected type '{}' at index {} breaking " +
                                 "contiguous sub-list from {} to {}. Allowed trailer types: " +
-                                "'{}', '{}'.", 
-                        cls, children().indexOf(entry), children().get(i).getClass(), i, 
+                                "'{}', '{}'.",
+                        cls, children().indexOf(entry), children().get(i).getClass(), i,
                         start, end, Entry.Space.class, trailerClass);
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -175,7 +175,7 @@ public abstract class DragReorderList extends OptionList {
         }
         return super.mouseReleased(mouseX, mouseY, button);
     }
-    
+
     /**
      * @return the index of the first instance of {@code cls} in the
      * {@link OptionList}.
@@ -184,7 +184,7 @@ public abstract class DragReorderList extends OptionList {
         for (int i = 0; i < children().size(); i++) {
             if (children().get(i).getClass().equals(cls)) return i;
         }
-        throw new IllegalArgumentException("getListStart could not find any element of type " 
+        throw new IllegalArgumentException("getListStart could not find any element of type "
                 + cls.getName());
     }
 
@@ -202,7 +202,7 @@ public abstract class DragReorderList extends OptionList {
 
     /**
      * Finds the backing list index of the entry at the specified index.
-     * 
+     *
      * @return the number of entries of classes not matching 
      * {@link DragReorderList#dragClass} before (and including) the specified
      * index.
@@ -231,7 +231,7 @@ public abstract class DragReorderList extends OptionList {
             cancelDrag();
             return;
         }
-        
+
         @Nullable Entry hoveredEntry = getEntryAtPosition(getX() + (double)getWidth() / 2, mouseY);
         if (hoveredEntry == null) {
             if (mouseY > getBottom() || mouseY > getY() + itemHeight * children().size()) {
@@ -240,17 +240,17 @@ public abstract class DragReorderList extends OptionList {
                 hoveredEntry = children().get(end);
             }
         }
-        
+
         int hoveredSlot;
         if (hoveredEntry == null) {
             // Not targeting a valid element, so we snap to list top - 1
             // (previous check covers list bottom)
             hoveredSlot = start - 1;
-        } 
+        }
         else {
             // Targeting a valid element, so we get its index
             hoveredSlot = children().indexOf(hoveredEntry);
-            
+
             // If outside the sub-list, snap to top or bottom
             if (hoveredSlot <= start - 1) {
                 hoveredSlot = start - 1;
@@ -261,7 +261,7 @@ public abstract class DragReorderList extends OptionList {
             else {
                 // Within the sub-list, but it's still possible that there are
                 // invalid elements here so we need to check
-                if (hoveredEntry.getClass().equals(OptionList.Entry.Space.class) 
+                if (hoveredEntry.getClass().equals(OptionList.Entry.Space.class)
                         || hoveredEntry.getClass().equals(trailerClass)) {
                     // Targeting a trailer, check that the main entry is valid
                     // and switch to it

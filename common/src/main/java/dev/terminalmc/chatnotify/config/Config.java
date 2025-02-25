@@ -25,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,19 +33,27 @@ import java.util.*;
 import java.util.function.Supplier;
 
 /**
- * Root configuration options class.
+ * Root configuration options class. Consists of:
  *
- * <p><b>Note:</b> The list of {@link Notification} instances is required to 
- * maintain an instance at index 0 for the user's name. This instance is handled
+ * <p>A range of mostly-enum controls for global behavior.</p>
+ *
+ * <p>A set of default values for new {@link Notification} instances.</p>
+ *
+ * <p>A list of prefix strings for use in message sender detection.</p>
+ *
+ * <p>A list of {@link Notification} instances.</p>
+ *
+ * <p><b>Note:</b> The list of {@link Notification}s is required to maintain an
+ * instance at index {@code 0} for the user's name. This instance is handled
  * differently in several ways, but is kept in the list for ease of iteration.
  * </p>
  *
- * <p>The {@code version} field of a config class must be incremented whenever 
- * the json structure of the class is changed, to facilitate correct conditional
- * deserialization.</p>
+ * <p><b>Note:</b> The {@code VERSION} constant of a config class must be
+ * incremented whenever the json structure of the class is changed, to
+ * facilitate correct conditional deserialization.</p>
  *
- * <p><b>Note:</b> For enum controls, the default value is the first value of
- * the enum.</p>
+ * <p><b>Note:</b> For enum controls without a specified default value, the
+ * first value of the enum should be used as the default.</p>
  */
 public class Config {
     public static final int VERSION = 9;
@@ -66,7 +73,7 @@ public class Config {
             .setPrettyPrinting()
             .create();
 
-    // Options
+    // Controls
 
     /**
      * Controls how messages are intercepted.
@@ -88,7 +95,8 @@ public class Config {
     }
 
     /**
-     * Controls how many {@link Notification}s can be activated.
+     * Controls how many {@link Notification}s can be activated by a single
+     * message.
      */
     public NotifMode notifMode;
     public enum NotifMode {
@@ -138,17 +146,21 @@ public class Config {
     public SoundSource soundSource;
     public static final SoundSource soundSourceDefault = SoundSource.PLAYERS;
 
+    // Defaults
+
     /**
-     * The default restyle text color for new {@link Notification} instances.
+     * The default {@link TextStyle} color for new {@link Notification}s.
      */
     public int defaultColor;
     public static final int defaultColorDefault = 0xffc400;
 
     /**
-     * The default restyle text color for new {@link Notification} instances.
+     * The default {@link Sound} identifier for new {@link Notification}s.
      */
     public final Sound defaultSound;
     public static final Supplier<Sound> defaultSoundDefault = Sound::new;
+
+    // Prefixes
 
     /**
      * The list of prefix strings to be checked when evaluating whether a 
@@ -158,9 +170,11 @@ public class Config {
     public static final Supplier<List<String>> prefixesDefault =
             () -> new ArrayList<>(List.of("/shout", "/me", "!"));
 
+    // Notifications
+
     /**
      * The list of all {@link Notification} instances, guaranteed to contain
-     * at least one instance.
+     * at least {@code 1} instance.
      */
     private final List<Notification> notifications;
     private static final Supplier<List<Notification>> notificationsDefault =
@@ -252,11 +266,11 @@ public class Config {
 
     /**
      * Removes the {@link Notification} at the specified index in the list, if 
-     * possible.
+     * possible
      *
-     * <p><b>Note:</b> Will fail without error if the specified index is 0.</p>
+     * <p><b>Note:</b> Will fail without error if the index is {@code 0}.</p>
      * @param index the index of the notification.
-     * @return {@code true} if the list was modified, {@code false} otherwise.
+     * @return {@code true} if the list was modified.
      */
     public boolean removeNotif(int index) {
         if (index != 0) {
@@ -270,12 +284,12 @@ public class Config {
      * Removes the {@link Notification} at the source index to the destination 
      * index in the list, if possible, 
      *
-     * <p><b>Note:</b> Will fail without error if either index is 0.</p>
+     * <p><b>Note:</b> Will fail without error if either index is {@code 0}.</p>
      * @param sourceIndex the index of the element to move.
      * @param destIndex the desired final index of the element.
-     * @return {@code true} if the list was modified, {@code false} otherwise.
+     * @return {@code true} if the list was modified.
      */
-    public boolean changeNotifPriority(int sourceIndex, int destIndex) {
+    public boolean moveNotif(int sourceIndex, int destIndex) {
         if (sourceIndex > 0 && destIndex > 0 && sourceIndex != destIndex) {
             notifications.add(destIndex, notifications.remove(sourceIndex));
             return true;
@@ -336,6 +350,7 @@ public class Config {
         return config != null ? config : new Config();
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static @Nullable Config load(Path file, Gson gson) {
         try (InputStreamReader reader = new InputStreamReader(
                 new FileInputStream(file.toFile()), StandardCharsets.UTF_8)) {
@@ -385,27 +400,28 @@ public class Config {
     // Validation
 
     /**
-     * Validation method to be called after config editing and before saving.
+     * Validates this instance. To be called after editing and before saving.
      */
     private Config validate() {
+        // Validate defaults
         if (defaultColor < 0 || defaultColor > 0xFFFFFF) defaultColor = defaultColorDefault;
         defaultSound.validate();
 
         // Remove blank prefixes and sort by decreasing length
         prefixes.removeIf(String::isBlank);
         prefixes.sort(Comparator.comparingInt(String::length).reversed());
-        
+
         // Validate username notification
         validateUserNotif();
 
-        // Cleanup notifications and remove any blanks except first
+        // Validate notifications and remove any blank instances except first
         notifications.removeIf((n) -> {
             n.validate();
             return (
                     n != notifications.getFirst()
-                    && n.triggers.isEmpty()
-                    && n.exclusionTriggers.isEmpty()
-                    && n.responseMessages.isEmpty()
+                            && n.triggers.isEmpty()
+                            && n.exclusionTriggers.isEmpty()
+                            && n.responseMessages.isEmpty()
             );
         });
 
@@ -430,8 +446,7 @@ public class Config {
 
     public static class Deserializer implements JsonDeserializer<Config> {
         @Override
-        public Config deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
-                throws JsonParseException {
+        public Config deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext ctx) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;
@@ -466,7 +481,8 @@ public class Config {
             Sound defaultSound = JsonUtil.getOrDefault(ctx, obj, "defaultSound",
                     Sound.class, defaultSoundDefault.get(), silent);
 
-            List<String> prefixes = JsonUtil.getOrDefault(obj, "prefixes", prefixesDefault.get(), silent);
+            List<String> prefixes = JsonUtil.getOrDefault(obj, "prefixes",
+                    prefixesDefault.get(), silent);
 
             List<Notification> notifications = JsonUtil.getOrDefault(ctx, obj, "notifications",
                     Notification.class, notificationsDefault.get(), silent);

@@ -95,8 +95,6 @@ public class HsvColorPicker extends OverlayWidget {
     private int oldCFieldTextX;
     private int oldCFieldTextY;
 
-    private int cFieldTextWidth;
-
     private TextField hexField;
     private Button cancelButton;
     private Button confirmButton;
@@ -106,7 +104,7 @@ public class HsvColorPicker extends OverlayWidget {
 
     private boolean updateFromCursor;
 
-    public HsvColorPicker(int x, int y, int width, int height, 
+    public HsvColorPicker(int x, int y, int width, int height,
                           Supplier<Integer> source, Consumer<Integer> dest,
                           Consumer<OverlayWidget> close) {
         super(x, y, width, height, true, Component.empty(), close);
@@ -122,9 +120,9 @@ public class HsvColorPicker extends OverlayWidget {
      */
     protected void init() {
         Minecraft mc = Minecraft.getInstance();
-        
+
         // Fixed values
-        int textFieldHeight = 20;
+        int hexFieldHeight = 20;
         int minColorBoxWidth = 12;
 
         int interiorWidth = width - (BORDER * 2);
@@ -146,14 +144,13 @@ public class HsvColorPicker extends OverlayWidget {
 
         // Hex code text field
         Font font = mc.font;
-        int hexFieldHeight = textFieldHeight;
         int hexFieldX = BORDER + hsvPickerBoxWidth;
         int hexFieldY = BORDER;
         int hexFieldWidth = interiorWidth - hsvPickerBoxWidth;
 
         hexField = new TextField(getX() + hexFieldX, getY() + hexFieldY,
                 hexFieldWidth, hexFieldHeight);
-        hexField.hexColorValidator().strict();
+        hexField.strict().hexColorValidator();
         hexField.setMaxLength(7);
         hexField.setResponder(this::updateColorFromHexField);
         hexField.setValue(TextColor.fromRgb(Color.HSBtoRGB(hsv[0], hsv[1], hsv[2])).formatValue());
@@ -162,29 +159,26 @@ public class HsvColorPicker extends OverlayWidget {
         int cancelButtonWidth = interiorWidth - hsvPickerBoxWidth - (hsvPickerBoxWidth / 2);
         int buttonHeight = 20;
         int cancelButtonX = BORDER + hsvPickerBoxWidth;
-        int cancelButtonY = BORDER + interiorHeight - buttonHeight;
+        int buttonY = BORDER + interiorHeight - buttonHeight;
 
-        cancelButton = Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
-                    onClose();
-                })
-                .pos(getX() + cancelButtonX, getY() + cancelButtonY)
+        cancelButton = Button.builder(CommonComponents.GUI_CANCEL, (button) -> onClose())
+                .pos(getX() + cancelButtonX, getY() + buttonY)
                 .size(cancelButtonWidth, buttonHeight)
                 .build();
 
         int confirmButtonWidth = interiorWidth - hsvPickerBoxWidth - cancelButtonWidth;
         int confirmButtonX = BORDER + hsvPickerBoxWidth + cancelButtonWidth;
-        int confirmButtonY = cancelButtonY;
 
         confirmButton = Button.builder(CommonComponents.GUI_OK, (button) -> {
                     dest.accept(Mth.hsvToRgb(hsv[0], hsv[1], hsv[2]));
                     onClose();
                 })
-                .pos(getX() + confirmButtonX, getY() + confirmButtonY)
+                .pos(getX() + confirmButtonX, getY() + buttonY)
                 .size(confirmButtonWidth, buttonHeight)
                 .build();
 
         // New and old color display boxes
-        cFieldTextWidth = Math.min(Math.max(font.width(newColorLabel), font.width(oldColorLabel)),
+        int cFieldTextWidth = Math.min(Math.max(font.width(newColorLabel), font.width(oldColorLabel)),
                 interiorWidth - hsvPickerBoxWidth - minColorBoxWidth);
         int combinedCFieldHeight = interiorHeight - hexFieldHeight - buttonHeight - (OUTLINE * 4);
 

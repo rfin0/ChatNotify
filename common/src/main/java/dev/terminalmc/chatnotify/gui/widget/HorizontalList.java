@@ -26,7 +26,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -35,12 +34,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 /**
  * A horizontal semi-equivalent of 
  * {@link net.minecraft.client.gui.components.AbstractSelectionList}.
- * 
+ *
  * <p><b>Note:</b> Minimal methods available, more to be added as required.</p>
  */
 public class HorizontalList<E extends AbstractWidget> extends AbstractContainerWidget {
@@ -54,16 +52,16 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
             ResourceLocation.fromNamespaceAndPath(ChatNotify.MOD_ID, "widget/scroller_horizontal");
     private static final ResourceLocation SCROLLER_BACKGROUND_SPRITE =
             ResourceLocation.fromNamespaceAndPath(ChatNotify.MOD_ID, "widget/scroller_background_horizontal");
-    
+
     private static final int SCROLLBAR_WIDTH = 32;
     private static final int SCROLLBAR_HEIGHT = 6;
 
     private static final int MIN_WIDTH = SCROLLBAR_WIDTH * 2;
     private static final int MIN_HEIGHT = 20 + SCROLLBAR_HEIGHT;
 
-    
+
     private final List<E> entries = new ArrayList<>();
-    
+
     private final Minecraft mc;
     private final int space;
 
@@ -73,8 +71,8 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
         MIDDLE,
         BOTTOM,
     }
-    
-    public boolean topScrollbar = false;
+
+    public boolean topScrollbar;
 
     private boolean scrolling;
     private double scrollAmount;
@@ -82,18 +80,13 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     private @Nullable E hovered;
     private @Nullable E selected;
     
-    
-    public HorizontalList(int x, int y, int width, int height, int spacing) {
-        this(x, y, width, height, spacing, false);
-    }
-
     public HorizontalList(int x, int y, int width, int height, int spacing, boolean topScrollbar) {
         super(x, y, width, height, Component.empty());
         this.space = spacing;
         this.mc = Minecraft.getInstance();
         this.topScrollbar = topScrollbar;
     }
-    
+
     // Hovered entry
 
     /**
@@ -116,7 +109,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
             }
         }
     }
-    
+
     // Selected entry
 
     /**
@@ -135,7 +128,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
                 "Specified entry is not present in the list.");
         this.selected = selected;
     }
-    
+
     // Entry list management
 
     /**
@@ -189,14 +182,14 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
         entries.clear();
         setSelected(null);
     }
-    
+
     // Bounds
-    
+
     @Override
     public void setWidth(int width) {
         setSize(width, getHeight());
     }
-    
+
     @Override
     public void setHeight(int height) {
         setSize(getWidth(), height);
@@ -212,9 +205,9 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
         setSize(width, height);
         setPosition(x, y);
     }
-    
+
     // Rendering
-    
+
     @Override
     protected void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY,
                                 float partialTick) {
@@ -245,7 +238,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
         int x = getX() - (int)scrollAmount;
         int topOffset = topScrollbar ? SCROLLBAR_HEIGHT : 0;
         int bottomOffset = topScrollbar ? 0 : SCROLLBAR_HEIGHT;
-        
+
         for (E child : entries) {
             // Reposition
             int y = switch(snap) {
@@ -274,7 +267,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
             int scrollerWidth = (int)((float)(getWidth() * getWidth()) / (float)getMaxPosition());
             scrollerWidth = Mth.clamp(scrollerWidth, SCROLLBAR_WIDTH, getWidth());
 
-            int scrollerPos = Math.max(getX(), (int)scrollAmount 
+            int scrollerPos = Math.max(getX(), (int)scrollAmount
                     * (getWidth() - scrollerWidth)
                     / getMaxScroll()
                     + getX());
@@ -304,7 +297,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
         guiGraphics.blit(Screen.FOOTER_SEPARATOR, getX() - 1, getBottom(), 0.0F, 0.0F, getWidth() + 2, 2, 32, 2);
         RenderSystem.disableBlend();
     }
-    
+
     // Focus and visibility
 
     @Override
@@ -337,7 +330,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
             scroll(rightHang);
         }
     }
-    
+
     // Scrolling
 
     @Override
@@ -393,7 +386,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     protected int getScrollbarPosition() {
         return topScrollbar ? getY() : getY() + getHeight() - SCROLLBAR_HEIGHT;
     }
-    
+
     protected int getMaxPosition() {
         int pos = 0;
         for (AbstractWidget e : entries) {
@@ -418,48 +411,9 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     public void setClampedScrollAmount(double scroll) {
         scrollAmount = Mth.clamp(scroll, 0.0F, getMaxScroll());
     }
-    
+
     public int getMaxScroll() {
         return Math.max(0, getMaxPosition() - getWidth());
-    }
-    
-    // Navigation
-
-    @Nullable
-    protected E nextEntry(ScreenDirection direction) {
-        return nextEntry(direction, (entry) -> true);
-    }
-
-    @Nullable
-    protected E nextEntry(ScreenDirection direction, Predicate<E> predicate) {
-        return nextEntry(direction, predicate, getSelected());
-    }
-
-    @Nullable
-    protected E nextEntry(ScreenDirection direction, Predicate<E> predicate, @Nullable E selected) {
-        int dir = switch (direction) {
-            case RIGHT, LEFT -> 0;
-            case UP -> -1;
-            case DOWN -> 1;
-        };
-
-        if (!children().isEmpty() && dir != 0) {
-            int index;
-            if (selected == null) {
-                index = dir > 0 ? 0 : children().size() - 1;
-            } else {
-                index = children().indexOf(selected) + dir;
-            }
-
-            for(int k = index; k >= 0 && k < entries.size(); k += dir) {
-                E entry = children().get(k);
-                if (predicate.test(entry)) {
-                    return entry;
-                }
-            }
-        }
-
-        return null;
     }
     
     // Narration
@@ -499,7 +453,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
             }
         }
     }
-    
+
     // Extra
 
     /**

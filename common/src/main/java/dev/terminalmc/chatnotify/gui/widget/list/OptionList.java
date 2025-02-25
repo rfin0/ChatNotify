@@ -60,11 +60,11 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     protected final int entryWidth;
     protected final int entryHeight;
     protected final int entrySpacing;
-    
+
     protected int rowWidth;
     protected int dynWideEntryWidth;
     protected int dynEntryWidth;
-    
+
     protected int entryX;
     protected int dynWideEntryX;
     protected int dynEntryX;
@@ -85,7 +85,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     /**
      * Re-calculates all dimensional and positional base parameters used by
      * list entries and their sub-elements.
-     * 
+     *
      * <p>Should be called whenever the size of the {@link OptionList} is
      * changed.</p>
      */
@@ -107,12 +107,12 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
      */
     protected void init() {
         double scrollAmount = getScrollAmount();
-        
+
         clearEntries();
         setFocused(null);
-        
+
         addEntries();
-        
+
         setScrollAmount(scrollAmount);
     }
 
@@ -132,7 +132,8 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         super.addEntry(entry);
         super.addEntry(new Entry.Space(entry));
     }
-
+    
+    @SuppressWarnings("unused")
     public void addSpacedEntry(int index, Entry entry) {
         addEntry(index, entry);
         addEntry(index + 1, new Entry.Space(entry));
@@ -146,7 +147,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     /**
      * Updates the size and position of the {@link OptionList}, then initializes
      * it to update list entries.
-     * 
+     *
      * <p>It would be more efficient to iterate over list entries and resize and
      * reposition each, rather than re-creating them, but that would add 
      * significant complexity and yield minimal observable performance benefit.
@@ -239,7 +240,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
 
         public static class ActionButton extends Entry {
             private final Button button;
-            
+
             public ActionButton(int x, int width, int height, Component message,
                                 @Nullable Tooltip tooltip, int tooltipDelay,
                                 Button.OnPress onPress) {
@@ -254,7 +255,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
 
                 elements.add(button);
             }
-            
+
             public void setBounds(int x, int width, int height) {
                 button.setPosition(x, 0);
                 button.setSize(width, height);

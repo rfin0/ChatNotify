@@ -31,16 +31,26 @@ import java.util.List;
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 import static dev.terminalmc.chatnotify.util.Localization.translationKey;
 
-public class NotifOptionsScreen extends OptionScreen {
+/**
+ * Supports a series of
+ * {@link dev.terminalmc.chatnotify.gui.widget.list.OptionList}s for
+ * configuration of a {@link Notification}.
+ *
+ * <p><b>Note:</b> {@link Notification#editing} should be set to {@link true}
+ * when opening this screen, and will be set to {@link false} when it is closed.
+ * </p>
+ */
+public class NotifScreen extends OptionScreen {
     private final Notification notif;
 
-    public NotifOptionsScreen(Screen lastScreen, Notification notif) {
+    public NotifScreen(Screen lastScreen, Notification notif) {
         this(lastScreen, notif, TabKey.TRIGGERS.key);
     }
-    
-    public NotifOptionsScreen(Screen lastScreen, Notification notif, String defaultKey) {
+
+    public NotifScreen(Screen lastScreen, Notification notif, String defaultKey) {
         super(lastScreen);
         this.notif = notif;
+        notif.editing = true;
         addTabs(defaultKey);
     }
 
@@ -52,7 +62,7 @@ public class NotifOptionsScreen extends OptionScreen {
                             BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                             FilterList.Entry.TriggerOptions.class,
                             (source, dest) -> notif == Config.get().getUserNotif()
-                                    ? notif.moveTrigger(source + 2, dest + 2) 
+                                    ? notif.moveTrigger(source + 2, dest + 2)
                                     : notif.moveTrigger(source, dest),
                             localized("option", "notif.trigger.list", "ℹ"),
                             localized("option", "notif.trigger.list.tooltip"),
@@ -62,23 +72,23 @@ public class NotifOptionsScreen extends OptionScreen {
                             (x, width, height, list, trigger, index) -> {
                                 if (notif.equals(Config.get().getUserNotif()) && index <= 1) {
                                     return new FilterList.Entry.LockedTriggerOptions(
-                                            x, width, height, trigger, index == 0 
-                                            ? localized("option", 
-                                            "notif.trigger.list.special.profile_name") 
-                                            : localized("option", 
+                                            x, width, height, trigger, index == 0
+                                            ? localized("option",
+                                            "notif.trigger.list.special.profile_name")
+                                            : localized("option",
                                             "notif.trigger.list.special.display_name"));
                                 } else {
                                     return new FilterList.Entry.TriggerOptions(
                                             x, width, height, list, trigger, notif.textStyle, index,
                                             (i) -> notif.triggers.remove((int) i),
                                             new TextField.Validator.UniqueTrigger(
-                                                    () -> Config.get().getNotifs(),
+                                                    () -> Config.get().getNotifs(), 
                                                     (n) -> n.triggers, notif, trigger), true);
                                 }
                             },
                             (x, width, height, list, trigger) -> trigger.styleTarget.enabled
                                     ? new FilterList.Entry.StyleTargetOptions(
-                                        x, width, height, list, trigger.styleTarget)
+                                    x, width, height, list, trigger.styleTarget)
                                     : null,
                             () -> notif.triggers.add(new Trigger())
                     );
@@ -89,7 +99,7 @@ public class NotifOptionsScreen extends OptionScreen {
                                 cast(screen).notif
                         )),
                 new Tab(TabKey.SOUND.key, (screen) ->
-                        new SoundOptionList(Minecraft.getInstance(), 0, 0, 0,
+                        new SoundList(Minecraft.getInstance(), 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT,
                                 cast(screen).notif.sound
                         )),
@@ -129,8 +139,8 @@ public class NotifOptionsScreen extends OptionScreen {
                             () -> notif.exclusionTriggers,
                             (x, width, height, list, trigger, index) ->
                                     new FilterList.Entry.TriggerOptions(
-                                            x, width, height, list, trigger, notif.textStyle, index, 
-                                            (i) -> notif.exclusionTriggers.remove((int) i), 
+                                            x, width, height, list, trigger, notif.textStyle, index,
+                                            (i) -> notif.exclusionTriggers.remove((int) i),
                                             new TextField.Validator.UniqueTrigger(
                                                     () -> List.of(notif),
                                                     (n) -> n.exclusionTriggers,
@@ -182,10 +192,10 @@ public class NotifOptionsScreen extends OptionScreen {
         }
     }
 
-    private static NotifOptionsScreen cast(OptionScreen screen) {
-        if (!(screen instanceof NotifOptionsScreen s)) throw new IllegalArgumentException(
+    private static NotifScreen cast(OptionScreen screen) {
+        if (!(screen instanceof NotifScreen s)) throw new IllegalArgumentException(
                 String.format("Option list supplier for class %s cannot use screen type %s",
-                        NotifOptionsScreen.class.getName(), screen.getClass().getName()));
+                        NotifScreen.class.getName(), screen.getClass().getName()));
         return s;
     }
 

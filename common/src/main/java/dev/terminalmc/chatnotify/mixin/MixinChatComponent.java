@@ -60,7 +60,7 @@ import org.spongepowered.asm.mixin.Unique;
 public class MixinChatComponent {
 
     @WrapMethod(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V")
-    private void replaceMessage(Component message, MessageSignature headerSignature, 
+    private void replaceMessage(Component message, MessageSignature headerSignature,
                                 GuiMessageTag tag, Operation<Void> original) {
         message = chatNotify$replaceMessage(message, tag);
         if (message != null) original.call(message, headerSignature, tag);
@@ -70,11 +70,11 @@ public class MixinChatComponent {
     private static @Nullable Component chatNotify$replaceMessage(Component message, GuiMessageTag tag) {
         if (switch (Config.get().detectionMode) {
             case HUD_KNOWN_TAGS -> (
-                    tag == null 
-                    || tag.equals(GuiMessageTag.system())
-                    || tag.equals(GuiMessageTag.systemSinglePlayer())
-                    || tag.equals(GuiMessageTag.chatNotSecure())
-                    || tag.equals(GuiMessageTag.chatError())
+                    tag == null
+                            || tag.equals(GuiMessageTag.system())
+                            || tag.equals(GuiMessageTag.systemSinglePlayer())
+                            || tag.equals(GuiMessageTag.chatNotSecure())
+                            || tag.equals(GuiMessageTag.chatError())
             );
             case HUD -> true;
             case PACKET -> false;
@@ -84,7 +84,7 @@ public class MixinChatComponent {
             return message;
         }
     }
-    
+
     @WrapMethod(method = "getHeight()I")
     private int wrapGetHeight(Operation<Integer> original) {
         if (Minecraft.getInstance().screen instanceof ChatScreen cs) {

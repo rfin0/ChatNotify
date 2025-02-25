@@ -33,6 +33,15 @@ public class Trigger implements Functional.StringSupplier {
     public final int version = VERSION;
 
     /**
+     * A regex {@link Pattern} compiled from {@link Trigger#string}, or 
+     * {@code null} if {@link Trigger#type} is not {@link Type#REGEX} or the 
+     * string could not be compiled.
+     */
+    public transient @Nullable Pattern pattern;
+
+    // Options
+
+    /**
      * Not currently used.
      */
     public boolean enabled;
@@ -43,13 +52,6 @@ public class Trigger implements Functional.StringSupplier {
      */
     public @NotNull String string;
     public static final @NotNull String stringDefault = "";
-
-    /**
-     * A regex {@link Pattern} compiled from {@link Trigger#string}, or 
-     * {@code null} if {@link Trigger#type} is not {@link Type#REGEX} or the 
-     * string could not be compiled.
-     */
-    public transient @Nullable Pattern pattern;
 
     /**
      * The restyle target.
@@ -115,7 +117,7 @@ public class Trigger implements Functional.StringSupplier {
         this.styleTarget = styleTarget;
         this.type = type;
     }
-    
+
     @Override
     public @NotNull String getString() {
         return string;
@@ -132,6 +134,9 @@ public class Trigger implements Functional.StringSupplier {
 
     // Validation
 
+    /**
+     * Validates this instance. To be called after editing and before saving.
+     */
     Trigger validate() {
         if (type == Type.KEY) string = string.toLowerCase(Locale.ROOT);
         styleTarget.validate();
@@ -143,8 +148,7 @@ public class Trigger implements Functional.StringSupplier {
 
     public static class Deserializer implements JsonDeserializer<Trigger> {
         @Override
-        public @Nullable Trigger deserialize(JsonElement json, java.lang.reflect.Type typeOfT,
-                                             JsonDeserializationContext ctx) throws JsonParseException {
+        public Trigger deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext ctx) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;

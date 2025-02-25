@@ -58,7 +58,8 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
      * @param xMargin the space between the side of each entry and the edge of
      *                the list widget.
      */
-    public ExpandingList(int x, int y, int width, int maxHeight, int itemHeight, int entryHeight, int xMargin) {
+    public ExpandingList(int x, int y, int width, int maxHeight, int itemHeight,
+                         int entryHeight, int xMargin) {
         super(Minecraft.getInstance(), width, 0, y, itemHeight);
         super.setX(x);
         this.maxHeight = maxHeight;
@@ -94,6 +95,7 @@ public class ExpandingList extends ContainerObjectSelectionList<ExpandingList.En
      * Clears the list and adds a new entry for each element of {@code widgets},
      * adjusting the list height accordingly.
      */
+    @SuppressWarnings("unused")
     public void replaceWidgets(Iterable<AbstractWidget> widgets) {
         clearWidgets();
         widgets.forEach(this::addWidget);

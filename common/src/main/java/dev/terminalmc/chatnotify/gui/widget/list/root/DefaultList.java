@@ -38,9 +38,9 @@ import java.awt.*;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
-public class DefaultOptionList extends OptionList {
-    public DefaultOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
-                             int entryHeight, int entrySpacing) {
+public class DefaultList extends OptionList {
+    public DefaultList(Minecraft mc, int width, int height, int y, int entryWidth,
+                       int entryHeight, int entrySpacing) {
         super(mc, width, height, y, entryWidth, entryHeight, entrySpacing);
     }
 
@@ -49,7 +49,7 @@ public class DefaultOptionList extends OptionList {
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "default.list", "ℹ"),
                 Tooltip.create(localized("option", "default.list.tooltip")), -1));
-        
+
         addEntry(new Entry.DefaultColor(dynEntryX, dynEntryWidth, entryHeight, this));
         addEntry(new Entry.DefaultSound(dynEntryX, dynEntryWidth, entryHeight, this));
         addEntry(new OptionList.Entry.DoubleSlider(entryX, entryWidth, entryHeight, 0, 1, 2,
@@ -63,32 +63,32 @@ public class DefaultOptionList extends OptionList {
                 (value) -> Config.get().defaultSound.setPitch(value.floatValue())));
         addEntry(new Entry.SoundSource(dynEntryX, dynEntryWidth, entryHeight, this));
     }
-    
+
     // Custom entries
 
     private abstract static class Entry extends OptionList.Entry {
 
         private static class DefaultColor extends Entry {
-            DefaultColor(int x, int width, int height, DefaultOptionList list) {
+            DefaultColor(int x, int width, int height, DefaultList list) {
                 super();
                 int colorFieldWidth = Minecraft.getInstance().font.width("#FFAAFF+++");
 
                 Button mainButton = Button.builder(localized("option", "default.color")
                                         .setStyle(Style.EMPTY.withColor(Config.get().defaultColor)),
-                        (button) -> {
-                            int cpHeight = HsvColorPicker.MIN_HEIGHT;
-                            int cpWidth = HsvColorPicker.MIN_WIDTH;
-                            list.screen.setOverlay(new HsvColorPicker(
-                                    x + width / 2 - cpWidth / 2,
-                                    list.screen.height / 2 - cpHeight / 2,
-                                    cpWidth, cpHeight,
-                                    () -> Config.get().defaultColor,
-                                    (val) -> Config.get().defaultColor = val,
-                                    (widget) -> {
-                                        list.screen.removeOverlayWidget();
-                                        list.init();
-                                    }));
-                        })
+                                (button) -> {
+                                    int cpHeight = HsvColorPicker.MIN_HEIGHT;
+                                    int cpWidth = HsvColorPicker.MIN_WIDTH;
+                                    list.screen.setOverlay(new HsvColorPicker(
+                                            x + width / 2 - cpWidth / 2,
+                                            list.screen.height / 2 - cpHeight / 2,
+                                            cpWidth, cpHeight,
+                                            () -> Config.get().defaultColor,
+                                            (val) -> Config.get().defaultColor = val,
+                                            (widget) -> {
+                                                list.screen.removeOverlayWidget();
+                                                list.init();
+                                            }));
+                                })
                         .pos(x, 0)
                         .size(width - colorFieldWidth - SPACE, height)
                         .build();
@@ -119,24 +119,24 @@ public class DefaultOptionList extends OptionList {
         }
 
         private static class DefaultSound extends Entry {
-            DefaultSound(int x, int width, int height, DefaultOptionList list) {
+            DefaultSound(int x, int width, int height, DefaultList list) {
                 super();
                 elements.add(Button.builder(localized("option", "default.sound",
                                 Config.get().defaultSound.getId()), (button) -> {
-                    int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
-                    int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
-                    int wX = x + (width / 2) - (wWidth / 2);
-                    int wY = list.getY();
-                    list.screen.setOverlay(new DropdownTextField(
-                            wX, wY, wWidth, wHeight, Component.empty(),
-                            Config.get().defaultSound::getId, Config.get().defaultSound::setId,
-                            (widget) -> {
-                                list.screen.removeOverlayWidget();
-                                list.init();
-                            }, Minecraft.getInstance().getSoundManager().getAvailableSounds()
-                            .stream().map(ResourceLocation::toString).sorted().toList())
-                            .withSoundDropType());
-                })
+                            int wHeight = Math.max(DropdownTextField.MIN_HEIGHT, list.height);
+                            int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
+                            int wX = x + (width / 2) - (wWidth / 2);
+                            int wY = list.getY();
+                            list.screen.setOverlay(new DropdownTextField(
+                                    wX, wY, wWidth, wHeight, Component.empty(),
+                                    Config.get().defaultSound::getId, Config.get().defaultSound::setId,
+                                    (widget) -> {
+                                        list.screen.removeOverlayWidget();
+                                        list.init();
+                                    }, Minecraft.getInstance().getSoundManager().getAvailableSounds()
+                                    .stream().map(ResourceLocation::toString).sorted().toList())
+                                    .withSoundDropType());
+                        })
                         .pos(x, 0)
                         .size(width, height)
                         .build());
@@ -144,11 +144,11 @@ public class DefaultOptionList extends OptionList {
         }
 
         private static class SoundSource extends Entry {
-            SoundSource(int x, int width, int height, DefaultOptionList list) {
+            SoundSource(int x, int width, int height, DefaultList list) {
                 super();
 
                 elements.add(CycleButton.<net.minecraft.sounds.SoundSource>builder(source -> Component.translatable(
-                        "soundCategory." + source.getName()))
+                                "soundCategory." + source.getName()))
                         .withValues(net.minecraft.sounds.SoundSource.values())
                         .withInitialValue(Config.get().soundSource)
                         .withTooltip((status) -> Tooltip.create(localized(
@@ -157,8 +157,8 @@ public class DefaultOptionList extends OptionList {
                                 localized("option", "notif.sound.source"),
                                 (button, status) -> Config.get().soundSource = status));
 
-                elements.add(Button.builder(Component.literal("\uD83D\uDD0A"),
-                                (button) -> Minecraft.getInstance().setScreen(new SoundOptionsScreen(
+                elements.add(Button.builder(Component.literal("\uD83D\uDD0A"), (button) ->
+                                Minecraft.getInstance().setScreen(new SoundOptionsScreen(
                                         list.screen, Minecraft.getInstance().options)))
                         .tooltip(Tooltip.create(localized(
                                 "option", "notif.sound.open.minecraft_volume")))

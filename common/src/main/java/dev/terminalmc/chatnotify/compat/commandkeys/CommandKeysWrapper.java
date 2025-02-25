@@ -20,10 +20,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 
 /**
  * Wraps {@link CommandKeysUtil} to catch errors caused by the CommandKeys mod 
- * not being available.
- * 
- * <p>There are other arguably better ways of doing this, such as by calling
- * loader-specific API methods to check whether the mod is loaded.</p>
+ * not providing the expected methods.
  */
 public class CommandKeysWrapper {
     private static boolean hasFailed = false;

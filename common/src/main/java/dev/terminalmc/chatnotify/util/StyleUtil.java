@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 
 public class StyleUtil {
     private static boolean debug = false;
-    
+
     public static Component restyle(Component msg, String cleanStr, Trigger trig, Matcher matcher,
                                     TextStyle textStyle, boolean restyleAllInstances) {
         debug = Config.get().debugMode == Config.DebugMode.ALL;
@@ -77,7 +77,7 @@ public class StyleUtil {
                             for (int i = 1; i <= matcher.groupCount(); i++) {
                                 if (trig.styleTarget.groupIndexes.contains(i)) {
                                     restyled = true;
-                                    msg = restyleLeaves(msg, textStyle, 
+                                    msg = restyleLeaves(msg, textStyle,
                                             matcher.start(i), matcher.end(i));
                                 }
                             }

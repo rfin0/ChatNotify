@@ -77,27 +77,25 @@ public class DropdownTextField extends OverlayWidget {
 
     protected void init() {
         Minecraft mc = Minecraft.getInstance();
-        
+
         int x = getX();
         int y = getY();
 
         int widgetHeight = 20;
         int verticalSpace = 1;
-        int buttonWidth = widgetHeight;
+        int buttonWidth = 20;
         int textFieldWidth = width - (2 * widgetHeight);
 
-        cancelButton = Button.builder(Component.literal("❌").withStyle(ChatFormatting.RED), 
-                (button) -> {
-                    onClose();
-                })
+        cancelButton = Button.builder(Component.literal("❌").withStyle(ChatFormatting.RED),
+                        (button) -> onClose())
                 .pos(x + width - (buttonWidth * 2), y)
                 .size(buttonWidth, widgetHeight)
                 .build();
         confirmButton = Button.builder(Component.literal("✔").withStyle(ChatFormatting.GREEN),
-                (button) -> {
-                    dest.accept(textField.getValue());
-                    onClose();
-                })
+                        (button) -> {
+                            dest.accept(textField.getValue());
+                            onClose();
+                        })
                 .pos(x + width - buttonWidth, y)
                 .size(buttonWidth, widgetHeight)
                 .build();
@@ -135,12 +133,6 @@ public class DropdownTextField extends OverlayWidget {
     }
 
     // Regular widget stuff
-
-    public DropdownTextField withDefaultDropType() {
-        dropWidgetProvider = this::createDefaultDropWidget;
-        init();
-        return this;
-    }
 
     private DropdownWidget createDefaultDropWidget(String str) {
         return new DropdownWidget(textField.getX(), textField.getY() + textField.getHeight(),
@@ -287,7 +279,7 @@ public class DropdownTextField extends OverlayWidget {
             dropdown.renderWidget(graphics, mouseX, mouseY, delta);
         }
     }
-    
+
     @Override
     public void onClose() {
         super.onClose();
@@ -313,6 +305,7 @@ public class DropdownTextField extends OverlayWidget {
             return new DropdownWidget(x, y, width, height, msg, font, dest);
         }
 
+        @SuppressWarnings("deprecation")
         @Override
         public void onClick(double mouseX, double mouseY) {
             dest.accept(getMessage().getString());
@@ -321,7 +314,7 @@ public class DropdownTextField extends OverlayWidget {
 
     public static class SoundDropdownWidget extends DropdownWidget {
         private static @Nullable SoundInstance lastSound;
-        
+
         private SoundDropdownWidget(int x, int y, int width, int height, Component msg,
                                     Font font, Consumer<String> dest) {
             super(x, y, width, height, msg, font, dest);

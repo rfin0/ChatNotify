@@ -44,7 +44,7 @@ public class MiscOptionList extends OptionList {
     @Override
     protected void addEntries() {
         Minecraft mc = Minecraft.getInstance();
-        
+
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "notif.misc.control"), null, -1));
         addEntry(new Entry.Controls(entryX, entryWidth, entryHeight, notif));
@@ -60,29 +60,33 @@ public class MiscOptionList extends OptionList {
                 localized("option", "notif.misc.msg.replacement"),
                 localized("option", "notif.misc.msg.replacement").append(".\n")
                         .append(localized("option", "notif.misc.msg.replacement.tooltip"))
-                        .append("\n\n").append(localized("option", "notif.misc.msg.tooltip.blank_hide"))));
+                        .append("\n\n")
+                        .append(localized("option", "notif.misc.msg.tooltip.blank_hide"))));
         addEntry(new Entry.CustomMessage(dynWideEntryX, dynWideEntryWidth, entryHeight,
                 () -> notif.statusBarMsg, (str) -> notif.statusBarMsg = str,
                 () -> notif.statusBarMsgEnabled, (val) -> notif.statusBarMsgEnabled = val,
                 localized("option", "notif.misc.msg.status_bar"),
                 localized("option", "notif.misc.msg.status_bar").append(".\n")
                         .append(localized("option", "notif.misc.msg.status_bar.tooltip"))
-                        .append("\n\n").append(localized("option", "notif.misc.msg.tooltip.blank_original"))));
+                        .append("\n\n")
+                        .append(localized("option", "notif.misc.msg.tooltip.blank_original"))));
         addEntry(new Entry.CustomMessage(dynWideEntryX, dynWideEntryWidth, entryHeight,
                 () -> notif.titleMsg, (str) -> notif.titleMsg = str,
                 () -> notif.titleMsgEnabled, (val) -> notif.titleMsgEnabled = val,
                 localized("option", "notif.misc.msg.title"),
                 localized("option", "notif.misc.msg.title").append(".\n")
                         .append(localized("option", "notif.misc.msg.title.tooltip"))
-                        .append("\n\n").append(localized("option", "notif.misc.msg.tooltip.blank_original"))));
+                        .append("\n\n")
+                        .append(localized("option", "notif.misc.msg.tooltip.blank_original"))));
         addEntry(new Entry.CustomMessage(dynWideEntryX, dynWideEntryWidth, entryHeight,
                 () -> notif.toastMsg, (str) -> notif.toastMsg = str,
                 () -> notif.toastMsgEnabled, (val) -> notif.toastMsgEnabled = val,
                 localized("option", "notif.misc.msg.toast"),
                 localized("option", "notif.misc.msg.toast").append(".\n")
                         .append(localized("option", "notif.misc.msg.toast.tooltip"))
-                        .append("\n\n").append(localized("option", "notif.misc.msg.tooltip.blank_original"))));
-        
+                        .append("\n\n")
+                        .append(localized("option", "notif.misc.msg.tooltip.blank_original"))));
+
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
                 localized("option", "notif.misc.reset"), null, -1));
 
@@ -103,7 +107,7 @@ public class MiscOptionList extends OptionList {
                         localized("option", "notif.misc.reset"),
                         localized("option", "notif.misc.reset.confirm")))));
     }
-    
+
     // Custom entries
 
     private abstract static class Entry extends OptionList.Entry {
@@ -146,8 +150,8 @@ public class MiscOptionList extends OptionList {
 
                 // Status button
                 elements.add(CycleButton.booleanBuilder(
-                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                        CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .displayOnlyValue()
                         .withInitialValue(statusSupplier.get())
                         .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,

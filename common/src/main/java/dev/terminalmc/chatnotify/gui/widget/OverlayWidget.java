@@ -36,7 +36,7 @@ public abstract class OverlayWidget extends AbstractWidget {
     public final double nominalWidthRatio;
     public final double nominalHeightRatio;
 
-    public OverlayWidget(int x, int y, int width, int height, boolean fixedSize, 
+    public OverlayWidget(int x, int y, int width, int height, boolean fixedSize,
                          Component msg, Consumer<OverlayWidget> close) {
         super(x, y, width, height, msg);
         checkWidth(width);
@@ -82,12 +82,14 @@ public abstract class OverlayWidget extends AbstractWidget {
 
     public int getNominalWidth(int screenWidth) {
         if (fixedSize) return width;
-        return Math.min(Math.max(getMinWidth(), (int)(screenWidth * nominalWidthRatio)), getMaxWidth());
+        return Math.min(Math.max(getMinWidth(), (int)(screenWidth * nominalWidthRatio)),
+                getMaxWidth());
     }
 
     public int getNominalHeight(int screenHeight) {
         if (fixedSize) return height;
-        return Math.min(Math.max(getMinHeight(), (int)(screenHeight * nominalHeightRatio)), getMaxHeight());
+        return Math.min(Math.max(getMinHeight(), (int)(screenHeight * nominalHeightRatio)),
+                getMaxHeight());
     }
 
     // Re-init on reposition or resize to maintain sub-widget position and size

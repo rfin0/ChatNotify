@@ -20,7 +20,6 @@ import com.google.gson.*;
 import dev.terminalmc.chatnotify.util.JsonUtil;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
@@ -127,6 +126,9 @@ public class TextStyle {
 
     // Validation
 
+    /**
+     * Validates this instance. To be called after editing and before saving.
+     */
     TextStyle validate() {
         if (color < 0 || color > 0xFFFFFF) color = colorDefault;
         return this;
@@ -136,8 +138,7 @@ public class TextStyle {
 
     public static class Deserializer implements JsonDeserializer<TextStyle> {
         @Override
-        public @Nullable TextStyle deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
-                throws JsonParseException {
+        public TextStyle deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;

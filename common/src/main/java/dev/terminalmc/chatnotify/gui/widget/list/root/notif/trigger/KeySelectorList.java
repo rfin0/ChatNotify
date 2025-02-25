@@ -56,7 +56,7 @@ public class KeySelectorList extends OptionList {
             "commands.message.display.incoming",
             "commands.message.display.outgoing",
     };
-    
+
     private final Trigger trigger;
 
     public KeySelectorList(Minecraft mc, int width, int height, int y, int entryWidth,
@@ -89,14 +89,14 @@ public class KeySelectorList extends OptionList {
                 localized("key", "group.command"), null, -1));
         addKeyEntries(COMMAND_KEYS);
     }
-    
+
     private void addKeyEntries(String[] keys) {
         for (int i = 0; i < keys.length; i++) {
             addEntry(new Entry.KeyOption(entryX, entryWidth, entryHeight, this, trigger,
                     keys[i], i < keys.length - 1 ? keys[++i] : null));
         }
     }
-    
+
     // Custom entries
 
     private abstract static class Entry extends OptionList.Entry {
@@ -119,13 +119,13 @@ public class KeySelectorList extends OptionList {
                       @NotNull String key1, @Nullable String key2) {
                 super();
                 int buttonWidth = (width - SPACE_TINY) / 2;
-                
+
                 elements.add(Button.builder(localized("key", "id." + key1),
-                        (button) -> {
-                            trigger.string = key1;
-                            list.setScrollAmount(0);
-                            list.init();
-                        })
+                                (button) -> {
+                                    trigger.string = key1;
+                                    list.setScrollAmount(0);
+                                    list.init();
+                                })
                         .tooltip(Tooltip.create(Component.literal(key1)))
                         .pos(x, 0)
                         .size(buttonWidth, height)

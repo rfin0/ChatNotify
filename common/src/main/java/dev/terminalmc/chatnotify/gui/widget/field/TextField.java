@@ -48,15 +48,16 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
  * double-clicking to select words, triple-clicking to select all, and content
  * validation with warning text color and tooltip.
  */
+@SuppressWarnings("UnusedReturnValue")
 public class TextField extends EditBox {
     public static final long CLICK_CHAIN_TIME = 250L;
     public static final int TEXT_COLOR_DEFAULT = 0xE0E0E0;
     public static final int TEXT_COLOR_ERROR = 0xFF5555;
     public static final int TEXT_COLOR_HINT = 0x555555;
     public static final int TEXT_COLOR_PREVIEW = 0xAAAAAA;
-    
+
     private final Font font;
-    
+
     // Validation
     public final List<@NotNull Validator> validators = new ArrayList<>();
     public boolean lenient = true;
@@ -67,11 +68,11 @@ public class TextField extends EditBox {
     // Undo-redo history
     private final List<String> history = new ArrayList<>();
     private int historyIndex = -1;
-    
+
     // Click-drag selection
     private double dragOriginX;
     private int dragOriginPos;
-    
+
     // Double and triple-click selection
     private long lastClickTime;
     private int chainedClicks;
@@ -84,7 +85,7 @@ public class TextField extends EditBox {
         this(Minecraft.getInstance().font, x, y, width, height, Component.empty(), validator);
     }
 
-    public TextField(Font font, int x, int y, int width, int height, Component msg, 
+    public TextField(Font font, int x, int y, int width, int height, Component msg,
                      @Nullable Validator validator) {
         super(font, x, y, width, height, msg);
         this.font = font;
@@ -92,27 +93,27 @@ public class TextField extends EditBox {
             this.validators.add(validator);
         }
     }
-
+    
     public TextField withValidator(@NotNull Validator validator) {
         this.validators.add(validator);
         return this;
     }
-
+    
     public TextField regexValidator() {
         this.validators.add(new Validator.Regex());
         return this;
     }
-
+    
     public TextField hexColorValidator() {
         this.validators.add(new Validator.HexColor());
         return this;
     }
-
+    
     public TextField soundValidator() {
         this.validators.add(new Validator.Sound());
         return this;
     }
-
+    
     public TextField posIntValidator() {
         this.validators.add(new Validator.PosInt());
         return this;
@@ -123,6 +124,7 @@ public class TextField extends EditBox {
         return this;
     }
 
+    @SuppressWarnings("unused")
     public TextField lenient() {
         this.lenient = true;
         return this;
@@ -153,7 +155,7 @@ public class TextField extends EditBox {
         super.setTooltip(normalTooltip);
         return true;
     }
-    
+
     @Override
     public void setHint(@NotNull Component hint) {
         super.setHint(hint.copy().withColor(TEXT_COLOR_HINT));
@@ -174,9 +176,9 @@ public class TextField extends EditBox {
             super.setTextColor(color);
         }
     }
-    
+
     // Chained clicks and click-drag
-    
+
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (super.mouseClicked(mouseX, mouseY, button)) {
@@ -191,8 +193,8 @@ public class TextField extends EditBox {
                         // go backwards to the start of the word.
                         if (pos < 0) {
                             start = 0;
-                        } else if (pos >= getValue().length() 
-                                || getValue().charAt(pos) == ' ' 
+                        } else if (pos >= getValue().length()
+                                || getValue().charAt(pos) == ' '
                                 || (pos > 0 && getValue().charAt(pos - 1) != ' ')) {
                             start = getWordPosition(-1);
                         }
@@ -216,11 +218,11 @@ public class TextField extends EditBox {
                 chainedClicks = 0;
             }
             lastClickTime = time;
-            
+
             // Reset drag origin
             dragOriginX = mouseX;
             dragOriginPos = getCursorPosition();
-            
+
             return true;
         }
         return false;
@@ -230,7 +232,7 @@ public class TextField extends EditBox {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (button != 0) return false;
         String str = getValue();
-        
+
         if (mouseX < dragOriginX) { // Dragging left
             String subLeft = str.substring(0, dragOriginPos);
             int offsetChars = font.plainSubstrByWidth(subLeft,
@@ -243,7 +245,7 @@ public class TextField extends EditBox {
                     Mth.floor(mouseX - dragOriginX), false).length();
             moveCursorTo(dragOriginPos + offsetChars, true);
         }
-        
+
         return true;
     }
 
@@ -289,7 +291,7 @@ public class TextField extends EditBox {
             setValue(history.get(++historyIndex));
         }
     }
-    
+
     // Validator
 
     @FunctionalInterface
@@ -330,7 +332,8 @@ public class TextField extends EditBox {
 
             @Override
             public Optional<Component> validate(String str) {
-                if (sounds.contains(str) || (!str.contains(":") && sounds.contains(("minecraft:" + str)))) {
+                if (sounds.contains(str)
+                        || (!str.contains(":") && sounds.contains(("minecraft:" + str)))) {
                     return Optional.empty();
                 } else {
                     return Optional.of(localized("ui", "field.error.sound")
@@ -376,15 +379,15 @@ public class TextField extends EditBox {
             final @Nullable Notification notif;
             final Trigger trigger;
 
-            public UniqueTrigger(Supplier<List<Notification>> notifSupplier, 
-                                 Function<Notification, List<Trigger>> triggerSupplier, 
+            public UniqueTrigger(Supplier<List<Notification>> notifSupplier,
+                                 Function<Notification, List<Trigger>> triggerSupplier,
                                  @Nullable Notification notif, Trigger trigger) {
                 this.notifSupplier = notifSupplier;
                 this.triggerSupplier = triggerSupplier;
                 this.notif = notif;
                 this.trigger = trigger;
             }
-            
+
             @Override
             public Optional<Component> validate(String str) {
                 if (str.isBlank()) return Optional.empty();
@@ -397,8 +400,8 @@ public class TextField extends EditBox {
                             j++;
                             if (
                                     !t.equals(trigger)
-                                    && t.string.equals(str)
-                                    && t.type.equals(trigger.type)
+                                            && t.string.equals(str)
+                                            && t.type.equals(trigger.type)
                             ) {
                                 if (n.equals(notif)) {
                                     return Optional.of(localized(
@@ -423,7 +426,7 @@ public class TextField extends EditBox {
             }
         }
     }
-    
+
     // Utility methods
 
     public static boolean isUndo(int keyCode) {

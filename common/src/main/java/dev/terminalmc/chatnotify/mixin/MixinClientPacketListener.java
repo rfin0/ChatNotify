@@ -94,9 +94,9 @@ public class MixinClientPacketListener {
                                 PlayerInfo playerInfo, CallbackInfo ci) {
         if (Minecraft.getInstance().player == null) return;
         if (
-                action.equals(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME) 
-                && playerInfo.getProfile().getId().equals(Minecraft.getInstance().player.getUUID())
-                && entry.displayName() != null
+                action.equals(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME)
+                        && playerInfo.getProfile().getId().equals(Minecraft.getInstance().player.getUUID())
+                        && entry.displayName() != null
         ) {
             Config.get().setDisplayName(FormatUtil.stripCodes(entry.displayName().getString()));
         }
@@ -123,7 +123,7 @@ public class MixinClientPacketListener {
     private void chatNotify$storeMessage(String message) {
         long time = System.nanoTime();
         chatNotify$removeOldMessages(time);
-        
+
         String plainMsg = "";
 
         // If message starts with a prefix, remove the prefix.

@@ -50,7 +50,7 @@ public class PrefixList extends OptionList {
                     init();
                 }));
     }
-    
+
     // Custom entries
 
     private abstract static class Entry extends OptionList.Entry {
@@ -61,17 +61,17 @@ public class PrefixList extends OptionList {
 
                 TextField prefixField = new TextField(x, 0, width, height);
                 prefixField.setMaxLength(30);
-                prefixField.setResponder((prefix) -> 
+                prefixField.setResponder((prefix) ->
                         Config.get().prefixes.set(index, prefix.strip()));
                 prefixField.setValue(Config.get().prefixes.get(index));
                 elements.add(prefixField);
 
                 elements.add(Button.builder(
-                        Component.literal("❌").withStyle(ChatFormatting.RED),
-                        (button) -> {
-                            Config.get().prefixes.remove(index);
-                            list.init();
-                        })
+                                Component.literal("❌").withStyle(ChatFormatting.RED),
+                                (button) -> {
+                                    Config.get().prefixes.remove(index);
+                                    list.init();
+                                })
                         .pos(x + width + SPACE, 0)
                         .size(list.smallWidgetWidth, height)
                         .build());

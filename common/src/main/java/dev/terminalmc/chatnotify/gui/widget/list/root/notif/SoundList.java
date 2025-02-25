@@ -38,10 +38,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
-/**
- * Contains controls for a {@link Sound}.
- */
-public class SoundOptionList extends OptionList {
+public class SoundList extends OptionList {
     public static final String[] NOTEBLOCK_SOUNDS = {
             "block.note_block.banjo",
             "block.note_block.bass",
@@ -115,8 +112,8 @@ public class SoundOptionList extends OptionList {
     private final Sound sound;
     private @Nullable SoundInstance lastSound;
 
-    public SoundOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
-                           int entryHeight, Sound sound) {
+    public SoundList(Minecraft mc, int width, int height, int y, int entryWidth,
+                     int entryHeight, Sound sound) {
         super(mc, width, height, y, entryWidth, entryHeight, 1);
         this.sound = sound;
     }
@@ -170,7 +167,7 @@ public class SoundOptionList extends OptionList {
                     sounds[i], i < sounds.length - 1 ? sounds[++i] : null));
         }
     }
-    
+
     // Utility methods
 
     private void refreshSoundField() {
@@ -193,7 +190,7 @@ public class SoundOptionList extends OptionList {
             mc.getSoundManager().play(lastSound);
         }
     }
-    
+
     // Custom entries
 
     private abstract static class Entry extends OptionList.Entry {
@@ -202,7 +199,7 @@ public class SoundOptionList extends OptionList {
             private final Sound sound;
             private final TextField soundField;
 
-            SoundField(int x, int width, int height, Sound sound, SoundOptionList list) {
+            SoundField(int x, int width, int height, Sound sound, SoundList list) {
                 super();
                 this.sound = sound;
                 int statusButtonWidth = 25;
@@ -232,7 +229,7 @@ public class SoundOptionList extends OptionList {
 
                 // Status button
                 elements.add(CycleButton.booleanBuilder(
-                        CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .displayOnlyValue()
                         .withInitialValue(sound.isEnabled())
@@ -246,7 +243,7 @@ public class SoundOptionList extends OptionList {
         }
 
         private static class SoundSource extends Entry {
-            SoundSource(int x, int width, int height, SoundOptionList list) {
+            SoundSource(int x, int width, int height, SoundList list) {
                 super();
                 int mainButtonWidth = width - list.smallWidgetWidth - 1;
 
@@ -260,9 +257,8 @@ public class SoundOptionList extends OptionList {
                                 localized("option", "notif.sound.source"),
                                 (button, status) -> Config.get().soundSource = status));
 
-                elements.add(Button.builder(
-                                Component.literal("\uD83D\uDD0A"),
-                                (button) -> Minecraft.getInstance().setScreen(new SoundOptionsScreen(
+                elements.add(Button.builder(Component.literal("\uD83D\uDD0A"), (button) -> 
+                                Minecraft.getInstance().setScreen(new SoundOptionsScreen(
                                         list.screen, Minecraft.getInstance().options)))
                         .tooltip(Tooltip.create(localized(
                                 "option", "notif.sound.open.minecraft_volume.tooltip")))
@@ -273,11 +269,11 @@ public class SoundOptionList extends OptionList {
         }
 
         private static class SoundOption extends Entry {
-            SoundOption(int x, int width, int height, SoundOptionList list, Sound sound,
+            SoundOption(int x, int width, int height, SoundList list, Sound sound,
                         String soundId1, @Nullable String soundId2) {
                 super();
                 int buttonWidth = (width - SPACE_TINY) / 2;
-                
+
                 elements.add(new SilentButton(x, 0, buttonWidth, height,
                         localized("sound", "id." + soundId1),
                         (button) -> {

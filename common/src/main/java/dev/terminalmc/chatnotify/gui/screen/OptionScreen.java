@@ -36,9 +36,9 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Contains one tightly-coupled {@link OptionList}, which is used to display
- * all option control widgets.
- * 
+ * Supports displaying a series of {@link OptionList}s, accessible via a
+ * {@link HorizontalList} of 'tab'-style buttons in the header.
+ *
  * <p>Supports displaying a single {@link OverlayWidget}, which requires hiding
  * all other widgets to avoid rendering and click conflicts but is still simpler
  * than screen switching.</p>
@@ -91,12 +91,12 @@ public abstract class OptionScreen extends OptionsSubScreen {
     public static final int MAX_TAB_WIDTH = 120;
     public static final int TAB_HEIGHT = 20;
     public static final int TAB_SPACING = 4;
-    
-    
+
+
     protected final HorizontalList<Button> tabs = new HorizontalList<>(
             TAB_LIST_MARGIN, TAB_LIST_Y, width - TAB_LIST_MARGIN * 2, TAB_LIST_HEIGHT,
             TAB_SPACING, true);
-    
+
     private @Nullable OptionList list;
     private @Nullable OverlayWidget overlay = null;
 
@@ -107,18 +107,18 @@ public abstract class OptionScreen extends OptionsSubScreen {
     public OptionScreen(Screen lastScreen) {
         super(lastScreen, Minecraft.getInstance().options, Component.empty());
     }
-    
+
     // Lifecycle
-    
+
     @Override
     protected void init() {
         clearWidgets();
         clearFocus();
-        
+
         addHeader();
         addContents();
         addFooter();
-        
+
         setInitialFocus();
     }
 
@@ -142,7 +142,7 @@ public abstract class OptionScreen extends OptionsSubScreen {
                     HEADER_MARGIN);
             addRenderableWidget(list);
         }
-        
+
         // Overlay widget
         if (overlay != null) {
             overlay.updateBounds(width, height);
@@ -230,7 +230,7 @@ public abstract class OptionScreen extends OptionsSubScreen {
     }
 
     // Overlay widget handling
-    
+
     public void setOverlay(OverlayWidget widget) {
         removeOverlayWidget();
         overlay = widget;

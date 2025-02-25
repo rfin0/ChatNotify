@@ -27,6 +27,7 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.chat.Component;
 
 import java.util.*;
@@ -78,11 +79,11 @@ public class ChatNotify {
 
     public static void onEndTick(Minecraft mc) {
         tickResponseMessages(mc);
-        
+
         // Config reset warning toast
         if (hasResetConfig && mc.screen instanceof TitleScreen) {
             hasResetConfig = false;
-            mc.getToasts().addToast(new SystemToast(new SystemToast.SystemToastId(15000L), 
+            mc.getToasts().addToast(new SystemToast(new SystemToast.SystemToastId(15000L),
                     localized("toast", "reset.title"), localized("toast", "reset.message",
                     Component.literal(Config.UNREADABLE_FILE_NAME).withStyle(ChatFormatting.GOLD))));
         }
@@ -93,7 +94,7 @@ public class ChatNotify {
             responseMessages.clear();
             return;
         }
-        
+
         List<String> sending = new ArrayList<>();
         responseMessages.removeIf((resMsg) -> {
             if (--resMsg.countdown <= 0) {
@@ -108,11 +109,11 @@ public class ChatNotify {
             }
             return false;
         });
-        
-        sendMessages(sending);
+
+        sendMessages(sending, mc.getConnection());
     }
-    
-    private static void sendMessages(List<String> messages) {
+
+    private static void sendMessages(List<String> messages, ClientPacketListener connection) {
         if (messages.isEmpty()) return;
         Minecraft mc = Minecraft.getInstance();
         switch (Config.get().sendMode) {
@@ -132,15 +133,15 @@ public class ChatNotify {
             case PACKET -> {
                 for (String msg : messages) {
                     if (msg.startsWith("/")) {
-                        mc.getConnection().sendCommand(msg.substring(1));
+                        connection.sendCommand(msg.substring(1));
                     } else {
-                        mc.getConnection().sendChat(msg);
+                        connection.sendChat(msg);
                     }
                 }
             }
         }
     }
-    
+
     public static void updateUsernameNotif(Config config) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null) {

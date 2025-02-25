@@ -37,7 +37,7 @@ public class NotificationToast implements Toast {
     private static final int X_MARGIN = 10;
     private static final int Y_MARGIN = 6;
     private static final int LINE_SPACE = 3;
-    
+
     private final int lineHeight;
     private final List<FormattedCharSequence> messageLines;
 
@@ -60,7 +60,7 @@ public class NotificationToast implements Toast {
             int height = HEIGHT + lineHeight * Math.max(0, messageLines.size() - 2);
             int partialSpriteHeight = HEIGHT - 4;
             int bottomSpriteHeight = Math.min(4, height - partialSpriteHeight);
-            
+
             // Top border
             renderBackgroundRow(graphics, width, 0, 0, partialSpriteHeight);
 
@@ -76,7 +76,7 @@ public class NotificationToast implements Toast {
             renderBackgroundRow(graphics, width, HEIGHT - bottomSpriteHeight,
                     height - bottomSpriteHeight, bottomSpriteHeight);
         }
-        
+
         if (messageLines.size() == 1) {
             // Single line, center vertically
             graphics.drawString(font, messageLines.getFirst(),
@@ -88,15 +88,16 @@ public class NotificationToast implements Toast {
                         X_MARGIN, Y_MARGIN + lineHeight * j, -1, false);
             }
         }
-        
+
         return elapsedTime < DISPLAY_TIME * component.getNotificationDisplayTimeMultiplier()
                 ? Visibility.SHOW : Visibility.HIDE;
     }
 
-    private void renderBackgroundRow(GuiGraphics graphics, int width, int vOffset, int y, int vHeight) {
+    private void renderBackgroundRow(GuiGraphics graphics, int width, int vOffset,
+                                     int y, int vHeight) {
         int uWidth = vOffset == 0 ? 20 : 5;
         int uRemainder = Math.min(60, width - uWidth);
-        
+
         // Left border
         graphics.blitSprite(BACKGROUND_SPRITE, WIDTH, HEIGHT, 0, vOffset,
                 0, y, uWidth, vHeight);

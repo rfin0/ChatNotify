@@ -27,15 +27,15 @@ import org.jetbrains.annotations.Nullable;
 
 public class ChatHeadsUtil {
     /**
-     * Gets the most recently saved message ownership data.
+     * Gets the most recently saved message ownership data from ChatHeads.
      *
      * <p>Both pair elements will be {@code null} if there was no data.</p>
      */
-    static @NotNull Pair<PlayerInfo,Integer> getPlayerInfo() {
+    static @NotNull Pair<@Nullable PlayerInfo, @Nullable Integer> getPlayerInfo() {
         if (ChatHeads.lastSenderData == HeadData.EMPTY) {
             return new Pair<>(null, null);
         } else {
-            return new Pair<>(ChatHeads.lastSenderData.playerInfo(), 
+            return new Pair<>(ChatHeads.lastSenderData.playerInfo(),
                     ChatHeads.lastSenderData.codePointIndex());
         }
     }
@@ -43,8 +43,8 @@ public class ChatHeadsUtil {
     /**
      * Tells ChatHeads to update its saved message ownership data.
      */
-    static void handleAddedMessage(Component message, 
-                                   @Nullable ChatType.Bound bound, 
+    static void handleAddedMessage(Component message,
+                                   @Nullable ChatType.Bound bound,
                                    @Nullable PlayerInfo playerInfo) {
         ChatHeads.handleAddedMessage(message, bound, playerInfo);
     }

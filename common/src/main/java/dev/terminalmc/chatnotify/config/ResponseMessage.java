@@ -26,8 +26,15 @@ public class ResponseMessage implements Functional.StringSupplier {
     public static final int VERSION = 2;
     public final int version = VERSION;
 
+    /**
+     * The active countdown value.
+     */
     public transient int countdown;
-    public transient String sendingString;
+
+    /**
+     * The processed version of {@link ResponseMessage#string}
+     */
+    public transient @Nullable String sendingString;
 
     // Options
 
@@ -59,7 +66,8 @@ public class ResponseMessage implements Functional.StringSupplier {
          */
         NORMAL("~"),
         /**
-         * Replace regex group indicators with groups from the trigger.
+         * Replace regex group indicators with groups from the activating
+         * {@link Trigger}.
          */
         REGEX(".*"),
         /**
@@ -106,6 +114,9 @@ public class ResponseMessage implements Functional.StringSupplier {
 
     // Validation
 
+    /**
+     * Validates this instance. To be called after editing and before saving.
+     */
     ResponseMessage validate() {
         if (delayTicks < 0) delayTicks = delayTicksDefault;
         return this;
@@ -115,8 +126,7 @@ public class ResponseMessage implements Functional.StringSupplier {
 
     public static class Deserializer implements JsonDeserializer<ResponseMessage> {
         @Override
-        public @Nullable ResponseMessage deserialize(JsonElement json, java.lang.reflect.Type typeOfT,
-                                                     JsonDeserializationContext ctx) throws JsonParseException {
+        public ResponseMessage deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext ctx) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;

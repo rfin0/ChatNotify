@@ -35,10 +35,10 @@ import java.util.regex.Pattern;
 
 public class FormatUtil {
     private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("\\u00A7.?");
-    private static final String PLACEHOLDER_PATTERN_STRING 
+    private static final String PLACEHOLDER_PATTERN_STRING
             = "%(\\d+\\$)?([-#+ 0,(<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(PLACEHOLDER_PATTERN_STRING);
-    
+
     /**
      * {@link net.minecraft.util.StringUtil#stripColor} only strips valid 
      * format codes, but invalid codes are also hidden from view so we remove 
@@ -53,7 +53,7 @@ public class FormatUtil {
      * {@link MutableComponent} tree to {@link PlainTextContents} elements, 
      * and in the process converts any format codes to {@link Style}s.
      */
-    public static MutableComponent convertToStyledLiteral(MutableComponent text) 
+    public static MutableComponent convertToStyledLiteral(MutableComponent text)
             throws IllegalArgumentException {
         // If contents are translatable, convert to literal
         if (text.getContents() instanceof TranslatableContents) {
@@ -62,28 +62,28 @@ public class FormatUtil {
 
         // Recurse for all siblings
         text.getSiblings().replaceAll(sibling -> convertToStyledLiteral(sibling.copy()));
-        
+
         // Convert codes in contents
         if (text.getContents() instanceof PlainTextContents) {
             text = convertCodesToStyles(text);
         }
-        
+
         return text;
     }
 
     /**
      * Converts the contents of the {@link MutableComponent} from 
      * {@link TranslatableContents} to {@link PlainTextContents}.
-     * 
+     *
      * <p><b>Note:</b> Does not recurse, only affects root. Caller must recurse
      * if required.</p>
      */
-    private static MutableComponent convertToLiteral(MutableComponent text) 
+    private static MutableComponent convertToLiteral(MutableComponent text)
             throws IllegalArgumentException {
         if (!(text.getContents() instanceof TranslatableContents contents)) return text;
-        
+
         boolean debug = Config.get().debugMode.equals(Config.DebugMode.ALL);
-        
+
         if (debug) {
             ChatNotify.LOG.warn("Converting message to literal");
             ChatNotify.LOG.warn("Text:");
@@ -91,10 +91,10 @@ public class FormatUtil {
             ChatNotify.LOG.warn("Tree:");
             ChatNotify.LOG.warn(text.toString());
         }
-        
+
         // Detach siblings
         List<Component> oldSiblings = new ArrayList<>(text.getSiblings());
-        
+
         // Process translatable contents
         Language lang = Language.getInstance();
         String key = contents.getKey();
@@ -104,7 +104,7 @@ public class FormatUtil {
         String string = fallback == null
                 ? lang.getOrDefault(key)
                 : lang.getOrDefault(key, fallback);
-        
+
         // Minecraft will not attempt to process the placeholders if the string
         // format is invalid, so we check that here
         boolean validFormat = true;
@@ -120,11 +120,11 @@ public class FormatUtil {
                 ChatNotify.LOG.warn(string);
             }
         }
-        
+
         if (validFormat) {
             // Split on placeholders to get an array of plain text elements
             List<String> split = new ArrayList<>(List.of(PLACEHOLDER_PATTERN.split(string)));
-            
+
             // Pad the array if necessary for ease of iteration
             if (split.isEmpty()) {
                 split.add(""); // Pad start
@@ -191,10 +191,10 @@ public class FormatUtil {
                 }
             }
         }
-        
+
         // Re-attach siblings
         text.getSiblings().addAll(oldSiblings);
-        
+
         return text;
     }
 
@@ -206,20 +206,20 @@ public class FormatUtil {
      */
     private static MutableComponent convertCodesToStyles(MutableComponent text) {
         if (!(text.getContents() instanceof PlainTextContents contents)) return text;
-        
+
         // Check whether conversion is required
         String str = contents.text();
         if (!str.contains("§")) return text;
-        
+
         // Detach siblings
         List<Component> oldSiblings = new ArrayList<>(text.getSiblings());
-        
+
         // Convert
         text = Component.empty().withStyle(text.getStyle());
         StringBuilder sb = new StringBuilder();
         char[] chars = str.toCharArray();
         FormatCodes codes = new FormatCodes();
-        
+
         for (int i = 0; i < chars.length; i++) {
             if (chars[i] == '§') { // Section sign
                 if (!sb.isEmpty()) {
@@ -231,7 +231,7 @@ public class FormatUtil {
                     char next = chars[++i]; // Skip to next char
                     switch (next) { // Process code
                         case 'r' -> codes.clear();
-                        case '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f' 
+                        case '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'
                                 -> codes.color = ChatFormatting.getByCode(next);
                         case 'k' -> codes.obfuscated = true;
                         case 'l' -> codes.bold = true;
@@ -248,13 +248,13 @@ public class FormatUtil {
         if (!sb.isEmpty()) {
             text.append(Component.literal(sb.toString()).withStyle(codes.createStyle()));
         }
-        
+
         // Re-attach siblings
         text.getSiblings().addAll(oldSiblings);
-        
+
         return text;
     }
-    
+
     private static class FormatCodes {
         @Nullable ChatFormatting color = null;
         boolean bold = false;
@@ -262,7 +262,7 @@ public class FormatUtil {
         boolean underline = false;
         boolean strikethrough = false;
         boolean obfuscated = false;
-        
+
         Style createStyle() {
             return new Style(
                     color == null ? null : TextColor.fromLegacyFormat(color),
@@ -277,7 +277,7 @@ public class FormatUtil {
                     null
             );
         }
-        
+
         void clear() {
             color = null;
             bold = false;

@@ -23,21 +23,20 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Wraps {@link ChatHeadsUtil} to catch errors caused by the ChatHeads mod not 
- * being available.
- * 
- * <p>There are other arguably better ways of doing this, such as by calling
- * loader-specific API methods to check whether the mod is loaded.</p>
+ * Wraps {@link ChatHeadsUtil} to catch errors caused by the ChatHeads mod not
+ * providing the expected methods.
  */
 public class ChatHeadsWrapper {
     private static boolean hasFailed = false;
 
     /**
-     * Gets the most recently saved message ownership data.
-     * 
+     * Gets the most recently saved message ownership data from ChatHeads.
+     *
+     * <p>Both pair elements will be {@code null} if there was no data.</p>
+     *
      * <p>Returns {@code null} if the operation failed.</p>
      */
-    public static @Nullable Pair<PlayerInfo,Integer> getPlayerInfo() {
+    public static @Nullable Pair<@Nullable PlayerInfo, @Nullable Integer> getPlayerInfo() {
         if (hasFailed) return null;
         try {
             return ChatHeadsUtil.getPlayerInfo();
@@ -51,8 +50,8 @@ public class ChatHeadsWrapper {
      * Tells ChatHeads to update its saved message ownership data.
      */
     public static void handleAddedMessage(Component message,
-                                   @Nullable ChatType.Bound bound,
-                                   @Nullable PlayerInfo playerInfo) {
+                                          @Nullable ChatType.Bound bound,
+                                          @Nullable PlayerInfo playerInfo) {
         if (hasFailed) return;
         try {
             ChatHeadsUtil.handleAddedMessage(message, bound, playerInfo);

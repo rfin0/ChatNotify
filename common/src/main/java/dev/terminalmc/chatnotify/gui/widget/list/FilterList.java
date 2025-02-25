@@ -17,9 +17,9 @@
 package dev.terminalmc.chatnotify.gui.widget.list;
 
 import dev.terminalmc.chatnotify.config.*;
-import dev.terminalmc.chatnotify.gui.screen.NotifOptionsScreen;
+import dev.terminalmc.chatnotify.gui.screen.NotifScreen;
 import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
-import dev.terminalmc.chatnotify.gui.screen.TriggerOptionsScreen;
+import dev.terminalmc.chatnotify.gui.screen.TriggerScreen;
 import dev.terminalmc.chatnotify.gui.widget.ConfirmButton;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.RightClickableButton;
@@ -66,7 +66,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
     private final Supplier<List<E>> listSupplier;
     private final EntrySupplier<E> entrySupplier;
     private final @Nullable TrailerSupplier<E> trailerSupplier;
-    
+
     public FilterList(Minecraft mc, int width, int height, int y, int entryWidth,
                       int entryHeight, int entrySpacing,
                       Class<? extends Entry.ListEntry> entryClass,
@@ -196,7 +196,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                     (button, status) -> list.statusConsumer.accept(status)));
                     movingX += statusButtonWidth + SPACE;
                 }
-                
+
                 TextField searchField = new TextField(movingX, 0, searchFieldWidth, height);
                 searchField.setMaxLength(64);
                 searchField.setHint(localized("common", "search"));
@@ -241,7 +241,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 if (canUseStyleTarget) triggerFieldWidth -= list.tinyWidgetWidth;
                 if (keyTrigger) triggerFieldWidth -= list.tinyWidgetWidth;
                 int movingX = x;
-                
+
                 // Index indicator
                 Button indicatorButton = Button.builder(
                                 Component.literal(String.valueOf(index + 1)), (button) -> {})
@@ -284,9 +284,9 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 if (keyTrigger) {
                     // Key selection button
                     Button keySelectButton = Button.builder(Component.literal("\uD83D\uDD0D"),
-                                    (button) -> mc.setScreen(new TriggerOptionsScreen(
+                                    (button) -> mc.setScreen(new TriggerScreen(
                                             mc.screen, trigger, textStyle, () -> {},
-                                            TriggerOptionsScreen.TabKey.KEY_SELECTOR.key)))
+                                            TriggerScreen.TabKey.KEY_SELECTOR.key)))
                             .pos(movingX, 0)
                             .size(list.tinyWidgetWidth, height)
                             .build();
@@ -299,8 +299,8 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                 // Trigger field
                 TextField triggerField = new TextField(movingX, 0, triggerFieldWidth, height);
-                if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
                 triggerField.withValidator(validator);
+                if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
                 triggerField.setMaxLength(240);
                 triggerField.setResponder((str) -> trigger.string = str.strip());
                 triggerField.setValue(trigger.string);
@@ -310,9 +310,9 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                 // Trigger editor button
                 Button editorButton = Button.builder(Component.literal("✎"),
-                                (button) -> mc.setScreen(new TriggerOptionsScreen(
+                                (button) -> mc.setScreen(new TriggerScreen(
                                         mc.screen, trigger, textStyle, () -> {},
-                                        TriggerOptionsScreen.TabKey.TRIGGER_EDITOR.key)))
+                                        TriggerScreen.TabKey.TRIGGER_EDITOR.key)))
                         .pos(movingX, 0)
                         .size(list.tinyWidgetWidth, height)
                         .build();
@@ -610,6 +610,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                 boolean keyTrig = singleTrig && trigger.type == Trigger.Type.KEY;
 
                 int baseFieldWidth = Minecraft.getInstance().font.width("#FFAAFF++"); // ~54
+                //noinspection UnnecessaryLocalVariable
                 int colorFieldWidth = baseFieldWidth;
                 int soundFieldWidth = baseFieldWidth;
                 int statusButtonWidth = Math.max(24, height);
@@ -725,10 +726,10 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     Button keySelectButton = Button.builder(Component.literal("\uD83D\uDD0D"),
                                     (button) -> {
                                         notif.editing = true;
-                                        mc.setScreen(new TriggerOptionsScreen(
+                                        mc.setScreen(new TriggerScreen(
                                                 mc.screen, trigger, notif.textStyle,
                                                 () -> notif.editing = false,
-                                                TriggerOptionsScreen.TabKey.KEY_SELECTOR.key));
+                                                TriggerScreen.TabKey.KEY_SELECTOR.key));
                                     })
                             .pos(movingX, 0)
                             .size(list.tinyWidgetWidth, height)
@@ -752,10 +753,8 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     triggerField.setValue(trigger.string);
                     triggerField.setHint(localized("option", "notif.trigger.field.hint"));
                 } else {
-                    triggerField = new FakeTextField(movingX, 0, triggerFieldWidth, height, () -> {
-                        notif.editing = true;
-                        mc.setScreen(new NotifOptionsScreen(mc.screen, notif));
-                    });
+                    triggerField = new FakeTextField(movingX, 0, triggerFieldWidth, height, () ->
+                            mc.setScreen(new NotifScreen(mc.screen, notif)));
                     triggerField.setMaxLength(240);
                     triggerField.setValue(createLabel(notif, triggerFieldWidth - 10).getString());
                 }
@@ -767,10 +766,10 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     Button editorButton = Button.builder(Component.literal("✎"),
                                     (button) -> {
                                         notif.editing = true;
-                                        mc.setScreen(new TriggerOptionsScreen(
+                                        mc.setScreen(new TriggerScreen(
                                                 mc.screen, trigger, notif.textStyle,
                                                 () -> notif.editing = false,
-                                                TriggerOptionsScreen.TabKey.TRIGGER_EDITOR.key));
+                                                TriggerScreen.TabKey.TRIGGER_EDITOR.key));
                                     })
                             .pos(movingX, 0)
                             .size(list.tinyWidgetWidth, height)
@@ -786,10 +785,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
 
                 ImageButton editButton = new ImageButton(movingX, 0,
                         list.smallWidgetWidth, height, OPTION_SPRITES,
-                        (button) -> {
-                            notif.editing = true;
-                            mc.setScreen(new NotifOptionsScreen(mc.screen, notif));
-                        });
+                        (button) -> mc.setScreen(new NotifScreen(mc.screen, notif)));
                 editButton.setTooltip(Tooltip.create(localized(
                         "option", "notif.open.options.tooltip")));
                 editButton.setTooltipDelay(Duration.ofMillis(200));
@@ -838,7 +834,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                             int color = textColor.getValue();
                             notif.textStyle.color = color;
                             float[] hsv = new float[3];
-                            Color.RGBtoHSB(FastColor.ARGB32.red(color), 
+                            Color.RGBtoHSB(FastColor.ARGB32.red(color),
                                     FastColor.ARGB32.green(color),
                                     FastColor.ARGB32.blue(color), hsv);
                             if (hsv[2] < 0.1) colorField.setTextColor(0xFFFFFF);
@@ -878,11 +874,8 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                         Component.literal("\uD83D\uDD0A").withStyle(notif.sound.isEnabled()
                                 ? ChatFormatting.WHITE
                                 : ChatFormatting.RED
-                        ), (button) -> {
-                    notif.editing = true;
-                    mc.setScreen(new NotifOptionsScreen(mc.screen, notif,
-                            NotifOptionsScreen.TabKey.SOUND.key));
-                }, (button) -> {
+                        ), (button) -> mc.setScreen(new NotifScreen(mc.screen, notif,
+                        NotifScreen.TabKey.SOUND.key)), (button) -> {
                     // Toggle sound
                     notif.sound.setEnabled(!notif.sound.isEnabled());
                     list.init();

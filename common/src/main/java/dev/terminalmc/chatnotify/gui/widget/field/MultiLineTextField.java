@@ -47,7 +47,7 @@ public class MultiLineTextField extends MultiLineEditBox {
     public static final long CLICK_CHAIN_TIME = 250L;
     public static final int TEXT_COLOR_DEFAULT = 0xE0E0E0;
     public static final int TEXT_COLOR_ERROR = 0xFF5555;
-    
+
     // Validation
     public final List<TextField.@NotNull Validator> validators = new ArrayList<>();
     public boolean lenient = true;
@@ -65,17 +65,17 @@ public class MultiLineTextField extends MultiLineEditBox {
     private int chainedClicks;
 
     public MultiLineTextField(int x, int y, int width, int height) {
-        this(Minecraft.getInstance().font, x, y, width, height, Component.empty(), 
+        this(Minecraft.getInstance().font, x, y, width, height, Component.empty(),
                 Component.empty(), null);
     }
 
     public MultiLineTextField(int x, int y, int width, int height, Component placeholder) {
-        this(Minecraft.getInstance().font, x, y, width, height, placeholder, 
+        this(Minecraft.getInstance().font, x, y, width, height, placeholder,
                 Component.empty(), null);
     }
-    
+
     public MultiLineTextField(Font font, int x, int y, int width, int height,
-                              Component placeholder, Component message, 
+                              Component placeholder, Component message,
                               @Nullable TextField.Validator validator) {
         super(font, x, y, width, height, placeholder, message);
         if (validator != null) {
@@ -83,11 +83,13 @@ public class MultiLineTextField extends MultiLineEditBox {
         }
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public MultiLineTextField withValidator(@NotNull TextField.Validator validator) {
         this.validators.add(validator);
         return this;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public MultiLineTextField regexValidator() {
         this.validators.add(new TextField.Validator.Regex());
         return this;
@@ -130,7 +132,8 @@ public class MultiLineTextField extends MultiLineEditBox {
     public int getTextColor() {
         return currentTextColor;
     }
-    
+
+    @SuppressWarnings("unused")
     public void setTextColor(int color) {
         normalTextColor = color;
         if (errorTooltip == null) {
@@ -153,28 +156,29 @@ public class MultiLineTextField extends MultiLineEditBox {
             // Double-click to select all
             long time = Util.getMillis();
             if (lastClickTime + CLICK_CHAIN_TIME > time) {
+                MultilineTextField field = ((MultiLineEditBoxAccessor)this).getTextField();
+                MultilineTextFieldAccessor fieldAcc = (MultilineTextFieldAccessor)field;
                 switch (++chainedClicks) {
                     case 1 -> {
                         // double-click: select word
-                        MultilineTextField field = ((MultiLineEditBoxAccessor)this).getTextField();
-                        MultilineTextFieldAccessor fieldAcc = (MultilineTextFieldAccessor)field;
-                        field.seekCursor(Whence.ABSOLUTE, ((StringViewAccessor)(Object)field.getNextWord()).getBeginIndex());
+                        field.seekCursor(Whence.ABSOLUTE,
+                                ((StringViewAccessor)(Object)field.getNextWord()).getBeginIndex());
                         int pos = fieldAcc.getCursor();
-                        field.seekCursor(Whence.ABSOLUTE, ((StringViewAccessor)(Object)field.getPreviousWord()).getBeginIndex());
+                        //noinspection DataFlowIssue
+                        field.seekCursor(Whence.ABSOLUTE,
+                                ((StringViewAccessor)(Object)field.getPreviousWord()).getBeginIndex());
                         fieldAcc.setSelectCursor(pos);
                     }
                     case 2, 3 -> {
                         // triple-click: select all
                         // duplicated for quadruple to inhibit overshoot
-                        MultilineTextFieldAccessor field = (MultilineTextFieldAccessor)((MultiLineEditBoxAccessor)this).getTextField();
-                        field.setCursor(this.getValue().length());
-                        field.setSelectCursor(0);
+                        fieldAcc.setCursor(this.getValue().length());
+                        fieldAcc.setSelectCursor(0);
                     }
                     case 4 -> {
                         // quintuple-click: reset chain and deselect all
                         chainedClicks = 0;
-                        MultilineTextFieldAccessor field = (MultilineTextFieldAccessor)((MultiLineEditBoxAccessor)this).getTextField();
-                        field.setSelectCursor(field.getCursor());
+                        fieldAcc.setSelectCursor(fieldAcc.getCursor());
                     }
                 }
             } else {

@@ -43,12 +43,6 @@ import java.util.regex.PatternSyntaxException;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
-/**
- * Contains trigger and style target editing fields, no-responder display fields
- * for message text and key, and a list of recent messages.
- * 
- * <p>The message list can be restyled and/or filtered based on the trigger.</p>
- */
 public class TriggerEditorList extends OptionList {
     private final Trigger trigger;
     private final TextStyle textStyle;
@@ -59,7 +53,7 @@ public class TriggerEditorList extends OptionList {
     private String displayText = "";
     private TextField keyDisplayField;
     private String displayKey = "";
-    
+
     public TriggerEditorList(Minecraft mc, int width, int height, int y, int entryWidth,
                              int entryHeight, int entrySpacing, Trigger trigger,
                              TextStyle textStyle) {
@@ -86,7 +80,7 @@ public class TriggerEditorList extends OptionList {
         addSpacedEntry(new Entry.DisplayField(
                 dynWideEntryX, dynWideEntryWidth, entryHeight + itemHeight,
                 textDisplayField, localized("option", "notif.trigger.editor.display.text")));
-        
+
         // Key display field
         keyDisplayField = new TextField(dynWideEntryX, 0, dynWideEntryWidth, entryHeight);
         keyDisplayField.setMaxLength(256);
@@ -100,9 +94,9 @@ public class TriggerEditorList extends OptionList {
         // Chat message list
         addChatMessages(this.recentChat);
     }
-    
+
     // Display field utils
-    
+
     private void setTextDisplayValue(String text) {
         displayText = text;
         textDisplayField.setValue(displayText);
@@ -112,12 +106,12 @@ public class TriggerEditorList extends OptionList {
         displayKey = key;
         keyDisplayField.setValue(displayKey);
     }
-    
+
     // Chat message list
-    
+
     private void addChatMessages(List<Component> recentChat) {
         boolean restyleAll = Config.get().restyleMode.equals(Config.RestyleMode.ALL_INSTANCES);
-        
+
         // Filter and restyle, retaining original copies of messages to use
         // when displaying text and key of a clicked message.
         List<Pair<Component, Component>> displayChat = new ArrayList<>();
@@ -155,13 +149,13 @@ public class TriggerEditorList extends OptionList {
             }
             displayChat.add(new Pair<>(msg, restyledMsg));
         }
-        
+
         // Add message entries
         displayChat.forEach((pair) -> {
             Entry.MessageEntry entry = new Entry.MessageEntry(dynWideEntryX, dynWideEntryWidth,
                     this, pair.getFirst(), pair.getSecond());
             addEntry(entry);
-            int requiredHeight = 
+            int requiredHeight =
                     mc.font.wordWrapHeight(pair.getFirst().getString(), dynWideEntryWidth) - itemHeight;
             while (requiredHeight > 0) {
                 Entry.Space spaceEntry = new Entry.Space(entry);
@@ -169,7 +163,7 @@ public class TriggerEditorList extends OptionList {
                 requiredHeight -= itemHeight;
             }
         });
-        
+
         // If no message entries, add note
         if (!(children().getLast() instanceof Entry.MessageEntry)) {
             addEntry(new OptionList.Entry.Text(dynWideEntryX, dynWideEntryWidth, entryHeight,
@@ -204,9 +198,9 @@ public class TriggerEditorList extends OptionList {
                 typeButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(typeButton);
                 movingX += list.tinyWidgetWidth;
-                
+
                 // Trigger field
-                MultiLineTextField triggerField = new MultiLineTextField(movingX, 0, 
+                MultiLineTextField triggerField = new MultiLineTextField(movingX, 0,
                         triggerFieldWidth, height, localized("option", "notif.trigger.field.hint"));
                 if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
                 triggerField.withValidator(new TextField.Validator.UniqueTrigger(
@@ -214,8 +208,8 @@ public class TriggerEditorList extends OptionList {
                 triggerField.setValueListener((str) -> {
                     trigger.string = str.strip();
                     if (list.children().size() > 4) {
-                        list.children().removeIf((entry) -> entry instanceof MessageEntry 
-                                || entry instanceof Text 
+                        list.children().removeIf((entry) -> entry instanceof MessageEntry
+                                || entry instanceof Text
                                 || (entry instanceof Space && list.children().indexOf(entry) > 4));
                         list.addChatMessages(list.recentChat);
                     }
@@ -296,11 +290,11 @@ public class TriggerEditorList extends OptionList {
 
                 // Delete button
                 elements.add(Button.builder(
-                        Component.literal("❌").withStyle(ChatFormatting.RED),
-                        (button) -> {
-                            styleTarget.enabled = false;
-                            list.init();
-                        })
+                                Component.literal("❌").withStyle(ChatFormatting.RED),
+                                (button) -> {
+                                    styleTarget.enabled = false;
+                                    list.init();
+                                })
                         .pos(movingX, 0)
                         .size(list.tinyWidgetWidth, height)
                         .build());
@@ -336,15 +330,15 @@ public class TriggerEditorList extends OptionList {
                                     list.init();
                                 }));
                 movingX = x + width - buttonWidth;
-                
+
                 elements.add(Button.builder(localized("option", "notif.format.color")
-                                        .setStyle(Style.EMPTY.withColor(list.textStyle.color)), 
+                                        .setStyle(Style.EMPTY.withColor(list.textStyle.color)),
                                 (button) -> {
                                     int cpHeight = HsvColorPicker.MIN_HEIGHT;
                                     int cpWidth = HsvColorPicker.MIN_WIDTH;
                                     list.screen.setOverlay(new HsvColorPicker(
-                                            x + width / 2 - cpWidth / 2, 
-                                            list.screen.height / 2 - cpHeight / 2, 
+                                            x + width / 2 - cpWidth / 2,
+                                            list.screen.height / 2 - cpHeight / 2,
                                             cpWidth, cpHeight,
                                             () -> list.textStyle.color,
                                             (val) -> list.textStyle.color = val,
@@ -383,7 +377,7 @@ public class TriggerEditorList extends OptionList {
             private final TriggerEditorList list;
             private final Component msg;
 
-            MessageEntry(int x, int width, TriggerEditorList list, 
+            MessageEntry(int x, int width, TriggerEditorList list,
                          Component msg, Component restyledMsg) {
                 super();
                 this.list = list;

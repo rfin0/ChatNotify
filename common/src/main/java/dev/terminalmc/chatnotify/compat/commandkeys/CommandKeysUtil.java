@@ -21,12 +21,14 @@ import dev.terminalmc.chatnotify.mixin.accessor.KeyAccessor;
 import dev.terminalmc.commandkeys.util.KeybindUtil;
 
 public class CommandKeysUtil {
+    public static final String DUAL_KEY_PATTERN_STRING = "^[a-z0-9.]+-[a-z0-9.]++$";
+
     /**
-     * Parses the specified string into two {@link InputConstants.Key} 
+     * Parses the specified string into two {@link InputConstants.Key}
      * instances, and passes them to CommandKeys' keypress handler.
      */
     static void send(String str) {
-        if (!str.matches(".+-.+")) return;
+        if (!str.matches(DUAL_KEY_PATTERN_STRING)) return;
         String[] splitStr = str.split("-");
         String limitKeyStr = splitStr[0];
         String KeyStr = splitStr[1];
@@ -34,7 +36,7 @@ public class CommandKeysUtil {
         InputConstants.Key limitKey = KeyAccessor.getNameMap().get(limitKeyStr);
         InputConstants.Key key = KeyAccessor.getNameMap().get(KeyStr);
         if (key == null || limitKey == null) return;
-        
+
         KeybindUtil.handleKeys(key, limitKey);
     }
 }
