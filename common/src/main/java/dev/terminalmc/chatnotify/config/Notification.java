@@ -209,7 +209,7 @@ public class Notification implements Functional.StringSupplier {
     ) {
         this.enabled = enabled;
         this.checkOwnMode = checkOwnMode;
-        this.inclusionEnabled = exclusionEnabled;
+        this.inclusionEnabled = inclusionEnabled;
         this.exclusionEnabled = exclusionEnabled;
         this.responseEnabled = responseEnabled;
         this.sound = sound;
