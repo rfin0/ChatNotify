@@ -109,6 +109,7 @@ public class FormatUtil {
         // format is invalid, so we check that here
         boolean validFormat = true;
         try {
+            //noinspection ResultOfMethodCallIgnored
             String.format(string, contents.getArgs());
         } catch (IllegalFormatException e) {
             validFormat = false;
@@ -208,7 +209,7 @@ public class FormatUtil {
         
         // Check whether conversion is required
         String str = contents.text();
-        if (!str.contains("\u00A7")) return text;
+        if (!str.contains("§")) return text;
         
         // Detach siblings
         List<Component> oldSiblings = new ArrayList<>(text.getSiblings());
@@ -220,7 +221,7 @@ public class FormatUtil {
         FormatCodes codes = new FormatCodes();
         
         for (int i = 0; i < chars.length; i++) {
-            if (chars[i] == '\u00A7') { // Section sign
+            if (chars[i] == '§') { // Section sign
                 if (!sb.isEmpty()) {
                     // Clear backlog
                     text.append(Component.literal(sb.toString()).withStyle(codes.createStyle()));

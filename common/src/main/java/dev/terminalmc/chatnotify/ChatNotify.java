@@ -37,11 +37,6 @@ public class ChatNotify {
     public static final String MOD_ID = "chatnotify";
     public static final String MOD_NAME = "ChatNotify";
     public static final ModLogger LOG = new ModLogger(MOD_NAME);
-    public static final Component PREFIX = Component.empty()
-            .append(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY))
-            .append(Component.literal(MOD_NAME).withStyle(ChatFormatting.GOLD))
-            .append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY))
-            .withStyle(ChatFormatting.GRAY);
     public static boolean hasResetConfig = false;
 
     /**

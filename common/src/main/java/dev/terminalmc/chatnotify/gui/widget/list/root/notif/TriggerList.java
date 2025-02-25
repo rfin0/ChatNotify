@@ -210,7 +210,7 @@ public class TriggerList extends DragReorderList {
                 elements.add(indicatorButton);
 
                 // Drag reorder button
-                Button dragButton = Button.builder(Component.literal("\u2191\u2193"),
+                Button dragButton = Button.builder(Component.literal("↑↓"),
                                 (button) -> {
                                     this.setDragging(true);
                                     list.startDragging(this, StyleTargetOptions.class,
@@ -266,7 +266,7 @@ public class TriggerList extends DragReorderList {
                 movingX += triggerFieldWidth;
 
                 // Trigger editor button
-                Button editorButton = Button.builder(Component.literal("\u270e"),
+                Button editorButton = Button.builder(Component.literal("✎"),
                                 (button) -> list.openTriggerConfig(trigger))
                         .pos(movingX, 0)
                         .size(list.tinyWidgetWidth, height)
@@ -297,7 +297,7 @@ public class TriggerList extends DragReorderList {
 
                 // Delete button
                 elements.add(Button.builder(
-                        Component.literal("\u274C").withStyle(ChatFormatting.RED),
+                        Component.literal("❌").withStyle(ChatFormatting.RED),
                         (button) -> {
                             notif.triggers.remove(index);
                             list.init();
@@ -331,7 +331,7 @@ public class TriggerList extends DragReorderList {
 
                 // Info icon
                 StringWidget infoIcon = new StringWidget(movingX, 0, list.tinyWidgetWidth, height,
-                        Component.literal("\u2139"), Minecraft.getInstance().font);
+                        Component.literal("ℹ"), Minecraft.getInstance().font);
                 infoIcon.alignCenter();
                 infoIcon.setTooltip(Tooltip.create(localized(
                         "option", "notif.trigger.style_target.tooltip")));
@@ -368,7 +368,7 @@ public class TriggerList extends DragReorderList {
 
                 // Delete button
                 elements.add(Button.builder(
-                        Component.literal("\u274C").withStyle(ChatFormatting.RED), 
+                        Component.literal("❌").withStyle(ChatFormatting.RED), 
                         (button) -> {
                             styleTarget.enabled = false;
                             list.init();

@@ -86,14 +86,14 @@ public class DropdownTextField extends OverlayWidget {
         int buttonWidth = widgetHeight;
         int textFieldWidth = width - (2 * widgetHeight);
 
-        cancelButton = Button.builder(Component.literal("\u274C").withStyle(ChatFormatting.RED), 
+        cancelButton = Button.builder(Component.literal("❌").withStyle(ChatFormatting.RED), 
                 (button) -> {
                     onClose();
                 })
                 .pos(x + width - (buttonWidth * 2), y)
                 .size(buttonWidth, widgetHeight)
                 .build();
-        confirmButton = Button.builder(Component.literal("\u2714").withStyle(ChatFormatting.GREEN),
+        confirmButton = Button.builder(Component.literal("✔").withStyle(ChatFormatting.GREEN),
                 (button) -> {
                     dest.accept(textField.getValue());
                     onClose();

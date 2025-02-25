@@ -55,6 +55,7 @@ import org.spongepowered.asm.mixin.Unique;
  * logs the message and adds it to the message queues, and is the earliest 
  * merge point.
  */
+@SuppressWarnings("JavadocReference")
 @Mixin(value = ChatComponent.class, priority = 792)
 public class MixinChatComponent {
 

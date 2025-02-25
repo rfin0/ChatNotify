@@ -371,10 +371,10 @@ public class TextField extends EditBox {
         }
 
         class UniqueTrigger implements Validator {
-            Supplier<List<Notification>> notifSupplier;
-            Function<Notification,List<Trigger>> triggerSupplier;
-            @Nullable Notification notif;
-            Trigger trigger;
+            final Supplier<List<Notification>> notifSupplier;
+            final Function<Notification,List<Trigger>> triggerSupplier;
+            final @Nullable Notification notif;
+            final Trigger trigger;
 
             public UniqueTrigger(Supplier<List<Notification>> notifSupplier, 
                                  Function<Notification, List<Trigger>> triggerSupplier, 

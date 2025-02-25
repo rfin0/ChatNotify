@@ -53,7 +53,7 @@ public class Trigger {
     /**
      * The restyle target.
      */
-    public StyleTarget styleTarget;
+    public final StyleTarget styleTarget;
     public static final Supplier<StyleTarget> styleTargetDefault = StyleTarget::new;
 
     /**

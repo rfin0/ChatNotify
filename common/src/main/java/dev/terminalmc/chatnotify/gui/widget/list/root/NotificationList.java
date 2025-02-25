@@ -90,7 +90,7 @@ public class NotificationList extends DragReorderList {
                     (trigger) -> filterPattern.matcher(trigger.string).find())) {
                 if (i == 0) {
                     children().add(start, new Entry.LockedNotifOptions(
-                            dynWideEntryX, dynWideEntryWidth, entryHeight, this, notifs, 0));
+                            dynWideEntryX, dynWideEntryWidth, entryHeight, this, notifs));
                 } else {
                     children().add(start, new Entry.NotifOptions(
                             dynWideEntryX, dynWideEntryWidth, entryHeight, this, notifs, i));
@@ -555,8 +555,8 @@ public class NotificationList extends DragReorderList {
 
         private static class LockedNotifOptions extends NotifOptions {
             LockedNotifOptions(int x, int width, int height, NotificationList list,
-                               List<Notification> notifs, int index) {
-                super(x, width, height, list, notifs, index);
+                               List<Notification> notifs) {
+                super(x, width, height, list, notifs, 0);
             }
         }
     }

@@ -77,18 +77,10 @@ public class FormatList extends OptionList {
                          Supplier<Integer> supplier, Consumer<Integer> consumer,
                          Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
                          MutableComponent text) {
-                this(x, width, height, list, supplier, consumer, statusSupplier, statusConsumer, text, true);
-            }
-
-            ColorOptions(int x, int width, int height, FormatList list,
-                         Supplier<Integer> supplier, Consumer<Integer> consumer,
-                         Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,
-                         MutableComponent text, boolean showStatusButton) {
                 super();
                 int statusButtonWidth = Math.max(24, height);
                 int colorFieldWidth = Minecraft.getInstance().font.width("#FFAAFF+++");
-                int mainButtonWidth = width - colorFieldWidth - SPACE;
-                if (showStatusButton) mainButtonWidth -= (statusButtonWidth + SPACE);
+                int mainButtonWidth = width - colorFieldWidth - statusButtonWidth - SPACE * 2;
 
                 // Color GUI button
                 Button mainButton = Button.builder(text.withColor(supplier.get()),
@@ -131,17 +123,16 @@ public class FormatList extends OptionList {
                 });
                 colorField.setValue(TextColor.fromRgb(supplier.get()).formatValue());
                 elements.add(colorField);
-
-                if (showStatusButton) {
-                    // Status button
-                    elements.add(CycleButton.booleanBuilder(
-                                    CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                    CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
-                            .displayOnlyValue()
-                            .withInitialValue(statusSupplier.get())
-                            .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
-                                    Component.empty(), (button, status) -> statusConsumer.accept(status)));
-                }
+                
+                // Status button
+                elements.add(CycleButton.booleanBuilder(
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        .displayOnlyValue()
+                        .withInitialValue(statusSupplier.get())
+                        .create(x + width - statusButtonWidth, 0, statusButtonWidth, height,
+                                Component.empty(), (button, status) -> statusConsumer.accept(status)));
+                
             }
         }
         

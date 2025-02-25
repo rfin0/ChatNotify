@@ -50,7 +50,7 @@ public class MiscOptionList extends OptionList {
         addEntry(new Entry.Controls(entryX, entryWidth, entryHeight, notif));
 
         addEntry(new OptionList.Entry.Text(entryX, entryWidth, entryHeight,
-                localized("option", "notif.misc.msg", "\u2139"),
+                localized("option", "notif.misc.msg", "ℹ"),
                 Tooltip.create(localized("option", "notif.misc.msg.tooltip.format_codes")
                         .append("\n\n")
                         .append(localized("option", "notif.misc.msg.tooltip.regex_groups"))), -1));

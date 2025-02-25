@@ -147,7 +147,7 @@ public class Config {
     /**
      * The default restyle text color for new {@link Notification} instances.
      */
-    public Sound defaultSound;
+    public final Sound defaultSound;
     public static final Supplier<Sound> defaultSoundDefault = Sound::new;
 
     /**
@@ -294,18 +294,21 @@ public class Config {
         return instance;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public static Config getAndSave() {
         get();
         save();
         return instance;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public static Config resetAndSave() {
         instance = new Config();
         save();
         return instance;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public static Config reload() {
         instance = null;
         get();
