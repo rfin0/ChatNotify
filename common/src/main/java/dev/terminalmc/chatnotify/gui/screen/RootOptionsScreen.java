@@ -17,8 +17,10 @@
 package dev.terminalmc.chatnotify.gui.screen;
 
 import dev.terminalmc.chatnotify.config.Config;
-import dev.terminalmc.chatnotify.gui.widget.list.root.GlobalOptionList;
+import dev.terminalmc.chatnotify.gui.widget.list.root.ControlOptionList;
+import dev.terminalmc.chatnotify.gui.widget.list.root.DefaultOptionList;
 import dev.terminalmc.chatnotify.gui.widget.list.root.NotificationList;
+import dev.terminalmc.chatnotify.gui.widget.list.root.PrefixList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -39,7 +41,7 @@ import static dev.terminalmc.chatnotify.util.Localization.translationKey;
 public class RootOptionsScreen extends OptionScreen {
     
     public RootOptionsScreen(Screen lastScreen) {
-        this(lastScreen, TabKey.NOTIFICATIONS.key);
+        this(lastScreen, TabKey.NOTIFICATION.key);
     }
     
     public RootOptionsScreen(Screen lastScreen, String defaultKey) {
@@ -49,12 +51,20 @@ public class RootOptionsScreen extends OptionScreen {
     
     private void addTabs(String defaultKey) {
         List<Tab> tabs = List.of(
-                new Tab(TabKey.NOTIFICATIONS.key, (screen) ->
+                new Tab(TabKey.NOTIFICATION.key, (screen) ->
                         new NotificationList(Minecraft.getInstance(), 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
                         )),
-                new Tab(TabKey.GLOBAL.key, (screen) ->
-                        new GlobalOptionList(Minecraft.getInstance(), 0, 0, 0,
+                new Tab(TabKey.CONTROL.key, (screen) ->
+                        new ControlOptionList(Minecraft.getInstance(), 0, 0, 0,
+                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
+                        )),
+                new Tab(TabKey.DEFAULT.key, (screen) ->
+                        new DefaultOptionList(Minecraft.getInstance(), 0, 0, 0,
+                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
+                        )),
+                new Tab(TabKey.PREFIX.key, (screen) ->
+                        new PrefixList(Minecraft.getInstance(), 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
                         ))
         );
@@ -62,8 +72,10 @@ public class RootOptionsScreen extends OptionScreen {
     }
 
     public enum TabKey {
-        NOTIFICATIONS(translationKey("option", "notif")),
-        GLOBAL(translationKey("option", "global"));
+        NOTIFICATION(translationKey("option", "notif")),
+        CONTROL(translationKey("option", "control")),
+        DEFAULT(translationKey("option", "default")),
+        PREFIX(translationKey("option", "prefix"));
 
         public final String key;
         TabKey(String key) {

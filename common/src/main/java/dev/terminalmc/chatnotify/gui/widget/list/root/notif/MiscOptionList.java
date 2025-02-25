@@ -118,7 +118,7 @@ public class MiscOptionList extends OptionList {
                         .withInitialValue(notif.checkOwnMode)
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option", "notif.misc.control.self_notify.status." + status.name() + ".tooltip")))
-                        .create(x, 0, width, height, localized("option", "global.self_notify"),
+                        .create(x, 0, width, height, localized("option", "control.self_notify"),
                                 (button, status) ->
                                         notif.checkOwnMode = status));
             }
