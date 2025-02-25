@@ -17,9 +17,9 @@
 package dev.terminalmc.chatnotify.gui.screen;
 
 import dev.terminalmc.chatnotify.config.Config;
+import dev.terminalmc.chatnotify.gui.widget.list.FilterList;
 import dev.terminalmc.chatnotify.gui.widget.list.root.ControlOptionList;
 import dev.terminalmc.chatnotify.gui.widget.list.root.DefaultOptionList;
-import dev.terminalmc.chatnotify.gui.widget.list.root.NotificationList;
 import dev.terminalmc.chatnotify.gui.widget.list.root.PrefixList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -51,10 +51,24 @@ public class RootOptionsScreen extends OptionScreen {
     
     private void addTabs(String defaultKey) {
         List<Tab> tabs = List.of(
-                new Tab(TabKey.NOTIFICATION.key, (screen) ->
-                        new NotificationList(Minecraft.getInstance(), 0, 0, 0,
-                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
-                        )),
+                new Tab(TabKey.NOTIFICATION.key, (screen) -> new FilterList<>(
+                        Minecraft.getInstance(), 0, 0, 0,
+                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
+                        FilterList.Entry.NotifOptions.class,
+                        (source, dest) -> Config.get().changeNotifPriority(++source, ++dest),
+                        localized("option", "notif.list", "ℹ"),
+                        localized("option", "notif.list.tooltip"),
+                        null,
+                        null,
+                        () -> Config.get().getNotifs(),
+                        (x, width, height, list, notif, index) -> index == 0
+                                ? new FilterList.Entry.NotifOptions.Locked(
+                                        x, width, height, list, notif)
+                                : new FilterList.Entry.NotifOptions(
+                                        x, width, height, list, notif, index),
+                        null,
+                        () -> Config.get().addNotif()
+                )),
                 new Tab(TabKey.CONTROL.key, (screen) ->
                         new ControlOptionList(Minecraft.getInstance(), 0, 0, 0,
                                 BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING

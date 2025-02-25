@@ -23,7 +23,6 @@ import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
 import dev.terminalmc.chatnotify.gui.widget.SilentButton;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
-import dev.terminalmc.chatnotify.gui.widget.list.root.NotificationList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -246,7 +245,7 @@ public class SoundOptionList extends OptionList {
             }
         }
 
-        private static class SoundSource extends NotificationList.Entry {
+        private static class SoundSource extends Entry {
             SoundSource(int x, int width, int height, SoundOptionList list) {
                 super();
                 int mainButtonWidth = width - list.smallWidgetWidth - 1;

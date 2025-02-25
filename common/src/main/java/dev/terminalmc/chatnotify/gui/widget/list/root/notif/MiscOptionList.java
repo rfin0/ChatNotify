@@ -113,18 +113,20 @@ public class MiscOptionList extends OptionList {
                 super();
 
                 elements.add(CycleButton.<Notification.CheckOwnMode>builder((status) ->
-                                localized("option", "notif.misc.control.self_notify.status." + status.name()))
+                                localized("option", "notif.misc.control.self_notify.status."
+                                        + status.name()))
                         .withValues(Notification.CheckOwnMode.values())
                         .withInitialValue(notif.checkOwnMode)
                         .withTooltip((status) -> Tooltip.create(localized(
-                                "option", "notif.misc.control.self_notify.status." + status.name() + ".tooltip")))
+                                "option", "notif.misc.control.self_notify.status."
+                                        + status.name() + ".tooltip")))
                         .create(x, 0, width, height, localized("option", "control.self_notify"),
                                 (button, status) ->
                                         notif.checkOwnMode = status));
             }
         }
 
-        private static class CustomMessage extends TriggerList.Entry {
+        private static class CustomMessage extends Entry {
             CustomMessage(int x, int width, int height,
                           Supplier<String> textSupplier, Consumer<String> textConsumer,
                           Supplier<Boolean> statusSupplier, Consumer<Boolean> statusConsumer,

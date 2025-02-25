@@ -68,7 +68,7 @@ public class DefaultOptionList extends OptionList {
 
     private abstract static class Entry extends OptionList.Entry {
 
-        private static class DefaultColor extends NotificationList.Entry {
+        private static class DefaultColor extends Entry {
             DefaultColor(int x, int width, int height, DefaultOptionList list) {
                 super();
                 int colorFieldWidth = Minecraft.getInstance().font.width("#FFAAFF+++");
@@ -118,7 +118,7 @@ public class DefaultOptionList extends OptionList {
             }
         }
 
-        private static class DefaultSound extends NotificationList.Entry {
+        private static class DefaultSound extends Entry {
             DefaultSound(int x, int width, int height, DefaultOptionList list) {
                 super();
                 elements.add(Button.builder(localized("option", "default.sound",
@@ -143,7 +143,7 @@ public class DefaultOptionList extends OptionList {
             }
         }
 
-        private static class SoundSource extends NotificationList.Entry {
+        private static class SoundSource extends Entry {
             SoundSource(int x, int width, int height, DefaultOptionList list) {
                 super();
 

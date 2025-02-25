@@ -17,10 +17,12 @@
 package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
+import dev.terminalmc.chatnotify.util.Functional;
 import dev.terminalmc.chatnotify.util.JsonUtil;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ResponseMessage {
+public class ResponseMessage implements Functional.StringSupplier {
     public static final int VERSION = 2;
     public final int version = VERSION;
 
@@ -95,6 +97,11 @@ public class ResponseMessage {
         this.string = string;
         this.type = type;
         this.delayTicks = delayTicks;
+    }
+
+    @Override
+    public @NotNull String getString() {
+        return string;
     }
 
     // Validation

@@ -23,7 +23,6 @@ import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.MultiLineTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
-import dev.terminalmc.chatnotify.gui.widget.list.root.NotificationList;
 import dev.terminalmc.chatnotify.util.FormatUtil;
 import dev.terminalmc.chatnotify.util.MessageUtil;
 import dev.terminalmc.chatnotify.util.StyleUtil;
@@ -308,7 +307,7 @@ public class TriggerEditorList extends OptionList {
             }
         }
 
-        private static class Controls extends NotificationList.Entry {
+        private static class Controls extends Entry {
             Controls(int x, int width, int height, TriggerEditorList list) {
                 super();
                 int buttonWidth = (width - SPACE * 2) / 3;
@@ -399,7 +398,8 @@ public class TriggerEditorList extends OptionList {
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
                 list.setTextDisplayValue(FormatUtil.stripCodes(msg.getString()));
                 list.setKeyDisplayValue(msg.getContents() instanceof TranslatableContents tc
-                        ? tc.getKey() : localized("option", "notif.trigger.editor.display.key.none").getString());
+                        ? tc.getKey()
+                        : localized("option", "notif.trigger.editor.display.key.none").getString());
                 list.setScrollAmount(0);
                 return true;
             }

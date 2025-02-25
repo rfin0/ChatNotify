@@ -43,7 +43,7 @@ public class ControlOptionList extends OptionList {
 
     private abstract static class Entry extends OptionList.Entry {
 
-        private static class Controls1 extends NotificationList.Entry {
+        private static class Controls1 extends Entry {
             Controls1(int x, int width, int height) {
                 super();
                 int buttonWidth = (width - SPACE) / 2;
@@ -72,7 +72,7 @@ public class ControlOptionList extends OptionList {
             }
         }
 
-        private static class Controls2 extends NotificationList.Entry {
+        private static class Controls2 extends Entry {
             Controls2(int x, int width, int height) {
                 super();
                 int buttonWidth = (width - SPACE) / 2;
@@ -101,7 +101,7 @@ public class ControlOptionList extends OptionList {
             }
         }
 
-        private static class Controls3 extends NotificationList.Entry {
+        private static class Controls3 extends Entry {
             Controls3(int x, int width, int height) {
                 super();
                 int buttonWidth = (width - SPACE) / 2;
@@ -128,7 +128,7 @@ public class ControlOptionList extends OptionList {
             }
         }
 
-        private static class Controls4 extends NotificationList.Entry {
+        private static class Controls4 extends Entry {
             Controls4(int x, int width, int height) {
                 super();
 

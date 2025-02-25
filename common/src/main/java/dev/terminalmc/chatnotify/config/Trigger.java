@@ -18,6 +18,7 @@ package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
 import dev.terminalmc.chatnotify.ChatNotify;
+import dev.terminalmc.chatnotify.util.Functional;
 import dev.terminalmc.chatnotify.util.JsonUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +28,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public class Trigger {
+public class Trigger implements Functional.StringSupplier {
     public static final int VERSION = 4;
     public final int version = VERSION;
 
@@ -113,6 +114,11 @@ public class Trigger {
         this.string = string;
         this.styleTarget = styleTarget;
         this.type = type;
+    }
+    
+    @Override
+    public @NotNull String getString() {
+        return string;
     }
 
     public void tryCompilePattern() {

@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.3.12-alpha.1
+## 2.3.12-alpha.2
 
 - Switched to tab-style options UI
 

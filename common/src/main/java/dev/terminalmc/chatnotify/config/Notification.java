@@ -17,6 +17,7 @@
 package dev.terminalmc.chatnotify.config;
 
 import com.google.gson.*;
+import dev.terminalmc.chatnotify.util.Functional;
 import dev.terminalmc.chatnotify.util.JsonUtil;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,7 +49,7 @@ import java.util.function.Supplier;
  * <p>A range of control fields (boolean or enum) defining the status of other 
  * elements.</p>
  */
-public class Notification {
+public class Notification implements Functional.StringSupplier {
     public static final int VERSION = 6;
     public final int version = VERSION;
 
@@ -79,6 +80,7 @@ public class Notification {
      * should be used instead.</p>
      */
     public CheckOwnMode checkOwnMode;
+
     public enum CheckOwnMode {
         DEFER,
         ON,
@@ -368,6 +370,15 @@ public class Notification {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public String getString() {
+        StringBuilder sb = new StringBuilder();
+        for (Trigger t : triggers) {
+            sb.append(t.getString());
+        }
+        return sb.toString();
     }
 
     // Validation

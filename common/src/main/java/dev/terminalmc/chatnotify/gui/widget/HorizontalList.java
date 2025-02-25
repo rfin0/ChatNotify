@@ -91,6 +91,7 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
         super(x, y, width, height, Component.empty());
         this.space = spacing;
         this.mc = Minecraft.getInstance();
+        this.topScrollbar = topScrollbar;
     }
     
     // Hovered entry
