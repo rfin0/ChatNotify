@@ -52,7 +52,7 @@ public class Config {
     public static final int VERSION = 9;
     public final int version = VERSION;
     private static final Path CONFIG_DIR = Services.PLATFORM.getConfigDir();
-    public static final String FILE_NAME = ChatNotify.MOD_ID + "2.3.12-alpha.2.json"; // TODO remove
+    public static final String FILE_NAME = ChatNotify.MOD_ID + ".json";
     public static final String UNREADABLE_FILE_NAME = ChatNotify.MOD_ID + ".unreadable.json";
     public static final String OLD_FILE_NAME = ChatNotify.MOD_ID + ".old.json";
     public static final Gson GSON = new GsonBuilder()

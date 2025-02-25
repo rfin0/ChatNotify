@@ -1,8 +1,9 @@
 # Changelog
 
-## 2.3.12-alpha.2
+## 2.4.0
 
 - Switched to tab-style options UI
+- Added inclusion trigger option
 
 ## 2.3.11
 
