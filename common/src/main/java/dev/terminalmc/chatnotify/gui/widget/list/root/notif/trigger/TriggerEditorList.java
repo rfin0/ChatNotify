@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list.trigger;
+package dev.terminalmc.chatnotify.gui.widget.list.root.notif.trigger;
 
 import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.chatnotify.ChatNotify;
@@ -23,7 +23,7 @@ import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;
 import dev.terminalmc.chatnotify.gui.widget.field.MultiLineTextField;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
-import dev.terminalmc.chatnotify.gui.widget.list.main.NotificationList;
+import dev.terminalmc.chatnotify.gui.widget.list.root.NotificationList;
 import dev.terminalmc.chatnotify.util.FormatUtil;
 import dev.terminalmc.chatnotify.util.MessageUtil;
 import dev.terminalmc.chatnotify.util.StyleUtil;

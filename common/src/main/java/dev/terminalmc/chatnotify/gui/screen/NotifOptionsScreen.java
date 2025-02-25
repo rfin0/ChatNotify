@@ -17,7 +17,7 @@
 package dev.terminalmc.chatnotify.gui.screen;
 
 import dev.terminalmc.chatnotify.config.Notification;
-import dev.terminalmc.chatnotify.gui.widget.list.notif.*;
+import dev.terminalmc.chatnotify.gui.widget.list.root.notif.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 

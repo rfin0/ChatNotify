@@ -18,8 +18,8 @@ package dev.terminalmc.chatnotify.gui.screen;
 
 import dev.terminalmc.chatnotify.config.TextStyle;
 import dev.terminalmc.chatnotify.config.Trigger;
-import dev.terminalmc.chatnotify.gui.widget.list.trigger.KeySelectorList;
-import dev.terminalmc.chatnotify.gui.widget.list.trigger.TriggerEditorList;
+import dev.terminalmc.chatnotify.gui.widget.list.root.notif.trigger.KeySelectorList;
+import dev.terminalmc.chatnotify.gui.widget.list.root.notif.trigger.TriggerEditorList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 

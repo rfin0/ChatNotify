@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list.notif;
+package dev.terminalmc.chatnotify.gui.widget.list.root.notif;
 
 import dev.terminalmc.chatnotify.config.Notification;
 import dev.terminalmc.chatnotify.config.ResponseMessage;

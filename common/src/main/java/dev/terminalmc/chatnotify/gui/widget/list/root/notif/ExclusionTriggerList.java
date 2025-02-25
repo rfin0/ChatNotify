@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list.notif;
+package dev.terminalmc.chatnotify.gui.widget.list.root.notif;
 
-import dev.terminalmc.chatnotify.config.Notification;
-import dev.terminalmc.chatnotify.config.Trigger;
+import dev.terminalmc.chatnotify.config.*;
 import dev.terminalmc.chatnotify.gui.screen.OptionScreen;
 import dev.terminalmc.chatnotify.gui.screen.TriggerOptionsScreen;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
@@ -26,9 +25,7 @@ import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.CycleButton;
-import net.minecraft.client.gui.components.StringWidget;
-import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -41,22 +38,22 @@ import java.util.regex.Pattern;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
 
-public class InclusionTriggerList extends DragReorderList {
+public class ExclusionTriggerList extends DragReorderList {
     private final Notification notif;
     private String filterString = "";
     private @Nullable Pattern filterPattern = null;
     private OptionList.Entry.ActionButton addTriggerEntry;
 
-    public InclusionTriggerList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public ExclusionTriggerList(Minecraft mc, int width, int height, int y, int entryWidth,
                                 int entryHeight, int entrySpacing, Notification notif) {
         super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, 
-                new HashMap<>(Map.of(Entry.TriggerOptions.class, notif::moveInclusionTrigger)));
+                new HashMap<>(Map.of(Entry.TriggerOptions.class, notif::moveExclusionTrigger)));
         this.notif = notif;
 
         addTriggerEntry = new OptionList.Entry.ActionButton(
                 entryX, entryWidth, entryHeight, Component.literal("+"), null, -1,
                 (button) -> {
-                    notif.inclusionTriggers.add(new Trigger());
+                    notif.exclusionTriggers.add(new Trigger());
                     filterString = "";
                     filterPattern = null;
                     init();
@@ -79,8 +76,8 @@ public class InclusionTriggerList extends DragReorderList {
         int start = children().indexOf(addTriggerEntry);
         if (start == -1) start = children().size();
         // Add in reverse order
-        for (int i = notif.inclusionTriggers.size() - 1; i >= 0; i--) {
-            Trigger trigger = notif.inclusionTriggers.get(i);
+        for (int i = notif.exclusionTriggers.size() - 1; i >= 0; i--) {
+            Trigger trigger = notif.exclusionTriggers.get(i);
             if (filterPattern == null || filterPattern.matcher(trigger.string).find()) {
                 children().add(start, new Entry.TriggerOptions(dynWideEntryX,
                         dynWideEntryWidth, entryHeight, this, notif, trigger));
@@ -101,14 +98,14 @@ public class InclusionTriggerList extends DragReorderList {
     abstract static class Entry extends OptionList.Entry {
 
         private static class TriggerListHeader extends Entry {
-            TriggerListHeader(int x, int width, int height, InclusionTriggerList list) {
+            TriggerListHeader(int x, int width, int height, ExclusionTriggerList list) {
                 super();
                 int cappedWidth = Math.min(width, OptionScreen.BASE_ROW_WIDTH);
                 if (cappedWidth < width) {
                     x += (width - cappedWidth) / 2;
                     width = cappedWidth;
                 }
-                Component title = localized("option", "notif.inclusion.list", "ℹ");
+                Component title = localized("option", "notif.exclusion.list", "ℹ");
                 int titleWidth = Minecraft.getInstance().font.width(title) + 8;
                 int statusButtonWidth = 25;
                 int searchFieldMinWidth = 50;
@@ -123,7 +120,7 @@ public class InclusionTriggerList extends DragReorderList {
                 StringWidget titleWidget = new StringWidget(movingX, 0, titleWidth, height,
                         title, list.mc.font);
                 titleWidget.setTooltip(Tooltip.create(localized(
-                        "option", "notif.inclusion.list.tooltip")));
+                        "option", "notif.exclusion.list.tooltip")));
                 elements.add(titleWidget);
                 movingX += titleWidth + SPACE;
 
@@ -131,9 +128,9 @@ public class InclusionTriggerList extends DragReorderList {
                         CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN), 
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .displayOnlyValue()
-                        .withInitialValue(list.notif.inclusionEnabled)
+                        .withInitialValue(list.notif.exclusionEnabled)
                         .create(movingX, 0, statusButtonWidth, height, Component.empty(),
-                                (button, status) -> list.notif.inclusionEnabled = status));
+                                (button, status) -> list.notif.exclusionEnabled = status));
                 movingX += statusButtonWidth + SPACE;
                 
                 TextField searchField = new TextField(movingX, 0, searchFieldWidth, height);
@@ -154,10 +151,10 @@ public class InclusionTriggerList extends DragReorderList {
         }
 
         private static class TriggerOptions extends Entry {
-            private TriggerOptions(int x, int width, int height, InclusionTriggerList list,
+            private TriggerOptions(int x, int width, int height, ExclusionTriggerList list,
                                    Notification notif, Trigger trigger) {
                 super();
-                int index = notif.inclusionTriggers.indexOf(trigger);
+                int index = notif.exclusionTriggers.indexOf(trigger);
                 boolean keyTrigger = trigger.type == Trigger.Type.KEY;
                 int triggerFieldWidth = width - list.tinyWidgetWidth;
                 if (keyTrigger) triggerFieldWidth -= list.tinyWidgetWidth;
@@ -220,7 +217,7 @@ public class InclusionTriggerList extends DragReorderList {
                 TextField triggerField = new TextField(movingX, 0, triggerFieldWidth, height);
                 if (trigger.type == Trigger.Type.REGEX) triggerField.regexValidator();
                 triggerField.withValidator(new TextField.Validator.UniqueTrigger(() ->
-                        List.of(notif), (n) -> n.inclusionTriggers, notif, trigger));
+                        List.of(notif), (n) -> n.exclusionTriggers, notif, trigger));
                 triggerField.setMaxLength(240);
                 triggerField.setResponder((str) -> trigger.string = str.strip());
                 triggerField.setValue(trigger.string);
@@ -231,7 +228,7 @@ public class InclusionTriggerList extends DragReorderList {
                 elements.add(Button.builder(
                         Component.literal("❌").withStyle(ChatFormatting.RED),
                         (button) -> {
-                            notif.inclusionTriggers.remove(index);
+                            notif.exclusionTriggers.remove(index);
                             list.init();
                         })
                         .pos(x + width + SPACE, 0)

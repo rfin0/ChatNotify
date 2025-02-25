@@ -17,8 +17,8 @@
 package dev.terminalmc.chatnotify.gui.screen;
 
 import dev.terminalmc.chatnotify.config.Config;
-import dev.terminalmc.chatnotify.gui.widget.list.main.GlobalOptionList;
-import dev.terminalmc.chatnotify.gui.widget.list.main.NotificationList;
+import dev.terminalmc.chatnotify.gui.widget.list.root.GlobalOptionList;
+import dev.terminalmc.chatnotify.gui.widget.list.root.NotificationList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;

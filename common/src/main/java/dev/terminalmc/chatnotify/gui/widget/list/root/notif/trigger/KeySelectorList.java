@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list.trigger;
+package dev.terminalmc.chatnotify.gui.widget.list.root.notif.trigger;
 
 import dev.terminalmc.chatnotify.config.Trigger;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;

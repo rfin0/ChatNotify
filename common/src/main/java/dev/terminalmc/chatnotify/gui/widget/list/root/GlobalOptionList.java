@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list.main;
+package dev.terminalmc.chatnotify.gui.widget.list.root;
 
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.gui.widget.HsvColorPicker;

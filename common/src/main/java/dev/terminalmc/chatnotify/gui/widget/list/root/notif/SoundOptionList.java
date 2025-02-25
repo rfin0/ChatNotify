@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.chatnotify.gui.widget.list.notif;
+package dev.terminalmc.chatnotify.gui.widget.list.root.notif;
 
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.config.Sound;
@@ -23,7 +23,7 @@ import dev.terminalmc.chatnotify.gui.widget.field.FakeTextField;
 import dev.terminalmc.chatnotify.gui.widget.SilentButton;
 import dev.terminalmc.chatnotify.gui.widget.field.TextField;
 import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
-import dev.terminalmc.chatnotify.gui.widget.list.main.NotificationList;
+import dev.terminalmc.chatnotify.gui.widget.list.root.NotificationList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
