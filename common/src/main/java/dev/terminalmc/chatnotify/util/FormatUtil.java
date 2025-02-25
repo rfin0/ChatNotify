@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 public class FormatUtil {
     private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("\\u00A7.?");
     private static final String PLACEHOLDER_PATTERN_STRING 
-            = "%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
+            = "%(\\d+\\$)?([-#+ 0,(<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(PLACEHOLDER_PATTERN_STRING);
     
     /**
