@@ -84,6 +84,10 @@ public class HorizontalList<E extends AbstractWidget> extends AbstractContainerW
     
     
     public HorizontalList(int x, int y, int width, int height, int spacing) {
+        this(x, y, width, height, spacing, false);
+    }
+
+    public HorizontalList(int x, int y, int width, int height, int spacing, boolean topScrollbar) {
         super(x, y, width, height, Component.empty());
         this.space = spacing;
         this.mc = Minecraft.getInstance();

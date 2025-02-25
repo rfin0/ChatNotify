@@ -19,21 +19,16 @@ package dev.terminalmc.chatnotify.gui.screen;
 import dev.terminalmc.chatnotify.config.Config;
 import dev.terminalmc.chatnotify.gui.widget.list.main.GlobalOptionList;
 import dev.terminalmc.chatnotify.gui.widget.list.main.NotificationList;
-import dev.terminalmc.chatnotify.gui.widget.list.OptionList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 
 import static dev.terminalmc.chatnotify.util.Localization.localized;
+import static dev.terminalmc.chatnotify.util.Localization.translationKey;
 
 /**
  * Root options screen, including global options and a list of
@@ -42,48 +37,37 @@ import static dev.terminalmc.chatnotify.util.Localization.localized;
  * <p>Config is saved only when this is closed.</p>
  */
 public class RootOptionsScreen extends OptionScreen {
-    private final Tab defaultTab;
-
+    
     public RootOptionsScreen(Screen lastScreen) {
-        this(lastScreen, Tab.NOTIFICATIONS);
+        this(lastScreen, TabKey.NOTIFICATIONS.key);
     }
     
-    public RootOptionsScreen(Screen lastScreen, Tab defaultTab) {
+    public RootOptionsScreen(Screen lastScreen, String defaultKey) {
         super(lastScreen);
-        this.defaultTab = defaultTab;
-        addTabs();
+        addTabs(defaultKey);
     }
     
-    private void addTabs() {
-        List<TabButton> tabs = Arrays.stream(Tab.values()).map((tab) ->
-                new TabButton(tab.title, () -> tab.getList(this))).toList();
-        super.setTabs(tabs, Arrays.stream(Tab.values()).toList().indexOf(defaultTab));
+    private void addTabs(String defaultKey) {
+        List<Tab> tabs = List.of(
+                new Tab(TabKey.NOTIFICATIONS.key, (screen) ->
+                        new NotificationList(Minecraft.getInstance(), 0, 0, 0,
+                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
+                        )),
+                new Tab(TabKey.GLOBAL.key, (screen) ->
+                        new GlobalOptionList(Minecraft.getInstance(), 0, 0, 0,
+                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
+                        ))
+        );
+        super.setTabs(tabs, defaultKey);
     }
 
-    public enum Tab {
-        NOTIFICATIONS(localized("option", "notif"), (screen) ->
-                new NotificationList(Minecraft.getInstance(), 0, 0, 0,
-                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
-                )),
-        GLOBAL_OPTIONS(localized("option", "global"), (screen) ->
-                new GlobalOptionList(Minecraft.getInstance(), 0, 0, 0,
-                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING
-                ));
+    public enum TabKey {
+        NOTIFICATIONS(translationKey("option", "notif")),
+        GLOBAL(translationKey("option", "global"));
 
-        final Component title;
-        private final Function<RootOptionsScreen, @NotNull OptionList> supplier;
-        private @Nullable OptionList list = null;
-
-        Tab(Component title, Function<RootOptionsScreen, OptionList> supplier) {
-            this.title = title;
-            this.supplier = supplier;
-        }
-
-        public @NotNull OptionList getList(RootOptionsScreen screen) {
-            if (list == null) {
-                list = supplier.apply(screen);
-            }
-            return list;
+        public final String key;
+        TabKey(String key) {
+            this.key = key;
         }
     }
 

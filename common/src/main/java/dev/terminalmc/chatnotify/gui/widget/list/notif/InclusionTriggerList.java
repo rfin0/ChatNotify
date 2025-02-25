@@ -92,8 +92,8 @@ public class InclusionTriggerList extends DragReorderList {
     // Sub-screen opening
 
     private void openKeyConfig(Trigger trigger) {
-        mc.setScreen(new TriggerOptionsScreen(mc.screen, trigger, notif.textStyle,
-                () -> {}, TriggerOptionsScreen.Tab.KEY_SELECTOR));
+        mc.setScreen(new TriggerOptionsScreen(mc.screen, trigger, notif.textStyle, () -> {},
+                TriggerOptionsScreen.TabKey.KEY_SELECTOR.key));
     }
 
     // Custom entries

@@ -17,92 +17,87 @@
 package dev.terminalmc.chatnotify.gui.screen;
 
 import dev.terminalmc.chatnotify.config.Notification;
-import dev.terminalmc.chatnotify.gui.widget.list.*;
 import dev.terminalmc.chatnotify.gui.widget.list.notif.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 
-import static dev.terminalmc.chatnotify.util.Localization.localized;
+import static dev.terminalmc.chatnotify.util.Localization.translationKey;
 
 /**
  * Options screen for a {@link Notification}.
  */
 public class NotifOptionsScreen extends OptionScreen {
     private final Notification notif;
-    private final Tab defaultTab;
     
-    public NotifOptionsScreen(Screen lastScreen, Notification notif, Tab defaultTab) {
+    public NotifOptionsScreen(Screen lastScreen, Notification notif, String defaultKey) {
         super(lastScreen);
         this.notif = notif;
-        this.defaultTab = defaultTab;
-        addTabs();
+        addTabs(defaultKey);
     }
 
-    private void addTabs() {
-        List<TabButton> tabs = Arrays.stream(Tab.values()).map((tab) ->
-                new TabButton(tab.title, () -> tab.getList(this))).toList();
-        super.setTabs(tabs, Arrays.stream(Tab.values()).toList().indexOf(defaultTab));
+    private void addTabs(String defaultKey) {
+        List<Tab> tabs = List.of(
+                new Tab(TabKey.TRIGGERS.key, (screen) ->
+                        new TriggerList(Minecraft.getInstance(), 0, 0, 0,
+                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
+                                cast(screen).notif
+                        )),
+                new Tab(TabKey.FORMAT.key, (screen) ->
+                        new FormatList(Minecraft.getInstance(), 0, 0, 0,
+                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
+                                cast(screen).notif
+                        )),
+                new Tab(TabKey.SOUND.key, (screen) ->
+                        new SoundOptionList(Minecraft.getInstance(), 0, 0, 0,
+                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT,
+                                cast(screen).notif.sound
+                        )),
+                new Tab(TabKey.INCLUSION.key, (screen) ->
+                        new InclusionTriggerList(Minecraft.getInstance(), 0, 0, 0,
+                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
+                                cast(screen).notif
+                        )),
+                new Tab(TabKey.EXCLUSION.key, (screen) ->
+                        new ExclusionTriggerList(Minecraft.getInstance(), 0, 0, 0,
+                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
+                                cast(screen).notif
+                        )),
+                new Tab(TabKey.RESPONSES.key, (screen) ->
+                        new ResponseMessageList(Minecraft.getInstance(), 0, 0, 0,
+                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
+                                cast(screen).notif
+                        )),
+                new Tab(TabKey.MISC.key, (screen) ->
+                        new MiscOptionList(Minecraft.getInstance(), 0, 0, 0,
+                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
+                                cast(screen).notif
+                        ))
+        );
+        super.setTabs(tabs, defaultKey);
     }
 
-    public enum Tab {
-        TRIGGERS(localized("option", "notif.trigger"), (screen) ->
-                new TriggerList(Minecraft.getInstance(), 0, 0, 0,
-                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
-                        screen.notif
-                )),
-        FORMAT(localized("option", "notif.format"), (screen) ->
-                new FormatList(Minecraft.getInstance(), 0, 0, 0,
-                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
-                        screen.notif
-                )),
-        SOUND(localized("option", "notif.sound"), (screen) ->
-                new SoundOptionList(Minecraft.getInstance(), 0, 0, 0,
-                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT,
-                        screen.notif.sound
-                )),
-        INCLUSION(localized("option", "notif.inclusion"), (screen) ->
-                new InclusionTriggerList(Minecraft.getInstance(), 0, 0, 0,
-                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
-                        screen.notif
-                )),
-        EXCLUSION(localized("option", "notif.exclusion"), (screen) ->
-                new ExclusionTriggerList(Minecraft.getInstance(), 0, 0, 0,
-                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
-                        screen.notif
-                )),
-        RESPONSES(localized("option", "notif.response"), (screen) ->
-                new ResponseMessageList(Minecraft.getInstance(), 0, 0, 0,
-                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
-                        screen.notif
-                )),
-        MISC(localized("option", "notif.misc"), (screen) ->
-                new MiscOptionList(Minecraft.getInstance(), 0, 0, 0,
-                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
-                        screen.notif
-                ));
-        
-        final Component title;
-        private final Function<NotifOptionsScreen, @NotNull OptionList> supplier;
-        private @Nullable OptionList list = null;
+    public enum TabKey {
+        TRIGGERS(translationKey("option", "notif.trigger")),
+        FORMAT(translationKey("option", "notif.format")),
+        SOUND(translationKey("option", "notif.sound")),
+        INCLUSION(translationKey("option", "notif.inclusion")),
+        EXCLUSION(translationKey("option", "notif.exclusion")),
+        RESPONSES(translationKey("option", "notif.response")),
+        MISC(translationKey("option", "notif.misc"));
 
-        Tab(Component title, Function<NotifOptionsScreen, OptionList> supplier) {
-            this.title = title;
-            this.supplier = supplier;
+        public final String key;
+        TabKey(String key) {
+            this.key = key;
         }
+    }
 
-        public @NotNull OptionList getList(NotifOptionsScreen screen) {
-            if (list == null) {
-                list = supplier.apply(screen);
-            }
-            return list;
-        }
+    private static NotifOptionsScreen cast(OptionScreen screen) {
+        if (!(screen instanceof NotifOptionsScreen s)) throw new IllegalArgumentException(
+                String.format("Option list supplier for class %s cannot use screen type %s",
+                        NotifOptionsScreen.class.getName(), screen.getClass().getName()));
+        return s;
     }
 
     @Override

@@ -33,7 +33,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 /**
  * Contains one tightly-coupled {@link OptionList}, which is used to display
@@ -82,17 +82,21 @@ public abstract class OptionScreen extends OptionsSubScreen {
     public static final int BASE_LIST_ENTRY_WIDTH = BASE_ROW_WIDTH
             - (SCROLL_BAR_MARGIN * 2)
             - (HANGING_WIDGET_MARGIN * 2);
-    
+    // Tab list constants
     public static final int TAB_LIST_HEIGHT = HEADER_MARGIN - 4;
     public static final int TAB_LIST_Y = 2;
     public static final int TAB_LIST_MARGIN = 24;
-    
+    // Tab button constants
     public static final int MIN_TAB_WIDTH = 40;
     public static final int MAX_TAB_WIDTH = 120;
     public static final int TAB_HEIGHT = 20;
     public static final int TAB_SPACING = 4;
     
-    protected final HorizontalList<Button> tabs;
+    
+    protected final HorizontalList<Button> tabs = new HorizontalList<>(
+            TAB_LIST_MARGIN, TAB_LIST_Y, width - TAB_LIST_MARGIN * 2, TAB_LIST_HEIGHT,
+            TAB_SPACING, true);
+    
     private @Nullable OptionList list;
     private @Nullable OverlayWidget overlay = null;
 
@@ -102,35 +106,9 @@ public abstract class OptionScreen extends OptionsSubScreen {
      */
     public OptionScreen(Screen lastScreen) {
         super(lastScreen, Minecraft.getInstance().options, Component.empty());
-        this.tabs = new HorizontalList<>(TAB_LIST_MARGIN, TAB_LIST_Y,
-                width - TAB_LIST_MARGIN * 2, TAB_LIST_HEIGHT, TAB_SPACING);
-        this.tabs.topScrollbar = true;
     }
     
-    protected void setTabs(List<TabButton> tabList, int index) {
-        for (TabButton tab : tabList) {
-            tabs.addEntry(Button.builder(tab.title, (button) -> {
-                tabs.entries().forEach((b) -> b.active = true);
-                button.active = false;
-                setList(tab.listSupplier.get());
-            }).size(Math.clamp(Minecraft.getInstance().font.width(tab.title) + 8,
-                    MIN_TAB_WIDTH, MAX_TAB_WIDTH), TAB_HEIGHT).build());
-        }
-
-        this.tabs.getEntry(index).active = false;
-        this.list = tabList.get(index).listSupplier().get();
-        this.list.setScreen(this);
-    }
-    
-    public record TabButton(Component title, Supplier<@NotNull OptionList> listSupplier) {
-        
-    }
-    
-    private void setList(@NotNull OptionList list) {
-        this.list = list;
-        this.list.setScreen(this);
-        init();
-    }
+    // Lifecycle
     
     @Override
     protected void init() {
@@ -199,6 +177,56 @@ public abstract class OptionScreen extends OptionsSubScreen {
             screen.resize(Minecraft.getInstance(), width, height);
         }
         super.onClose();
+    }
+
+    // Tab handling
+
+    protected void setTabs(List<Tab> tabList, String defaultKey) {
+        if (tabList.isEmpty()) throw new IllegalArgumentException("Tab list cannot be empty!");
+
+        int defaultIndex = -1;
+        int i = 0;
+
+        for (Tab tab : tabList) {
+            Component title = Component.translatable(tab.key);
+            tabs.addEntry(Button.builder(title, (button) -> {
+                tabs.entries().forEach((b) -> b.active = true);
+                button.active = false;
+                setList(tab.getList(this));
+            }).size(Math.clamp(Minecraft.getInstance().font.width(title) + 8,
+                    MIN_TAB_WIDTH, MAX_TAB_WIDTH), TAB_HEIGHT).build());
+            if (defaultIndex == -1 && tab.key.equals(defaultKey)) defaultIndex = i;
+            else i++;
+        }
+
+        if (defaultIndex == -1) defaultIndex = 0;
+        tabs.getEntry(defaultIndex).active = false;
+        this.list = tabList.get(defaultIndex).getList(this);
+        this.list.setScreen(this);
+    }
+
+    private void setList(@NotNull OptionList list) {
+        this.list = list;
+        this.list.setScreen(this);
+        init();
+    }
+
+    public static class Tab {
+        final String key;
+        private final Function<OptionScreen, OptionList> supplier;
+        private @Nullable OptionList list = null;
+
+        public Tab(String key, Function<OptionScreen, OptionList> supplier) {
+            this.key = key;
+            this.supplier = supplier;
+        }
+
+        public @NotNull OptionList getList(OptionScreen screen) {
+            if (list == null) {
+                list = supplier.apply(screen);
+            }
+            return list;
+        }
     }
 
     // Overlay widget handling

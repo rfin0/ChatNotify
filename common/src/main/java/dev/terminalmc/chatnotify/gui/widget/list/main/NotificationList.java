@@ -105,24 +105,28 @@ public class NotificationList extends DragReorderList {
     private void openNotificationConfig(int index) {
         Notification notif = Config.get().getNotifs().get(index);
         notif.editing = true;
-        mc.setScreen(new NotifOptionsScreen(mc.screen, notif, NotifOptionsScreen.Tab.TRIGGERS));
+        mc.setScreen(new NotifOptionsScreen(mc.screen, notif,
+                NotifOptionsScreen.TabKey.TRIGGERS.key));
     }
 
     private void openTriggerConfig(Notification notif, Trigger trigger) {
         notif.editing = true;
-        mc.setScreen(new TriggerOptionsScreen(mc.screen, trigger, notif.textStyle,
-                () -> notif.editing = false, TriggerOptionsScreen.Tab.TRIGGER_EDITOR));
+        Runnable onClose = () -> notif.editing = false;
+        mc.setScreen(new TriggerOptionsScreen(mc.screen, trigger, notif.textStyle, onClose,
+                TriggerOptionsScreen.TabKey.TRIGGER_EDITOR.key));
     }
 
     private void openKeyConfig(Notification notif, Trigger trigger) {
         notif.editing = true;
-        mc.setScreen(new TriggerOptionsScreen(mc.screen, trigger, notif.textStyle,
-                () -> notif.editing = false, TriggerOptionsScreen.Tab.KEY_SELECTOR));
+        Runnable onClose = () -> notif.editing = false;
+        mc.setScreen(new TriggerOptionsScreen(mc.screen, trigger, notif.textStyle, onClose,
+                TriggerOptionsScreen.TabKey.KEY_SELECTOR.key));
     }
     
     private void openSoundConfig(Notification notif) {
         notif.editing = true;
-        mc.setScreen(new NotifOptionsScreen(mc.screen, notif, NotifOptionsScreen.Tab.SOUND));
+        mc.setScreen(new NotifOptionsScreen(mc.screen, notif,
+                NotifOptionsScreen.TabKey.SOUND.key));
     }
 
     // Custom entries

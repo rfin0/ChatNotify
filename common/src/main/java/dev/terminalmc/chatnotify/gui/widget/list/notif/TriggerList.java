@@ -99,13 +99,13 @@ public class TriggerList extends DragReorderList {
     // Sub-screen opening
 
     private void openTriggerConfig(Trigger trigger) {
-        mc.setScreen(new TriggerOptionsScreen(mc.screen, trigger, notif.textStyle,
-                () -> {}, TriggerOptionsScreen.Tab.TRIGGER_EDITOR));
+        mc.setScreen(new TriggerOptionsScreen(mc.screen, trigger, notif.textStyle, () -> {},
+                TriggerOptionsScreen.TabKey.TRIGGER_EDITOR.key));
     }
 
     private void openKeyConfig( Trigger trigger) {
-        mc.setScreen(new TriggerOptionsScreen(mc.screen, trigger, notif.textStyle,
-                () -> {}, TriggerOptionsScreen.Tab.KEY_SELECTOR));
+        mc.setScreen(new TriggerOptionsScreen(mc.screen, trigger, notif.textStyle, () -> {},
+                TriggerOptionsScreen.TabKey.TRIGGER_EDITOR.key));
     }
 
     // Re-ordering util
