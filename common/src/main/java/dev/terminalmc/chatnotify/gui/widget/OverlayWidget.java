@@ -31,7 +31,7 @@ import java.util.function.Consumer;
  * on top of any other GUI elements.
  */
 public abstract class OverlayWidget extends AbstractWidget {
-    private final Consumer<OverlayWidget> close;
+    private Consumer<OverlayWidget> close;
     public final boolean fixedSize;
     public final double nominalWidthRatio;
     public final double nominalHeightRatio;
@@ -46,6 +46,14 @@ public abstract class OverlayWidget extends AbstractWidget {
         this.fixedSize = fixedSize;
         this.nominalWidthRatio = width / (double)window.getGuiScaledWidth();
         this.nominalHeightRatio = height / (double)window.getGuiScaledHeight();
+    }
+    
+    public void addOnClose(Consumer<OverlayWidget> close) {
+        Consumer<OverlayWidget> close2 = this.close;
+        this.close = (widget) -> {
+            close.accept(widget);
+            close2.accept(widget);
+        };
     }
 
     @Override

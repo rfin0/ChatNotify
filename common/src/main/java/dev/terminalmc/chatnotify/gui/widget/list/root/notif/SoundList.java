@@ -212,13 +212,11 @@ public class SoundList extends OptionList {
                             int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                             int wX = x + (width / 2) - (wWidth / 2);
                             int wY = list.getY();
-                            list.screen.setOverlay(new DropdownTextField(
+                            list.screen.setOverlayWidget(new DropdownTextField(
                                     wX, wY, wWidth, wHeight, Component.empty(),
                                     sound::getId, sound::setId,
-                                    (widget) -> {
-                                        list.screen.removeOverlayWidget();
-                                        list.init();
-                                    }, Minecraft.getInstance().getSoundManager().getAvailableSounds()
+                                    (widget) -> list.init(),
+                                    Minecraft.getInstance().getSoundManager().getAvailableSounds()
                                     .stream().map(ResourceLocation::toString).sorted().toList())
                                     .withSoundDropType());
                         });

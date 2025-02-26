@@ -497,7 +497,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                 int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                                 int wX = x + (width / 2) - (wWidth / 2);
                                 int wY = list.getY();
-                                list.screen.setOverlay(new DropdownTextField(
+                                list.screen.setOverlayWidget(new DropdownTextField(
                                         wX, wY, wWidth, wHeight, Component.empty(),
                                         () -> message.string.matches(".+-.+")
                                                 ? message.string.split("-")[0]
@@ -506,10 +506,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                                 + (message.string.matches(".+-.+")
                                                 ? message.string.split("-")[1]
                                                 : "key.keyboard.unknown"),
-                                        (widget) -> {
-                                            list.screen.removeOverlayWidget();
-                                            list.init();
-                                        }, keys));
+                                        (widget) -> list.init(), keys));
                             });
                     MutableComponent label1 = localized(
                             "option", "notif.response.commandkeys.limit_key");
@@ -527,7 +524,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                 int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                                 int wX = x + (width / 2) - (wWidth / 2);
                                 int wY = list.getY();
-                                list.screen.setOverlay(new DropdownTextField(
+                                list.screen.setOverlayWidget(new DropdownTextField(
                                         wX, wY, wWidth, wHeight, Component.empty(),
                                         () -> message.string.matches(".+-.+")
                                                 ? message.string.split("-")[1]
@@ -535,10 +532,7 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                                         (val) -> message.string = (message.string.matches(".+-.+")
                                                 ? message.string.split("-")[0] + "-" + val
                                                 : "key.keyboard.unknown"),
-                                        (widget) -> {
-                                            list.screen.removeOverlayWidget();
-                                            list.init();
-                                        }, keys));
+                                        (widget) -> list.init(), keys));
                             });
                     MutableComponent label2 = localized(
                             "option", "notif.response.commandkeys.key");
@@ -803,16 +797,13 @@ public class FilterList<E extends Functional.StringSupplier> extends DragReorder
                     // Open color picker overlay widget
                     int cpHeight = HsvColorPicker.MIN_HEIGHT;
                     int cpWidth = HsvColorPicker.MIN_WIDTH;
-                    list.screen.setOverlay(new HsvColorPicker(
+                    list.screen.setOverlayWidget(new HsvColorPicker(
                             x + width / 2 - cpWidth / 2,
                             list.screen.height / 2 - cpHeight / 2,
                             cpWidth, cpHeight,
                             () -> notif.textStyle.color,
                             (color) -> notif.textStyle.color = color,
-                            (widget) -> {
-                                list.screen.removeOverlayWidget();
-                                list.init();
-                            }));
+                            (widget) -> list.init()));
                 }, (button) -> {
                     // Toggle color
                     notif.textStyle.doColor = !notif.textStyle.doColor;

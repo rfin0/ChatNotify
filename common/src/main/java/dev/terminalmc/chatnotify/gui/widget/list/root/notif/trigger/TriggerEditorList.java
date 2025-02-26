@@ -336,16 +336,13 @@ public class TriggerEditorList extends OptionList {
                                 (button) -> {
                                     int cpHeight = HsvColorPicker.MIN_HEIGHT;
                                     int cpWidth = HsvColorPicker.MIN_WIDTH;
-                                    list.screen.setOverlay(new HsvColorPicker(
+                                    list.screen.setOverlayWidget(new HsvColorPicker(
                                             x + width / 2 - cpWidth / 2,
                                             list.screen.height / 2 - cpHeight / 2,
                                             cpWidth, cpHeight,
                                             () -> list.textStyle.color,
                                             (val) -> list.textStyle.color = val,
-                                            (widget) -> {
-                                                list.screen.removeOverlayWidget();
-                                                list.init();
-                                            }));
+                                            (widget) -> list.init()));
                                 })
                         .pos(movingX, 0)
                         .size(buttonWidth, height)

@@ -78,16 +78,13 @@ public class DefaultList extends OptionList {
                                 (button) -> {
                                     int cpHeight = HsvColorPicker.MIN_HEIGHT;
                                     int cpWidth = HsvColorPicker.MIN_WIDTH;
-                                    list.screen.setOverlay(new HsvColorPicker(
+                                    list.screen.setOverlayWidget(new HsvColorPicker(
                                             x + width / 2 - cpWidth / 2,
                                             list.screen.height / 2 - cpHeight / 2,
                                             cpWidth, cpHeight,
                                             () -> Config.get().defaultColor,
                                             (val) -> Config.get().defaultColor = val,
-                                            (widget) -> {
-                                                list.screen.removeOverlayWidget();
-                                                list.init();
-                                            }));
+                                            (widget) -> list.init()));
                                 })
                         .pos(x, 0)
                         .size(width - colorFieldWidth - SPACE, height)
@@ -127,13 +124,12 @@ public class DefaultList extends OptionList {
                             int wWidth = Math.max(DropdownTextField.MIN_WIDTH, list.dynWideEntryWidth);
                             int wX = x + (width / 2) - (wWidth / 2);
                             int wY = list.getY();
-                            list.screen.setOverlay(new DropdownTextField(
+                            list.screen.setOverlayWidget(new DropdownTextField(
                                     wX, wY, wWidth, wHeight, Component.empty(),
-                                    Config.get().defaultSound::getId, Config.get().defaultSound::setId,
-                                    (widget) -> {
-                                        list.screen.removeOverlayWidget();
-                                        list.init();
-                                    }, Minecraft.getInstance().getSoundManager().getAvailableSounds()
+                                    Config.get().defaultSound::getId,
+                                    Config.get().defaultSound::setId,
+                                    (widget) -> list.init(),
+                                    Minecraft.getInstance().getSoundManager().getAvailableSounds()
                                     .stream().map(ResourceLocation::toString).sorted().toList())
                                     .withSoundDropType());
                         })

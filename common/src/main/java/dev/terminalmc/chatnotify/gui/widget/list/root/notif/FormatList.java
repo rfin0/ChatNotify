@@ -87,15 +87,12 @@ public class FormatList extends OptionList {
                                 (button) -> {
                                     int cpHeight = HsvColorPicker.MIN_HEIGHT;
                                     int cpWidth = HsvColorPicker.MIN_WIDTH;
-                                    list.getScreen().setOverlay(new HsvColorPicker(
+                                    list.getScreen().setOverlayWidget(new HsvColorPicker(
                                             x + width / 2 - cpWidth / 2,
                                             list.getScreen().height / 2 - cpHeight / 2,
                                             cpWidth, cpHeight,
                                             supplier, consumer,
-                                            (widget) -> {
-                                                list.getScreen().removeOverlayWidget();
-                                                list.initList();
-                                            }));
+                                            (widget) -> list.initList()));
                                 })
                         .pos(x, 0)
                         .size(mainButtonWidth, height)

@@ -118,6 +118,7 @@ public abstract class OptionScreen extends OptionsSubScreen {
         addHeader();
         addContents();
         addFooter();
+        addOverlay();
 
         setInitialFocus();
     }
@@ -134,6 +135,14 @@ public abstract class OptionScreen extends OptionsSubScreen {
         addRenderableWidget(tabs);
     }
 
+    protected void addOverlay() {
+        // Overlay widget
+        if (overlay != null) {
+            overlay.updateBounds(width, height);
+            setOverlay(overlay);
+        }
+    }
+
     @Override
     protected void addContents() {
         // Option list
@@ -141,12 +150,6 @@ public abstract class OptionScreen extends OptionsSubScreen {
             list.updateSizeAndPosition(width, height - HEADER_MARGIN - FOOTER_MARGIN,
                     HEADER_MARGIN);
             addRenderableWidget(list);
-        }
-
-        // Overlay widget
-        if (overlay != null) {
-            overlay.updateBounds(width, height);
-            setOverlay(overlay);
         }
     }
 
@@ -231,8 +234,13 @@ public abstract class OptionScreen extends OptionsSubScreen {
 
     // Overlay widget handling
 
-    public void setOverlay(OverlayWidget widget) {
-        removeOverlayWidget();
+    public void setOverlayWidget(OverlayWidget widget) {
+        widget.addOnClose((w) -> removeOverlay());
+        setOverlay(widget);
+    }
+
+    private void setOverlay(OverlayWidget widget) {
+        removeOverlay();
         overlay = widget;
         setChildrenVisible(false);
         ((ScreenAccessor)this).getChildren().addFirst(widget);
@@ -240,7 +248,7 @@ public abstract class OptionScreen extends OptionsSubScreen {
         ((ScreenAccessor)this).getRenderables().addLast(widget);
     }
 
-    public void removeOverlayWidget() {
+    public void removeOverlay() {
         if (overlay != null) {
             removeWidget(overlay);
             overlay = null;
@@ -261,7 +269,7 @@ public abstract class OptionScreen extends OptionsSubScreen {
         if (overlay != null) {
             if (keyCode == InputConstants.KEY_ESCAPE) {
                 overlay.onClose();
-                removeOverlayWidget();
+                removeOverlay();
             } else {
                 overlay.keyPressed(keyCode, scanCode, modifiers);
             }
