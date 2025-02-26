@@ -135,14 +135,6 @@ public abstract class OptionScreen extends OptionsSubScreen {
         addRenderableWidget(tabs);
     }
 
-    protected void addOverlay() {
-        // Overlay widget
-        if (overlay != null) {
-            overlay.updateBounds(width, height);
-            setOverlay(overlay);
-        }
-    }
-
     @Override
     protected void addContents() {
         // Option list
@@ -166,6 +158,14 @@ public abstract class OptionScreen extends OptionsSubScreen {
                 .pos(x, y)
                 .size(w, h)
                 .build());
+    }
+
+    protected void addOverlay() {
+        // Overlay widget
+        if (overlay != null) {
+            overlay.updateBounds(width, height);
+            setOverlay(overlay);
+        }
     }
 
     @Override
