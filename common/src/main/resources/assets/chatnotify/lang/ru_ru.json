@@ -216,6 +216,7 @@
   "option.chatnotify.root.exit_without_saving.confirm": "Это приведёт к перезагрузке файла конфигурации и отмене ВСЕХ внесённых изменений. Если у вас имеются активные ответы - они будут остановлены.",
   "modmenu.nameTranslation.chatnotify": "ChatNotify",
   "modmenu.descriptionTranslation.chatnotify": "Проигрывает звуковой сигнал, когда упоминается ваше имя, с возможностью создания собственных уведомлений.",
+  "fml.menu.mods.info.description.chatnotify": "Проигрывает звуковой сигнал, когда упоминается ваше имя, с возможностью создания собственных уведомлений.",
   "sound.chatnotify.group.explosion": "Звуки взрыва",
   "sound.chatnotify.group.illager": "Звуки разбойников",
   "sound.chatnotify.group.misc": "Разные звуки",
